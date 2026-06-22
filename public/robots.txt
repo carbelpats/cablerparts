@@ -1,0 +1,9 @@
+# Cabler Parts — robots.txt
+# Public storefront is fully crawlable. Account and admin areas are gated
+# behind auth and intentionally not linked for indexing.
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /admin
+
+Sitemap: https://www.cablerparts.com/sitemap.xml

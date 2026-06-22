@@ -1,0 +1,36 @@
+# Netlify build + SPA configuration for Cabler Parts.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Single-page-app fallback: serve index.html for any unmatched route so the
+# client router (react-router-dom) can handle deep links and refreshes.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# -----------------------------------------------------------------------------
+# Security response headers (applied to every route).
+#
+# Content-Security-Policy notes:
+#   - style-src allows 'unsafe-inline' + Google Fonts stylesheet host
+#     (https://fonts.googleapis.com) because the font links live in index.html.
+#   - font-src allows Google Fonts font files (https://fonts.gstatic.com).
+#   - img-src allows data: URLs (logo / payment-proof uploads stored inline) and
+#     https: (Unsplash + other remote product imagery).
+#   - connect-src allows the Supabase REST/Realtime/Auth endpoints
+#     (https://*.supabase.co + https://*.supabase.in).
+#   - frame-ancestors 'none' + X-Frame-Options DENY block clickjacking.
+#   - object-src 'none', base-uri 'self', form-action 'self' lock down the rest.
+#   - upgrade-insecure-requests forces any stray http subresource onto https.
+# -----------------------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
