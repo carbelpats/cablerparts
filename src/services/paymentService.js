@@ -1,18 +1,54 @@
-// paymentService — MOCK payment processor designed to swap for Moyasar/Stripe.
-// Provider is read from import.meta.env?.VITE_PAYMENT_PROVIDER (default "mock").
-// All exports are async. No real network calls.
+// paymentService — provider-agnostic payment layer designed to swap the built-in
+// MOCK processor for a real PSP (Moyasar / Stripe / HyperPay …) with no UI churn.
 //
-// Validation: Luhn check + future expiry + 3-4 digit CVC.
-// Documented TEST CARDS:
-//   4242 4242 4242 4242 -> { ok:true,  id, status:"paid" }
+// Provider is read from import.meta.env?.VITE_PAYMENT_PROVIDER (default "mock").
+// All exports are async where they hit a "processor"; the validators are sync.
+// No real network calls are made in mock mode, so previews/CI stay deterministic.
+//
+// Card validation: Luhn check + future expiry + 3-4 digit CVC. This module is the
+// SINGLE SOURCE of card validation — src/lib/validation.js re-exports these.
+//
+// Documented TEST CARDS (mock mode):
+//   4242 4242 4242 4242 -> { ok:true,  id, status:"paid" }   (Visa)
+//   5555 5555 5555 4444 -> { ok:true,  id, status:"paid" }   (Mastercard)
 //   4000 0000 0000 0002 -> { ok:false, error:"card_declined" }
 //   anything invalid     -> { ok:false, error:"invalid_card" }
+//
+// ---- WIRING A REAL GATEWAY (see .env.example + README "Payments") -------------
+// 1. Create a merchant account (Moyasar recommended for KSA — supports mada,
+//    Apple Pay, STC Pay, Visa/Mastercard; Tamara/Tabby for BNPL).
+// 2. Put the PUBLISHABLE key in VITE_MOYASAR_PUBLISHABLE_KEY (client-safe) and
+//    set VITE_PAYMENT_PROVIDER=moyasar.
+// 3. The SECRET key + the actual charge/capture + webhooks live SERVER-SIDE
+//    (a serverless function / your backend) — NEVER ship a secret in a VITE_*
+//    var. Tokenize the card client-side, send only the token to your server.
+// 4. Implement the provider branch in `createPayment` below to call your
+//    tokenization endpoint; the mock stays as the local/preview fallback.
+// -----------------------------------------------------------------------------
 
 const provider = (import.meta.env?.VITE_PAYMENT_PROVIDER || "mock").toLowerCase();
 
+export const PAYMENT_PROVIDER = provider;
+
+/* ------------------------------------------------------------------ *
+ * Payment methods (drive the checkout method selector). `card` covers
+ * Visa/Mastercard; mada is KSA's domestic scheme (also a card form).
+ * `needsCard` => the card form is shown; otherwise an alternative flow.
+ * ------------------------------------------------------------------ */
+export const PAYMENT_METHODS = [
+  { id: "mada", needsCard: true, kind: "card", region: "SA" },
+  { id: "card", needsCard: true, kind: "card", region: "*" },
+  { id: "applepay", needsCard: false, kind: "wallet", region: "*" },
+  { id: "stcpay", needsCard: false, kind: "wallet", region: "SA" },
+  { id: "tabby", needsCard: false, kind: "bnpl", region: "*" },
+  { id: "tamara", needsCard: false, kind: "bnpl", region: "*" },
+  { id: "cod", needsCard: false, kind: "cod", region: "*" },
+];
+
 // Exposed for the checkout UI hint.
 export const PAYMENT_TEST_CARDS = [
-  { number: "4242 4242 4242 4242", outcome: "success", label: "Successful payment" },
+  { number: "4242 4242 4242 4242", outcome: "success", label: "Visa — success" },
+  { number: "5555 5555 5555 4444", outcome: "success", label: "Mastercard — success" },
   { number: "4000 0000 0000 0002", outcome: "declined", label: "Card declined" },
 ];
 
@@ -28,7 +64,7 @@ function digits(value) {
 }
 
 // Luhn (mod 10) checksum.
-function luhnValid(num) {
+export function luhnValid(num) {
   const s = digits(num);
   if (s.length < 12 || s.length > 19) return false;
   let sum = 0;
@@ -45,8 +81,31 @@ function luhnValid(num) {
   return sum % 10 === 0;
 }
 
+/**
+ * Detect the card brand from its (partial) number. Mada is matched via a small,
+ * representative BIN prefix set (the official list is larger; this covers the
+ * common ranges + is easy to extend). Returns one of:
+ *   "mada" | "visa" | "mastercard" | "amex" | "unknown"
+ */
+export function detectCardBrand(number) {
+  const s = digits(number);
+  if (!s) return "unknown";
+  // A representative subset of mada BINs (Saudi domestic scheme).
+  const MADA_BINS = [
+    "440647", "440795", "446404", "457865", "468540", "468541", "468542",
+    "468543", "417633", "446393", "636120", "968201", "588845", "588848",
+    "440533", "489318", "489319", "445564", "968208", "636120", "417633",
+    "423766",
+  ];
+  if (MADA_BINS.some((bin) => s.startsWith(bin))) return "mada";
+  if (/^4/.test(s)) return "visa";
+  if (/^(5[1-5]|2[2-7])/.test(s)) return "mastercard";
+  if (/^3[47]/.test(s)) return "amex";
+  return "unknown";
+}
+
 // Accepts "MM/YY", "MM/YYYY", "MMYY", "MM YY". Returns true when not yet expired.
-function expiryValid(expiry) {
+export function expiryValid(expiry) {
   if (!expiry) return false;
   const cleaned = String(expiry).replace(/\s/g, "");
   const m = cleaned.match(/^(\d{1,2})\/?(\d{2}|\d{4})$/);
@@ -65,9 +124,17 @@ function expiryValid(expiry) {
   return true;
 }
 
-function cvcValid(cvc) {
+// CVC: 3 digits, or 4 for Amex.
+export function cvcValid(cvc, number) {
   const s = digits(cvc);
-  return s.length >= 3 && s.length <= 4;
+  const brand = number ? detectCardBrand(number) : null;
+  if (brand === "amex") return s.length === 4;
+  return s.length === 3 || s.length === 4;
+}
+
+// Just the card-number rule (Luhn + length), without expiry/cvc.
+export function cardNumberValid(number) {
+  return luhnValid(number);
 }
 
 /**
@@ -78,7 +145,7 @@ export async function validateCard(card) {
   const number = digits(card?.number);
   if (!luhnValid(number)) return { ok: false, error: "invalid_card" };
   if (!expiryValid(card?.expiry)) return { ok: false, error: "invalid_card" };
-  if (!cvcValid(card?.cvc)) return { ok: false, error: "invalid_card" };
+  if (!cvcValid(card?.cvc, number)) return { ok: false, error: "invalid_card" };
   return { ok: true };
 }
 
@@ -86,12 +153,17 @@ export async function validateCard(card) {
  * Mock processor
  * ------------------------------------------------------------------ */
 
-function genPaymentId() {
+function genPaymentId(prefix = "pay") {
   // Runtime handler use of Date.now — allowed.
-  return "pay_" + Date.now().toString(36) + Math.floor(Date.now() % 1000).toString(36);
+  return (
+    prefix +
+    "_" +
+    Date.now().toString(36) +
+    Math.floor(Date.now() % 1000).toString(36)
+  );
 }
 
-async function mockCreatePayment({ card }) {
+async function mockChargeCard({ card }) {
   const number = digits(card?.number);
 
   // Structural validation first — invalid cards never reach the processor.
@@ -102,7 +174,7 @@ async function mockCreatePayment({ card }) {
     return { ok: false, error: "card_declined" };
   }
 
-  // 4242… and any other Luhn-valid card succeed in the mock processor.
+  // 4242… / any other Luhn-valid card succeeds in the mock processor.
   if (number === TEST_CARD_SUCCESS || luhnValid(number)) {
     return { ok: true, id: genPaymentId(), status: "paid" };
   }
@@ -110,33 +182,77 @@ async function mockCreatePayment({ card }) {
   return { ok: false, error: "invalid_card" };
 }
 
+// Alternative (non-card) methods resolve deterministically in mock mode.
+function mockAlternative(method) {
+  switch (method) {
+    case "cod":
+      // Cash on delivery — no upfront charge; settled on hand-off.
+      return { ok: true, id: genPaymentId("cod"), status: "cod_pending" };
+    case "applepay":
+    case "stcpay":
+      return { ok: true, id: genPaymentId("wal"), status: "paid" };
+    case "tabby":
+    case "tamara":
+      // Buy-now-pay-later — a real integration redirects to the provider and
+      // confirms via webhook; the mock approves the plan immediately.
+      return { ok: true, id: genPaymentId("bnpl"), status: "bnpl_approved" };
+    default:
+      return { ok: false, error: "unsupported_method" };
+  }
+}
+
 /* ------------------------------------------------------------------ *
  * Public API
  * ------------------------------------------------------------------ */
 
 /**
- * createPayment({ amountUSD, currency, card:{number,expiry,cvc,name} })
+ * createPayment({ method, amountUSD, currency, card:{number,expiry,cvc,name} })
  *   -> { ok, id?, status?, error? }
  *
- * Swappable by VITE_PAYMENT_PROVIDER. Real providers (moyasar/stripe) would
- * call their publishable-key tokenization flow here; until wired they fall
- * back to the deterministic mock so previews stay fully functional.
+ * `method` is one of PAYMENT_METHODS ids (default "card"). Card methods
+ * (card/mada) require a `card`; alternative methods don't. Swappable by
+ * VITE_PAYMENT_PROVIDER. Real providers (moyasar/stripe) call their
+ * publishable-key tokenization flow here; until wired they fall back to the
+ * deterministic mock so previews stay fully functional.
  */
-export async function createPayment({ amountUSD, currency, card } = {}) {
+export async function createPayment({
+  method = "card",
+  amountUSD,
+  currency,
+  card,
+} = {}) {
+  const methodDef = PAYMENT_METHODS.find((m) => m.id === method);
+  const isCard = methodDef ? methodDef.needsCard : true;
+
+  // Real-provider branch — wire your PSP here. Until then we use the mock so the
+  // app is always runnable without server-side payment wiring.
   switch (provider) {
     case "moyasar":
     case "stripe":
-      // Placeholder for real-provider integration. Falls back to mock so the
-      // app remains runnable without server-side payment wiring.
-      return mockCreatePayment({ amountUSD, currency, card });
+    case "hyperpay":
+    case "tap":
+      // TODO: replace with the provider's tokenize + charge call. Keep the same
+      // { ok, id, status, error } contract so the checkout UI is unchanged.
+      return isCard
+        ? mockChargeCard({ amountUSD, currency, card })
+        : mockAlternative(method);
     case "mock":
     default:
-      return mockCreatePayment({ amountUSD, currency, card });
+      return isCard
+        ? mockChargeCard({ amountUSD, currency, card })
+        : mockAlternative(method);
   }
 }
 
 export default {
   createPayment,
   validateCard,
+  cardNumberValid,
+  expiryValid,
+  cvcValid,
+  luhnValid,
+  detectCardBrand,
+  PAYMENT_METHODS,
   PAYMENT_TEST_CARDS,
+  PAYMENT_PROVIDER,
 };

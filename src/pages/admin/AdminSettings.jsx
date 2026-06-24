@@ -37,6 +37,7 @@ import {
   AlertTriangle,
   Share2,
   FileText,
+  ShieldCheck,
 } from "lucide-react";
 import { useSettings } from "../../context/SettingsContext";
 import { useLang } from "../../context/LanguageContext";
@@ -68,6 +69,9 @@ const STRINGS = {
     pagesTitle: "Policies & pages",
     pagesDesc:
       "Rich-text content for the info pages. Empty pages show a “coming soon” block.",
+    complianceTitle: "Compliance & licensing",
+    complianceDesc:
+      "Legal identifiers and trust marks shown in the footer and policy pages.",
     // contact fields
     phone: "Phone",
     email: "Email",
@@ -108,8 +112,28 @@ const STRINGS = {
     pageShipping: "Shipping & returns",
     pageAbout: "About us",
     pageSupport: "Support",
+    pagePdpl: "PDPL (data protection)",
+    pageDisclaimer: "Disclaimer",
     english: "English",
     arabic: "Arabic",
+    // compliance fields
+    domain: "Domain",
+    crNumber: "Commercial registration (CR) number",
+    vatNumber: "VAT number",
+    maroof: "Maroof",
+    maroofUrl: "Maroof profile URL",
+    maroofLogo: "Maroof badge",
+    licenses: "Licenses & certifications",
+    licensesHint:
+      "Trust marks shown on policy pages — e.g. SASO, SFDA, ISO. Clear a logo to hide it.",
+    addLicense: "Add license",
+    removeLicense: "Remove license",
+    noLicenses: "No licenses yet.",
+    licenseNameEn: "License name (English)",
+    licenseNameAr: "License name (Arabic)",
+    licenseNumber: "License number",
+    licenseUrl: "License URL",
+    licenseLogo: "License logo",
     // image field
     imageUrl: "Image URL",
     upload: "Upload",
@@ -147,6 +171,9 @@ const STRINGS = {
     pagesTitle: "السياسات والصفحات",
     pagesDesc:
       "محتوى نصّي منسّق لصفحات المعلومات. الصفحات الفارغة تعرض كتلة «قريباً».",
+    complianceTitle: "الامتثال والتراخيص",
+    complianceDesc:
+      "المعرّفات النظامية وعلامات الثقة التي تظهر في التذييل وصفحات السياسات.",
     // contact fields
     phone: "الهاتف",
     email: "البريد الإلكتروني",
@@ -187,8 +214,28 @@ const STRINGS = {
     pageShipping: "الشحن والإرجاع",
     pageAbout: "من نحن",
     pageSupport: "الدعم",
+    pagePdpl: "نظام حماية البيانات (PDPL)",
+    pageDisclaimer: "إخلاء المسؤولية",
     english: "الإنجليزية",
     arabic: "العربية",
+    // compliance fields
+    domain: "النطاق",
+    crNumber: "رقم السجل التجاري",
+    vatNumber: "الرقم الضريبي",
+    maroof: "معروف",
+    maroofUrl: "رابط حساب معروف",
+    maroofLogo: "شارة معروف",
+    licenses: "التراخيص والشهادات",
+    licensesHint:
+      "علامات الثقة التي تظهر في صفحات السياسات — مثل ساسو أو الغذاء والدواء أو الأيزو. امسح الشعار لإخفائه.",
+    addLicense: "إضافة ترخيص",
+    removeLicense: "إزالة الترخيص",
+    noLicenses: "لا توجد تراخيص بعد.",
+    licenseNameEn: "اسم الترخيص (إنجليزي)",
+    licenseNameAr: "اسم الترخيص (عربي)",
+    licenseNumber: "رقم الترخيص",
+    licenseUrl: "رابط الترخيص",
+    licenseLogo: "شعار الترخيص",
     // image field
     imageUrl: "رابط الصورة",
     upload: "رفع",
@@ -225,6 +272,8 @@ const PAGE_KEYS = [
   "shipping",
   "about",
   "support",
+  "pdpl",
+  "disclaimer",
 ];
 const PAGE_LABELS = {
   privacy: "pagePrivacy",
@@ -233,6 +282,8 @@ const PAGE_LABELS = {
   shipping: "pageShipping",
   about: "pageAbout",
   support: "pageSupport",
+  pdpl: "pagePdpl",
+  disclaimer: "pageDisclaimer",
 };
 
 const inputBase =
@@ -243,6 +294,12 @@ let _pidSeq = 0;
 function newProviderId() {
   _pidSeq += 1;
   return `provider-${_pidSeq}-${_pidSeq * 7 + 3}`;
+}
+
+let _licSeq = 0;
+function newLicenseId() {
+  _licSeq += 1;
+  return `license-${_licSeq}-${_licSeq * 11 + 5}`;
 }
 
 // Map storageService error codes -> localized messages (falls back to generic).
@@ -495,6 +552,70 @@ export default function AdminSettings() {
     setForm((f) => ({
       ...f,
       payments: f.payments.filter((_, i) => i !== idx),
+    }));
+
+  // compliance editing — top-level string fields (domain/crNumber/vatNumber)
+  const setCompliance = (key) => (eOrValue) => {
+    const val = eOrValue?.target ? eOrValue.target.value : eOrValue;
+    setForm((f) => ({
+      ...f,
+      compliance: { ...f.compliance, [key]: val },
+    }));
+  };
+  // maroof sub-group (url + logoUrl)
+  const setMaroof = (key, next) =>
+    setForm((f) => ({
+      ...f,
+      compliance: {
+        ...f.compliance,
+        maroof: { ...f.compliance?.maroof, [key]: next },
+      },
+    }));
+  // licenses array (write REPLACES wholesale)
+  const setLicense = (idx, patch) =>
+    setForm((f) => ({
+      ...f,
+      compliance: {
+        ...f.compliance,
+        licenses: (f.compliance?.licenses || []).map((l, i) =>
+          i === idx ? { ...l, ...patch } : l
+        ),
+      },
+    }));
+  const setLicenseName = (idx, locale, value) =>
+    setForm((f) => ({
+      ...f,
+      compliance: {
+        ...f.compliance,
+        licenses: (f.compliance?.licenses || []).map((l, i) =>
+          i === idx ? { ...l, name: { ...l.name, [locale]: value } } : l
+        ),
+      },
+    }));
+  const addLicense = () =>
+    setForm((f) => ({
+      ...f,
+      compliance: {
+        ...f.compliance,
+        licenses: [
+          ...(f.compliance?.licenses || []),
+          {
+            id: newLicenseId(),
+            name: { en: "", ar: "" },
+            number: "",
+            url: "",
+            logoUrl: null,
+          },
+        ],
+      },
+    }));
+  const removeLicense = (idx) =>
+    setForm((f) => ({
+      ...f,
+      compliance: {
+        ...f.compliance,
+        licenses: (f.compliance?.licenses || []).filter((_, i) => i !== idx),
+      },
     }));
 
   async function handleSave() {
@@ -842,6 +963,214 @@ export default function AdminSettings() {
                 </div>
               </Field>
             ))}
+          </div>
+        </Section>
+
+        {/* COMPLIANCE & LICENSING */}
+        <Section
+          icon={ShieldCheck}
+          title={t.complianceTitle}
+          desc={t.complianceDesc}
+        >
+          <div className="space-y-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={t.domain} htmlFor="set-domain">
+                <input
+                  id="set-domain"
+                  type="text"
+                  dir="ltr"
+                  inputMode="url"
+                  placeholder="cablerparts.com"
+                  value={form.compliance?.domain ?? ""}
+                  onChange={setCompliance("domain")}
+                  className={inputBase}
+                />
+              </Field>
+              <Field label={t.crNumber} htmlFor="set-cr">
+                <input
+                  id="set-cr"
+                  type="text"
+                  dir="ltr"
+                  inputMode="numeric"
+                  value={form.compliance?.crNumber ?? ""}
+                  onChange={setCompliance("crNumber")}
+                  className={inputBase}
+                />
+              </Field>
+              <Field label={t.vatNumber} htmlFor="set-vat">
+                <input
+                  id="set-vat"
+                  type="text"
+                  dir="ltr"
+                  inputMode="numeric"
+                  value={form.compliance?.vatNumber ?? ""}
+                  onChange={setCompliance("vatNumber")}
+                  className={inputBase}
+                />
+              </Field>
+            </div>
+
+            {/* Maroof sub-group */}
+            <div className="rounded-xl border border-border bg-surfaceElevated p-4">
+              <h3 className="mb-3 font-display text-base font-bold text-textPrimary text-start">
+                {t.maroof}
+              </h3>
+              <div className="space-y-4">
+                <Field label={t.maroofUrl} htmlFor="set-maroof-url">
+                  <div className="relative">
+                    <Link2
+                      className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-textMuted"
+                      aria-hidden="true"
+                    />
+                    <input
+                      id="set-maroof-url"
+                      type="url"
+                      dir="ltr"
+                      inputMode="url"
+                      placeholder="https://maroof.sa/…"
+                      value={form.compliance?.maroof?.url ?? ""}
+                      onChange={(e) => setMaroof("url", e.target.value)}
+                      className={`${inputBase} ps-9`}
+                    />
+                  </div>
+                </Field>
+                <ImageField
+                  label={t.maroofLogo}
+                  value={form.compliance?.maroof?.logoUrl ?? null}
+                  onChange={(next) => setMaroof("logoUrl", next)}
+                  idBase="set-maroof-logo"
+                  previewClassName="h-16 w-16"
+                />
+              </div>
+            </div>
+
+            {/* Licenses array */}
+            <div>
+              <h3 className="mb-1 font-display text-base font-bold text-textPrimary text-start">
+                {t.licenses}
+              </h3>
+              <p className="mb-3 text-[11px] text-textMuted text-start">
+                {t.licensesHint}
+              </p>
+
+              {(form.compliance?.licenses?.length ?? 0) === 0 ? (
+                <p className="rounded-lg border border-border bg-surfaceElevated p-5 text-center text-sm text-textSecondary">
+                  {t.noLicenses}
+                </p>
+              ) : (
+                <ul className="space-y-3">
+                  {form.compliance.licenses.map((lic, idx) => (
+                    <li
+                      key={lic.id || idx}
+                      className="rounded-xl border border-border bg-surfaceElevated p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1 space-y-4">
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <Field
+                              label={t.licenseNameEn}
+                              htmlFor={`lic-name-en-${idx}`}
+                            >
+                              <input
+                                id={`lic-name-en-${idx}`}
+                                type="text"
+                                dir="ltr"
+                                value={lic.name?.en ?? ""}
+                                onChange={(e) =>
+                                  setLicenseName(idx, "en", e.target.value)
+                                }
+                                className={inputBase}
+                              />
+                            </Field>
+                            <Field
+                              label={t.licenseNameAr}
+                              htmlFor={`lic-name-ar-${idx}`}
+                            >
+                              <input
+                                id={`lic-name-ar-${idx}`}
+                                type="text"
+                                dir="rtl"
+                                value={lic.name?.ar ?? ""}
+                                onChange={(e) =>
+                                  setLicenseName(idx, "ar", e.target.value)
+                                }
+                                className={inputBase}
+                              />
+                            </Field>
+                            <Field
+                              label={t.licenseNumber}
+                              htmlFor={`lic-number-${idx}`}
+                            >
+                              <input
+                                id={`lic-number-${idx}`}
+                                type="text"
+                                dir="ltr"
+                                value={lic.number ?? ""}
+                                onChange={(e) =>
+                                  setLicense(idx, { number: e.target.value })
+                                }
+                                className={inputBase}
+                              />
+                            </Field>
+                            <Field
+                              label={t.licenseUrl}
+                              htmlFor={`lic-url-${idx}`}
+                            >
+                              <div className="relative">
+                                <Link2
+                                  className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-textMuted"
+                                  aria-hidden="true"
+                                />
+                                <input
+                                  id={`lic-url-${idx}`}
+                                  type="url"
+                                  dir="ltr"
+                                  inputMode="url"
+                                  placeholder="https://…"
+                                  value={lic.url ?? ""}
+                                  onChange={(e) =>
+                                    setLicense(idx, { url: e.target.value })
+                                  }
+                                  className={`${inputBase} ps-9`}
+                                />
+                              </div>
+                            </Field>
+                          </div>
+                          <ImageField
+                            label={t.licenseLogo}
+                            value={lic.logoUrl ?? null}
+                            onChange={(next) =>
+                              setLicense(idx, { logoUrl: next })
+                            }
+                            idBase={`lic-logo-${idx}`}
+                            previewClassName="h-12 w-20"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeLicense(idx)}
+                          aria-label={`${t.removeLicense} ${
+                            lic.name?.[lang] || lic.name?.en || ""
+                          }`.trim()}
+                          className="grid h-9 w-9 shrink-0 place-items-center self-start rounded-lg border border-border bg-surface text-textSecondary transition-colors hover:border-danger/50 hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                type="button"
+                onClick={addLicense}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border bg-surface px-4 py-2 text-sm font-medium text-textSecondary transition-colors hover:border-primary/40 hover:text-textPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                {t.addLicense}
+              </button>
+            </div>
           </div>
         </Section>
 

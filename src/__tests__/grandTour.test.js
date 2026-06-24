@@ -11,9 +11,9 @@
 //   2. the seeded catalog loads
 //   3. an admin (email in the default VITE_ADMIN_EMAILS) creates a product
 //   4. payment: success card succeeds, decline card fails
-//   5. the customer places an order (status Processing)
-//   6. the admin advances the order: Processing -> Shipped -> Delivered
-//   7. trackById / the order record reflect Delivered
+//   5. the customer places an order (status Received)
+//   6. the admin advances it through the full lifecycle -> Delivered
+//   7. the admin attaches a tracking number; trackById reflects Delivered
 //   8. hasPurchased(productId) is true for the customer
 // -----------------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ describe("Cabler Parts — Grand Tour (LOCAL adapter, service layer)", () => {
     expect(declined.ok).toBe(false);
     expect(declined.error).toBe("card_declined");
 
-    // -- 5. the customer places an order (status Processing) ------------------
+    // -- 5. the customer places an order (status Received) -------------------
     const placed = await ordersService.placeOrder({
       userId: customerId,
       items: [
@@ -143,40 +143,58 @@ describe("Cabler Parts — Grand Tour (LOCAL adapter, service layer)", () => {
       paymentId: okPayment.id,
     });
     expect(placed.id).toMatch(/^MR-/);
-    expect(placed.status).toBe("Processing");
+    expect(placed.status).toBe("Received");
     expect(placed.userId).toBe(customerId);
     expect(placed.paymentId).toBe(okPayment.id);
     expect(Array.isArray(placed.statusHistory)).toBe(true);
-    expect(placed.statusHistory[0].status).toBe("Processing");
+    expect(placed.statusHistory[0].status).toBe("Received");
+    // new fulfilment metadata fields default to null
+    expect(placed.trackingNumber).toBe(null);
+    expect(placed.shippingMethod).toBe(null);
 
     // the order shows up in the customer's order list
     const customerOrders = await ordersService.listOrders(customerId);
     expect(customerOrders.some((o) => o.id === placed.id)).toBe(true);
 
-    // -- 6. admin advances the status: Processing -> Shipped -> Delivered -----
+    // -- 6. admin advances through the full lifecycle ------------------------
     const adminView = await ordersService.getAllOrders();
     expect(adminView.some((o) => o.id === placed.id)).toBe(true);
 
-    const shipped = await ordersService.updateOrderStatus(placed.id, "Shipped");
-    expect(shipped.status).toBe("Shipped");
-
-    const delivered = await ordersService.updateOrderStatus(
-      placed.id,
-      "Delivered"
-    );
-    expect(delivered.status).toBe("Delivered");
-    // history accumulated all three stages
-    expect(delivered.statusHistory.map((h) => h.status)).toEqual([
+    const lifecycle = [
+      "PaymentConfirmed",
       "Processing",
+      "Packed",
       "Shipped",
+      "OutForDelivery",
       "Delivered",
+    ];
+    let advanced;
+    for (const next of lifecycle) {
+      advanced = await ordersService.updateOrderStatus(placed.id, next);
+      expect(advanced.status).toBe(next);
+    }
+    // history accumulated every stage, starting from Received
+    expect(advanced.statusHistory.map((h) => h.status)).toEqual([
+      "Received",
+      ...lifecycle,
     ]);
+    // reaching Delivered stamps the actual delivery date
+    expect(typeof advanced.actualDeliveryDate).toBe("number");
 
-    // -- 7. trackById / the order record reflect Delivered -------------------
+    // -- 7. admin attaches tracking; record reflects Delivered ---------------
+    const withTracking = await ordersService.updateOrderFields(placed.id, {
+      trackingNumber: "ARM12345",
+      courierProvider: "Aramex",
+      shippingMethod: "standard",
+    });
+    expect(withTracking.trackingNumber).toBe("ARM12345");
+    expect(withTracking.courierProvider).toBe("Aramex");
+
     const tracked = await ordersService.trackById(placed.id);
     expect(tracked.found).toBe(true);
     expect(tracked.isDemo).toBe(false);
     expect(tracked.order.status).toBe("Delivered");
+    expect(tracked.order.trackingNumber).toBe("ARM12345");
 
     const fetched = await ordersService.getOrder(placed.id, customerId);
     expect(fetched.status).toBe("Delivered");

@@ -3,10 +3,14 @@
 //
 // Reads useParams().orderId -> useOrders().getOrder(orderId). If null, shows a
 // friendly not-found with a back link. Otherwise renders:
-//   - <OrderStatusTimeline status={getOrderStatus(order)} />
+//   - <OrderStatusTimeline status={getOrderStatus(order)} /> (full 7-stage life-
+//     cycle, handled by the timeline component)
 //   - the line items (PartIcon, name by lang, qty, line total)
 //   - the totals breakdown (subtotal / discount / shipping / total via useGeo)
-//   - shipping + contact summary
+//   - a SHIPPING & TRACKING block: localized shipping method, courier, tracking
+//     number (dir=ltr mono) + estimated/actual delivery date — or a subtle hint
+//     that the tracking number appears after the order ships
+//   - shipping address + contact summary
 //   - a back link to /account/orders
 //
 // Bilingual: own local STRINGS={en,ar} via useLang().lang. RTL via logical
@@ -24,12 +28,17 @@ import {
   Mail,
   Phone,
   Loader2,
+  Truck,
+  Hash,
+  CalendarClock,
+  CalendarCheck2,
 } from "lucide-react";
 import { useOrders } from "../../context/OrdersContext";
 import { useLang } from "../../context/LanguageContext";
 import { useGeo } from "../../context/GeoContext";
 import { useDocumentMeta } from "../../hooks/useDocumentMeta";
 import { PartIcon, ACCENT_GRADIENT } from "../../lib/partIcons";
+import { getShippingMethod } from "../../services/shippingService";
 import OrderStatusTimeline from "../../components/order/OrderStatusTimeline";
 
 const STRINGS = {
@@ -40,7 +49,11 @@ const STRINGS = {
       "We couldn't find that order on your account. It may belong to a different account.",
     orderId: "Order",
     placed: "Placed",
-    cancelledBadge: "Cancelled",
+    terminalBadge: {
+      Cancelled: "Cancelled",
+      Returned: "Returned",
+      Refunded: "Refunded",
+    },
     items: "Items",
     qty: "Qty",
     subtotal: "Subtotal",
@@ -50,6 +63,14 @@ const STRINGS = {
     total: "Total",
     shippingTo: "Shipping to",
     contact: "Contact",
+    // shipping & tracking
+    tracking: "Shipping & tracking",
+    method: "Shipping method",
+    courier: "Courier",
+    trackingNo: "Tracking number",
+    trackingPending: "Tracking number appears after shipping.",
+    estDelivery: "Estimated delivery",
+    deliveredOn: "Delivered on",
   },
   ar: {
     back: "العودة إلى الطلبات",
@@ -58,7 +79,11 @@ const STRINGS = {
       "تعذّر العثور على هذا الطلب في حسابك. قد يعود إلى حساب آخر.",
     orderId: "الطلب",
     placed: "تاريخ الطلب",
-    cancelledBadge: "أُلغي",
+    terminalBadge: {
+      Cancelled: "أُلغي",
+      Returned: "مُرتجَع",
+      Refunded: "مُستردّ",
+    },
     items: "القطع",
     qty: "الكمية",
     subtotal: "المجموع الفرعي",
@@ -68,6 +93,14 @@ const STRINGS = {
     total: "الإجمالي",
     shippingTo: "الشحن إلى",
     contact: "بيانات التواصل",
+    // shipping & tracking
+    tracking: "الشحن والتتبّع",
+    method: "طريقة الشحن",
+    courier: "شركة الشحن",
+    trackingNo: "رقم التتبّع",
+    trackingPending: "سيظهر رقم التتبّع بعد الشحن.",
+    estDelivery: "موعد التوصيل المتوقّع",
+    deliveredOn: "تم التوصيل في",
   },
 };
 
@@ -80,6 +113,21 @@ function formatDate(ms, lang) {
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
+    }).format(new Date(ms));
+  } catch {
+    return "";
+  }
+}
+
+// Date-only formatter for delivery dates (no time component).
+function formatDeliveryDate(ms, lang) {
+  if (!ms) return "";
+  try {
+    return new Intl.DateTimeFormat(lang === "ar" ? "ar" : "en", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     }).format(new Date(ms));
   } catch {
     return "";
@@ -179,6 +227,20 @@ export default function OrderDetail() {
   const items = Array.isArray(order.items) ? order.items : [];
   const shippingFree = !order.shippingUSD || order.shippingUSD <= 0;
 
+  // ---- Shipping & tracking (any of these may be null) ----------------------
+  const methodId = order.shippingMethod;
+  // Localized method name when the id is known; otherwise show the raw id.
+  const methodName = methodId
+    ? getShippingMethod(methodId).name?.[lang] || methodId
+    : null;
+  const courier = order.courierProvider || null;
+  const trackingNumber = order.trackingNumber || null;
+  const estDelivery = order.estimatedDeliveryDate || null;
+  const actualDelivery = order.actualDeliveryDate || null;
+  // Render the block whenever there's anything shipping-related to show.
+  const hasShippingInfo =
+    !!(methodName || courier || trackingNumber || estDelivery || actualDelivery);
+
   return (
     <div className="space-y-6">
       {BackLink}
@@ -196,9 +258,9 @@ export default function OrderDetail() {
             >
               {order.id}
             </h1>
-            {status.cancelled && (
+            {status.offTrack && (
               <span className="inline-flex items-center rounded-full bg-danger/15 px-2.5 py-0.5 text-xs font-semibold text-danger">
-                {t.cancelledBadge}
+                {t.terminalBadge[status.terminalStatus] || status.terminalStatus}
               </span>
             )}
           </div>
@@ -312,6 +374,92 @@ export default function OrderDetail() {
           </div>
         </dl>
       </section>
+
+      {/* shipping & tracking */}
+      {hasShippingInfo && (
+        <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+          <h2 className="mb-4 inline-flex items-center gap-2 font-display text-lg font-bold text-textPrimary text-start">
+            <Truck
+              className="h-5 w-5 text-textMuted rtl:-scale-x-100"
+              aria-hidden="true"
+            />
+            {t.tracking}
+          </h2>
+
+          <dl className="grid gap-4 sm:grid-cols-2">
+            {methodName && (
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-textMuted text-start">
+                  {t.method}
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-textPrimary text-start">
+                  {methodName}
+                </dd>
+              </div>
+            )}
+
+            {courier && (
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-textMuted text-start">
+                  {t.courier}
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-textPrimary text-start">
+                  <span dir="ltr">{courier}</span>
+                </dd>
+              </div>
+            )}
+
+            <div className="sm:col-span-2">
+              <dt className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-textMuted text-start">
+                <Hash className="h-3.5 w-3.5" aria-hidden="true" />
+                {t.trackingNo}
+              </dt>
+              {trackingNumber ? (
+                <dd className="mt-1">
+                  <span
+                    dir="ltr"
+                    className="inline-flex items-center rounded-lg bg-surfaceElevated px-2.5 py-1 font-mono text-sm font-semibold tracking-wide tabular-nums text-textPrimary ring-1 ring-border"
+                  >
+                    {trackingNumber}
+                  </span>
+                </dd>
+              ) : (
+                <dd className="mt-1 text-sm text-textMuted text-start">
+                  {t.trackingPending}
+                </dd>
+              )}
+            </div>
+
+            {estDelivery && (
+              <div>
+                <dt className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-textMuted text-start">
+                  <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t.estDelivery}
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-textPrimary text-start">
+                  <span dir="ltr" className="tabular-nums">
+                    {formatDeliveryDate(estDelivery, lang)}
+                  </span>
+                </dd>
+              </div>
+            )}
+
+            {actualDelivery && (
+              <div>
+                <dt className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-success text-start">
+                  <CalendarCheck2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t.deliveredOn}
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-success text-start">
+                  <span dir="ltr" className="tabular-nums">
+                    {formatDeliveryDate(actualDelivery, lang)}
+                  </span>
+                </dd>
+              </div>
+            )}
+          </dl>
+        </section>
+      )}
 
       {/* shipping + contact */}
       <div className="grid gap-4 sm:grid-cols-2">

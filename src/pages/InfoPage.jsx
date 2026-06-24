@@ -90,6 +90,8 @@ const PAGE_KEY_BY_SLUG = {
   shipping: "shipping",
   privacy: "privacy",
   terms: "terms",
+  pdpl: "pdpl",
+  disclaimer: "disclaimer",
 };
 
 /* ----------------------------------------------------------------------------
@@ -302,7 +304,7 @@ const CONTENT = {
       sections: [
         {
           heading: "30-day returns",
-          body: "Unused parts in original packaging can be returned within 30 days of delivery. Start a return by contacting us with your order ID; we’ll issue instructions and a refund to your original payment method once the item is received and inspected.",
+          body: "Unused parts in original packaging can be returned within 30 days of delivery. Start a return by contacting us with your order ID; we’ll issue instructions and a refund to your original payment method once the item is received and inspected. Approved refunds are processed within 7–14 business days of receiving and inspecting the return, back to the original payment method used at checkout.",
         },
         {
           heading: "2-year warranty",
@@ -322,7 +324,7 @@ const CONTENT = {
       sections: [
         {
           heading: "إرجاع خلال 30 يومًا",
-          body: "يمكن إرجاع القطع غير المستخدمة بعبوتها الأصلية خلال 30 يومًا من الاستلام. ابدأ الإرجاع بالتواصل معنا برقم طلبك؛ وسنزوّدك بالتعليمات ونعيد المبلغ إلى وسيلة الدفع الأصلية بعد استلام القطعة وفحصها.",
+          body: "يمكن إرجاع القطع غير المستخدمة بعبوتها الأصلية خلال 30 يومًا من الاستلام. ابدأ الإرجاع بالتواصل معنا برقم طلبك؛ وسنزوّدك بالتعليمات ونعيد المبلغ إلى وسيلة الدفع الأصلية بعد استلام القطعة وفحصها. تُعالَج المبالغ المستردّة المعتمدة خلال 7–14 يوم عمل من استلام القطعة المُرجعة وفحصها، وتُعاد إلى وسيلة الدفع الأصلية المستخدمة عند الدفع.",
         },
         {
           heading: "ضمان سنتين",
@@ -390,7 +392,7 @@ const CONTENT = {
       sections: [
         {
           heading: "What we collect",
-          body: "Account details (name, email), order and shipping information, and basic usage data. Payment card details are processed by our payment provider and are never stored on our servers.",
+          body: "Account details (name, email), order and shipping information, and basic usage data. Payment card details are tokenized by our PCI-DSS-compliant payment provider and are never stored on our servers — we never see or keep your full card number.",
         },
         {
           heading: "How we use it",
@@ -399,6 +401,10 @@ const CONTENT = {
         {
           heading: "Your choices",
           body: "You can view and update your profile from your account, and request deletion of your data by contacting us. We retain order records as required for warranty and legal purposes.",
+        },
+        {
+          heading: "Saudi PDPL compliance",
+          body: "We process personal data in line with the Saudi Personal Data Protection Law (PDPL). For full detail on your rights, the lawful basis for processing, retention periods, and how to reach our data controller, see our dedicated Personal Data Protection (PDPL) page.",
         },
       ],
     },
@@ -410,7 +416,7 @@ const CONTENT = {
       sections: [
         {
           heading: "ما الذي نجمعه",
-          body: "بيانات الحساب (الاسم، البريد الإلكتروني)، ومعلومات الطلب والشحن، وبيانات استخدام أساسية. تُعالَج بيانات بطاقة الدفع لدى مزوّد الدفع ولا تُخزَّن أبدًا على خوادمنا.",
+          body: "بيانات الحساب (الاسم، البريد الإلكتروني)، ومعلومات الطلب والشحن، وبيانات استخدام أساسية. تُرمَّز بيانات بطاقة الدفع لدى مزوّد الدفع المتوافق مع معيار PCI-DSS ولا تُخزَّن أبدًا على خوادمنا — فنحن لا نرى رقم بطاقتك الكامل ولا نحتفظ به.",
         },
         {
           heading: "كيف نستخدمها",
@@ -419,6 +425,10 @@ const CONTENT = {
         {
           heading: "خياراتك",
           body: "يمكنك عرض ملفك الشخصي وتحديثه من حسابك، وطلب حذف بياناتك بالتواصل معنا. نحتفظ بسجلّات الطلبات وفق ما يتطلّبه الضمان والأغراض القانونية.",
+        },
+        {
+          heading: "الامتثال لنظام حماية البيانات الشخصية السعودي",
+          body: "نعالج البيانات الشخصية وفقًا لنظام حماية البيانات الشخصية السعودي (PDPL). للاطّلاع على تفاصيل حقوقك، والأساس النظامي للمعالجة، ومدد الاحتفاظ، وكيفية التواصل مع المتحكّم في البيانات لدينا، راجع صفحة حماية البيانات الشخصية (PDPL) المخصّصة.",
         },
       ],
     },
@@ -463,6 +473,170 @@ const CONTENT = {
         {
           heading: "المسؤولية",
           body: "كابلر بارتس غير مسؤول عن تكاليف التركيب أو الأضرار التبعية. أقصى مسؤولية لنا عن أي مطالبة محدودة بسعر القطعة المتأثّرة. يخضع الإرجاع والضمان لسياسة الإرجاع والضمان.",
+        },
+      ],
+    },
+  },
+
+  pdpl: {
+    icon: ShieldCheck,
+    en: {
+      eyebrow: "Legal",
+      title: "Personal Data Protection (PDPL)",
+      intro:
+        "How Cabler Parts collects, uses, protects, and shares your personal data under the Saudi Personal Data Protection Law.",
+      sections: [
+        {
+          heading: "Legal basis",
+          body: "This policy is issued in accordance with the Saudi Personal Data Protection Law (PDPL — نظام حماية البيانات الشخصية) and its Implementing Regulations, issued by the Saudi Data & AI Authority (SDAIA). It complements our Privacy Policy and governs how we handle the personal data of customers in the Kingdom.",
+        },
+        {
+          heading: "Personal data we collect",
+          body: "Identity and contact data (name, email, phone, billing and shipping address); order, payment, and delivery records; vehicle and fitment data you add to The Garage; account credentials; and technical data such as device, browser, and usage information. We do not store full payment card numbers — these are tokenized by our PCI-DSS-compliant payment provider.",
+        },
+        {
+          heading: "Purposes of processing",
+          body: "We process personal data to create and manage your account, fulfil and deliver orders, process payments and refunds, provide customer support and warranty service, prevent fraud, comply with legal and tax obligations, and — with your consent — send you marketing communications.",
+        },
+        {
+          heading: "Lawful basis & consent",
+          body: "We rely on the lawful bases recognized by the PDPL: performance of the contract with you, compliance with a legal obligation, our legitimate interests (such as fraud prevention and service improvement), and your explicit consent where required (for example, marketing). You may withdraw consent at any time without affecting processing carried out before withdrawal.",
+        },
+        {
+          heading: "Data retention",
+          body: "We keep personal data only for as long as necessary for the purposes above, including the duration of your account and any period required by warranty, accounting, tax, and other legal obligations. When data is no longer needed, it is securely deleted or anonymized.",
+        },
+        {
+          heading: "Your rights",
+          body: [
+            "Right to be informed about how your personal data is processed.",
+            "Right to access your personal data and obtain a copy.",
+            "Right to request correction of inaccurate or incomplete data.",
+            "Right to request deletion of your data where there is no legal reason to retain it.",
+            "Right to object to or restrict certain processing, including direct marketing.",
+          ],
+        },
+        {
+          heading: "Security measures",
+          body: "We apply technical and organizational safeguards — encryption in transit, access controls, tokenized payments, and least-privilege handling of data — to protect personal data against loss, misuse, and unauthorized access. No method of transmission is completely secure, but we continually review and improve our controls.",
+        },
+        {
+          heading: "Cross-border transfer",
+          body: "Where personal data is transferred or processed outside the Kingdom (for example, by trusted hosting or service providers), we do so only in line with the PDPL and its conditions for cross-border transfer, and we require appropriate safeguards to keep your data protected to an equivalent standard.",
+        },
+        {
+          heading: "Contact the data controller",
+          body: "Cabler Parts is the data controller for your personal data. To exercise any of your rights, withdraw consent, or raise a concern, contact us at support@cablerparts.com or through our Contact page. You also have the right to lodge a complaint with the competent supervisory authority (SDAIA).",
+        },
+      ],
+    },
+    ar: {
+      eyebrow: "قانوني",
+      title: "سياسة حماية البيانات الشخصية",
+      intro:
+        "كيف يجمع كابلر بارتس بياناتك الشخصية ويستخدمها ويحميها ويشاركها وفق نظام حماية البيانات الشخصية السعودي.",
+      sections: [
+        {
+          heading: "الأساس النظامي",
+          body: "تصدر هذه السياسة وفقًا لنظام حماية البيانات الشخصية السعودي (PDPL) ولائحته التنفيذية، الصادر عن الهيئة السعودية للبيانات والذكاء الاصطناعي (سدايا). وهي مكمّلة لسياسة الخصوصية لدينا وتنظّم كيفية تعاملنا مع البيانات الشخصية للعملاء داخل المملكة.",
+        },
+        {
+          heading: "البيانات الشخصية التي نجمعها",
+          body: "بيانات الهوية والتواصل (الاسم، البريد الإلكتروني، الهاتف، عنوان الفوترة والشحن)؛ وسجلّات الطلبات والدفع والتوصيل؛ وبيانات المركبة والتوافق التي تضيفها إلى المرآب؛ وبيانات الدخول للحساب؛ والبيانات التقنية مثل الجهاز والمتصفّح ومعلومات الاستخدام. لا نخزّن أرقام بطاقات الدفع الكاملة — إذ تُرمَّز لدى مزوّد الدفع المتوافق مع معيار PCI-DSS.",
+        },
+        {
+          heading: "أغراض المعالجة",
+          body: "نعالج البيانات الشخصية لإنشاء حسابك وإدارته، وتنفيذ الطلبات وتوصيلها، ومعالجة المدفوعات والمبالغ المستردّة، وتقديم الدعم وخدمة الضمان، ومنع الاحتيال، والامتثال للالتزامات النظامية والضريبية، وإرسال الرسائل التسويقية بموافقتك.",
+        },
+        {
+          heading: "الأساس النظامي والموافقة",
+          body: "نعتمد على الأسس النظامية التي يقرّها نظام حماية البيانات الشخصية: تنفيذ العقد المبرم معك، والامتثال لالتزام نظامي، ومصالحنا المشروعة (مثل منع الاحتيال وتحسين الخدمة)، وموافقتك الصريحة عند الحاجة (كالتسويق). ويمكنك سحب موافقتك في أي وقت دون التأثير على المعالجة التي تمّت قبل السحب.",
+        },
+        {
+          heading: "الاحتفاظ بالبيانات",
+          body: "نحتفظ بالبيانات الشخصية للمدة اللازمة للأغراض المذكورة أعلاه فقط، بما في ذلك مدة استمرار حسابك وأي مدة يتطلّبها الضمان والمحاسبة والالتزامات الضريبية والنظامية الأخرى. وعند انتفاء الحاجة إليها، تُحذف بشكل آمن أو تُجهَّل هويتها.",
+        },
+        {
+          heading: "حقوقك",
+          body: [
+            "حق العلم بكيفية معالجة بياناتك الشخصية.",
+            "حق الوصول إلى بياناتك الشخصية والحصول على نسخة منها.",
+            "حق طلب تصحيح البيانات غير الدقيقة أو غير المكتملة.",
+            "حق طلب حذف بياناتك متى لم يوجد سبب نظامي للاحتفاظ بها.",
+            "حق الاعتراض على معالجات معيّنة أو تقييدها، بما في ذلك التسويق المباشر.",
+          ],
+        },
+        {
+          heading: "إجراءات الأمان",
+          body: "نطبّق ضوابط تقنية وتنظيمية — التشفير أثناء النقل، وضوابط الوصول، وترميز المدفوعات، ومبدأ الحدّ الأدنى من الصلاحيات في التعامل مع البيانات — لحماية البيانات الشخصية من الفقد وسوء الاستخدام والوصول غير المصرّح به. ولا توجد وسيلة نقل آمنة تمامًا، لكننا نراجع ضوابطنا ونحسّنها باستمرار.",
+        },
+        {
+          heading: "النقل خارج المملكة",
+          body: "حين تُنقل البيانات الشخصية أو تُعالَج خارج المملكة (مثل مزوّدي الاستضافة أو الخدمات الموثوقين)، نفعل ذلك فقط بما يتوافق مع نظام حماية البيانات الشخصية وشروطه للنقل خارج المملكة، ونشترط ضمانات مناسبة للحفاظ على حماية بياناتك بمستوى مكافئ.",
+        },
+        {
+          heading: "التواصل مع المتحكّم في البيانات",
+          body: "كابلر بارتس هو المتحكّم في بياناتك الشخصية. لممارسة أيٍّ من حقوقك أو سحب موافقتك أو إبداء ملاحظة، تواصل معنا عبر support@cablerparts.com أو من خلال صفحة التواصل. ولك أيضًا حق تقديم شكوى إلى الجهة الرقابية المختصّة (سدايا).",
+        },
+      ],
+    },
+  },
+
+  disclaimer: {
+    icon: FileText,
+    en: {
+      eyebrow: "Legal",
+      title: "Disclaimer & Domain Ownership",
+      intro:
+        "Our pledge of domain ownership and the disclaimers that apply to information published on this store.",
+      sections: [
+        {
+          heading: "Domain ownership pledge",
+          body: "The merchant operating this store pledges full ownership of the domain name __DOMAIN__ and bears full responsibility for the validity and integrity of all information published about it. Ownership of the domain belongs to the applicant/merchant, and the store is operated under that ownership.",
+        },
+        {
+          heading: "Accuracy of information",
+          body: "We make every effort to keep product details, specifications, pricing, fitment data, and availability accurate and up to date. However, information is provided “as is” and may contain inadvertent errors or change without notice. We do not warrant that all content is complete, current, or error-free, and we reserve the right to correct any error and update content at any time.",
+        },
+        {
+          heading: "Limitation of liability",
+          body: "To the maximum extent permitted by law, Cabler Parts is not liable for any indirect, incidental, or consequential damages arising from the use of this store or reliance on its content, including installation costs. Our maximum liability for any claim is limited to the price paid for the affected part, as set out in our Terms of Service.",
+        },
+        {
+          heading: "Third-party links & brands",
+          body: "This store may reference third-party brands, trademarks, and manufacturer part numbers solely to identify fitment and compatibility; all such marks remain the property of their respective owners and their use does not imply endorsement or affiliation. Any links to external sites are provided for convenience, and we are not responsible for their content, policies, or practices.",
+        },
+        {
+          heading: "Authentic store & impersonation",
+          body: "This store and its official domain __DOMAIN__ are genuine and operated by the merchant. We are not affiliated with any look-alike site, and we will never ask for your password or full card details by email or message. If you encounter a site, link, or message impersonating Cabler Parts, please report it to us immediately at support@cablerparts.com so we can act on it.",
+        },
+      ],
+    },
+    ar: {
+      eyebrow: "قانوني",
+      title: "إخلاء المسؤولية وتعهّد ملكية النطاق",
+      intro:
+        "تعهّدنا بملكية النطاق وإخلاءات المسؤولية المنطبقة على المعلومات المنشورة في هذا المتجر.",
+      sections: [
+        {
+          heading: "تعهّد ملكية النطاق",
+          body: "يتعهّد التاجر المُشغِّل لهذا المتجر بملكيته الكاملة لاسم النطاق __DOMAIN__ ويتحمّل كامل المسؤولية عن صحّة وسلامة جميع المعلومات المنشورة بشأنه. وتعود ملكية النطاق لمقدّم الطلب/التاجر، ويُشغَّل المتجر بموجب هذه الملكية.",
+        },
+        {
+          heading: "دقّة المعلومات",
+          body: "نبذل كل جهد للحفاظ على دقّة وتحديث تفاصيل المنتجات ومواصفاتها وأسعارها وبيانات التوافق وتوفّرها. ومع ذلك تُقدَّم المعلومات «كما هي» وقد تتضمّن أخطاءً غير مقصودة أو تتغيّر دون إشعار. ولا نضمن أن يكون كل المحتوى كاملًا أو محدّثًا أو خاليًا من الأخطاء، ونحتفظ بحق تصحيح أي خطأ وتحديث المحتوى في أي وقت.",
+        },
+        {
+          heading: "حدود المسؤولية",
+          body: "إلى أقصى حدّ يسمح به النظام، لا يتحمّل كابلر بارتس أي أضرار غير مباشرة أو عرضية أو تبعية تنشأ عن استخدام هذا المتجر أو الاعتماد على محتواه، بما في ذلك تكاليف التركيب. وأقصى مسؤولية لنا عن أي مطالبة محدودة بسعر القطعة المتأثّرة، وفق ما هو منصوص عليه في شروط الخدمة.",
+        },
+        {
+          heading: "روابط وعلامات الأطراف الثالثة",
+          body: "قد يشير هذا المتجر إلى علامات تجارية وأرقام قطع لجهات صانعة من أطراف ثالثة لغرض تحديد التوافق فقط؛ وتظل جميع تلك العلامات ملكًا لأصحابها، ولا يعني استخدامها أي تأييد أو ارتباط. وأي روابط لمواقع خارجية مقدَّمة للتسهيل فقط، ولسنا مسؤولين عن محتواها أو سياساتها أو ممارساتها.",
+        },
+        {
+          heading: "المتجر الأصلي وانتحال الهوية",
+          body: "هذا المتجر ونطاقه الرسمي __DOMAIN__ أصليان ويُشغَّلان من قِبل التاجر. ولسنا مرتبطين بأي موقع مشابه، ولن نطلب منك كلمة المرور أو بيانات بطاقتك الكاملة عبر البريد أو الرسائل. وإذا صادفت موقعًا أو رابطًا أو رسالة تنتحل هوية كابلر بارتس، فيرجى إبلاغنا فورًا عبر support@cablerparts.com لاتخاذ الإجراء اللازم.",
         },
       ],
     },
@@ -551,6 +725,30 @@ const META = {
     ar: {
       title: "شروط الخدمة",
       description: "الشروط التي تحكم استخدامك لمتجر كابلر بارتس وعمليات الشراء.",
+    },
+  },
+  pdpl: {
+    en: {
+      title: "Personal Data Protection (PDPL)",
+      description:
+        "How Cabler Parts handles your personal data under the Saudi Personal Data Protection Law — your rights, consent, retention, and contacting the data controller.",
+    },
+    ar: {
+      title: "سياسة حماية البيانات الشخصية",
+      description:
+        "كيف يتعامل كابلر بارتس مع بياناتك الشخصية وفق نظام حماية البيانات الشخصية السعودي — حقوقك والموافقة والاحتفاظ والتواصل مع المتحكّم في البيانات.",
+    },
+  },
+  disclaimer: {
+    en: {
+      title: "Disclaimer & Domain Ownership",
+      description:
+        "Cabler Parts domain ownership pledge, accuracy and liability disclaimers, third-party brands, and how to report impersonation.",
+    },
+    ar: {
+      title: "إخلاء المسؤولية وتعهّد ملكية النطاق",
+      description:
+        "تعهّد كابلر بارتس بملكية النطاق، وإخلاءات الدقّة والمسؤولية، وعلامات الأطراف الثالثة، وكيفية الإبلاغ عن انتحال الهوية.",
     },
   },
 };
@@ -692,11 +890,24 @@ export default function InfoPage({ slug: slugProp }) {
   const c = entry[lang] || entry.en;
   const Icon = entry.icon || Info;
 
+  // Resolve the live domain for slugs that interpolate it (the disclaimer's
+  // domain-ownership pledge). Static CONTENT uses a `__DOMAIN__` placeholder so
+  // the copy stays a plain string; we swap in settings.compliance.domain when
+  // available, otherwise the production default. Sections are mapped lazily so
+  // unrelated slugs keep their original (already-string) bodies untouched.
+  const domain = settings?.compliance?.domain || "cablerparts.com";
+  const fillDomain = (text) =>
+    typeof text === "string" ? text.replaceAll("__DOMAIN__", domain) : text;
+  const sections = (c.sections || []).map((s) => ({
+    heading: fillDomain(s.heading),
+    body: Array.isArray(s.body) ? s.body.map(fillDomain) : fillDomain(s.body),
+  }));
+
   // Admin-authored rich-text override for this slug, if any. The contact slug
   // is content-managed through settings.contact (the ContactCard) instead, so
-  // it never consults settings.pages. For every other CMS-backed slug we render
-  // the sanitized HTML when present, an editable "coming soon" block when empty,
-  // and fall back to the built-in static copy only for slugs with no CMS key.
+  // it never consults settings.pages. When an admin has authored HTML for a
+  // CMS-backed slug it overrides the built-in copy; otherwise the static
+  // sections below render (and the "coming soon" block only when neither exists).
   const pageKey = entry.isContact ? null : PAGE_KEY_BY_SLUG[slug];
   const cmsRaw =
     pageKey && settings?.pages?.[pageKey]
@@ -705,7 +916,6 @@ export default function InfoPage({ slug: slugProp }) {
         ""
       : "";
   const cmsHtml = cmsRaw ? sanitizeHtml(cmsRaw) : "";
-  const hasCmsKey = Boolean(pageKey);
   const soon = COMING_SOON[lang] || COMING_SOON.en;
 
   return (
@@ -768,40 +978,20 @@ export default function InfoPage({ slug: slugProp }) {
         )}
 
         {/* ---- Body ----
-             CMS-backed slugs render admin-authored rich text (sanitized) or an
-             editable "coming soon" block when empty; the contact slug (and any
-             slug with no CMS key) keeps its built-in static sections. */}
-        {hasCmsKey ? (
-          cmsHtml ? (
-            <div
-              className="info-prose mt-10 text-start"
-              dir={lang === "ar" ? "rtl" : "ltr"}
-              // Sanitized above via sanitizeHtml() (tag/attr allow-list).
-              dangerouslySetInnerHTML={{ __html: cmsHtml }}
-            />
-          ) : (
-            <div className="mt-10 rounded-2xl border border-dashed border-border bg-surface/60 p-8 text-center shadow-elevated backdrop-blur">
-              <span className="grid mx-auto h-12 w-12 place-items-center rounded-2xl border border-primary/30 bg-primary/10 text-primary">
-                <Info className="h-6 w-6" aria-hidden="true" />
-              </span>
-              <h2 className="mt-5 font-display text-lg font-700 text-textPrimary">
-                {soon.title}
-              </h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-textSecondary">
-                {soon.body}
-              </p>
-              <Link
-                to="/contact"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 font-display text-sm font-600 text-textPrimary transition-all duration-200 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
-              >
-                <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
-                {tx.contactCta}
-              </Link>
-            </div>
-          )
-        ) : (
+             Precedence: an admin-authored rich-text override (sanitized) wins;
+             otherwise the built-in static sections render (so every policy page
+             ships with clear, complete copy by default); the editable
+             "coming soon" block appears only when a slug has neither. */}
+        {cmsHtml ? (
+          <div
+            className="info-prose mt-10 text-start"
+            dir={lang === "ar" ? "rtl" : "ltr"}
+            // Sanitized above via sanitizeHtml() (tag/attr allow-list).
+            dangerouslySetInnerHTML={{ __html: cmsHtml }}
+          />
+        ) : sections.length > 0 ? (
           <div className="mt-10 flex flex-col gap-8">
-            {c.sections.map((s, i) => (
+            {sections.map((s, i) => (
               <section key={i} className="text-start">
                 <h2 className="font-display text-lg font-600 text-textPrimary">
                   {s.heading}
@@ -809,6 +999,25 @@ export default function InfoPage({ slug: slugProp }) {
                 <SectionBody body={s.body} />
               </section>
             ))}
+          </div>
+        ) : (
+          <div className="mt-10 rounded-2xl border border-dashed border-border bg-surface/60 p-8 text-center shadow-elevated backdrop-blur">
+            <span className="grid mx-auto h-12 w-12 place-items-center rounded-2xl border border-primary/30 bg-primary/10 text-primary">
+              <Info className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <h2 className="mt-5 font-display text-lg font-700 text-textPrimary">
+              {soon.title}
+            </h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-textSecondary">
+              {soon.body}
+            </p>
+            <Link
+              to="/contact"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 font-display text-sm font-600 text-textPrimary transition-all duration-200 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            >
+              <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
+              {tx.contactCta}
+            </Link>
           </div>
         )}
 

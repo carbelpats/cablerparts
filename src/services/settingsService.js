@@ -77,6 +77,22 @@ export const DEFAULT_SETTINGS = {
     { id: "tabby", name: "Tabby", logoUrl: null },
     { id: "tamara", name: "Tamara", logoUrl: null },
   ],
+  // Legal / regulatory compliance shown across the storefront (footer trust row
+  // + the /compliance page). Empty strings render nothing — the admin fills the
+  // real values before launch. `licenses` mirrors the `payments` array pattern
+  // (each row optionally carries an uploaded/linked logo).
+  compliance: {
+    // Domain the store legally operates under — used in the ownership pledge.
+    domain: "cablerparts.com",
+    // Saudi Commercial Registration number (رقم السجل التجاري).
+    crNumber: "",
+    // VAT registration number (الرقم الضريبي).
+    vatNumber: "",
+    // "Maroof" is the Saudi Ministry of Commerce trust platform.
+    maroof: { url: "", logoUrl: null },
+    // Additional licenses/certifications: [{ id, name:{en,ar}, number, url, logoUrl }]
+    licenses: [],
+  },
   // Social media profile URLs. Empty string => the link is hidden in the footer.
   social: {
     instagram: "",
@@ -91,7 +107,9 @@ export const DEFAULT_SETTINGS = {
   // InfoPage renders an editable "coming soon" fallback for that slug.
   pages: {
     privacy: { en: "", ar: "" },
+    pdpl: { en: "", ar: "" },
     terms: { en: "", ar: "" },
+    disclaimer: { en: "", ar: "" },
     warranty: { en: "", ar: "" },
     shipping: { en: "", ar: "" },
     about: { en: "", ar: "" },

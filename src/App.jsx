@@ -47,6 +47,7 @@ import { COMMON } from "./lib/i18n";
 
 import Navbar from "./components/Navbar";
 import CartDrawer from "./components/CartDrawer";
+import MiniCart from "./components/MiniCart";
 import ProductDetailModal from "./components/ProductDetailModal";
 import CheckoutModal from "./components/CheckoutModal";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -129,8 +130,14 @@ const STRINGS = {
       },
     ],
     securePayments: "Secure payments",
+    complianceHeading: "Licenses & Compliance",
+    crLabel: "Commercial Registration",
+    vatLabel: "VAT",
+    maroofLabel: "Maroof",
     legal: [
       { label: "Privacy", to: "/privacy" },
+      { label: "Data Protection", to: "/pdpl" },
+      { label: "Disclaimer", to: "/disclaimer" },
       { label: "Terms", to: "/terms" },
       { label: "Warranty", to: "/returns" },
     ],
@@ -183,8 +190,14 @@ const STRINGS = {
       },
     ],
     securePayments: "مدفوعات آمنة",
+    complianceHeading: "التراخيص والامتثال",
+    crLabel: "السجل التجاري",
+    vatLabel: "الرقم الضريبي",
+    maroofLabel: "معروف",
     legal: [
       { label: "الخصوصية", to: "/privacy" },
+      { label: "حماية البيانات", to: "/pdpl" },
+      { label: "إخلاء المسؤولية", to: "/disclaimer" },
       { label: "الشروط", to: "/terms" },
       { label: "الضمان", to: "/returns" },
     ],
@@ -547,6 +560,27 @@ function Footer() {
     return typeof url === "string" && url.trim() !== "";
   });
 
+  // CMS-driven legal/trust compliance — CR + VAT numbers, the Maroof trust
+  // badge, and any business licenses. Owner fills these in later, so every
+  // piece is opt-in: we only render a value when it's a non-empty string, and
+  // skip the whole block when nothing is present.
+  const compliance = settings?.compliance || {};
+  const crNumber =
+    typeof compliance.crNumber === "string" ? compliance.crNumber.trim() : "";
+  const vatNumber =
+    typeof compliance.vatNumber === "string" ? compliance.vatNumber.trim() : "";
+  const maroof = compliance.maroof || {};
+  const maroofUrl =
+    typeof maroof.url === "string" ? maroof.url.trim() : "";
+  const licenses = Array.isArray(compliance.licenses)
+    ? compliance.licenses
+    : [];
+  const hasCompliance =
+    crNumber !== "" ||
+    vatNumber !== "" ||
+    maroofUrl !== "" ||
+    licenses.length > 0;
+
   // Catalog/Garage footer links REALLY filter: set the category, then navigate
   // to the landing's #catalog — ScrollToHash performs the single scroll (works
   // from any route). One scroll trigger only, so no double-scroll jump.
@@ -627,6 +661,140 @@ function Footer() {
                 <span dir="ltr">{contactEmail}</span>
               </li>
             </ul>
+
+            {/* Compliance — legally-required trust signals for KSA commerce:
+                Commercial Registration + VAT numbers (mono chips), the Maroof
+                trust badge, and any business licenses. Every piece is opt-in
+                (owner fills them via the CMS), so the whole section only mounts
+                once at least one value exists. */}
+            {hasCompliance && (
+              <div className="mt-6">
+                <h3 className="flex items-center gap-2 font-display text-xs font-700 uppercase tracking-wider text-textPrimary">
+                  <ShieldCheck
+                    className="h-3.5 w-3.5 text-primary"
+                    aria-hidden="true"
+                  />
+                  {tx.complianceHeading}
+                </h3>
+
+                {/* CR + VAT — small mono chips, Latin numerals stay LTR. */}
+                {(crNumber !== "" || vatNumber !== "") && (
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {crNumber !== "" && (
+                      <li className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surfaceElevated px-2 py-1 font-mono text-[11px] text-textSecondary">
+                        <span>{tx.crLabel}:</span>
+                        <span dir="ltr" className="tabular-nums text-textPrimary">
+                          {crNumber}
+                        </span>
+                      </li>
+                    )}
+                    {vatNumber !== "" && (
+                      <li className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surfaceElevated px-2 py-1 font-mono text-[11px] text-textSecondary">
+                        <span>{tx.vatLabel}:</span>
+                        <span dir="ltr" className="tabular-nums text-textPrimary">
+                          {vatNumber}
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                )}
+
+                {/* Trust badges — Maroof + business licenses. Each links out
+                    (new tab) when a URL is set, and shows its uploaded logo
+                    when one is present, else a tidy text badge. */}
+                {(maroofUrl !== "" || licenses.length > 0) && (
+                  <ul className="mt-3 flex flex-wrap items-center gap-2.5">
+                    {maroofUrl !== "" && (
+                      <li>
+                        <a
+                          href={maroofUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={tx.maroofLabel}
+                          title={tx.maroofLabel}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surfaceElevated px-2 py-1 text-[11px] text-textSecondary transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+                        >
+                          {maroof.logoUrl ? (
+                            <img
+                              src={maroof.logoUrl}
+                              alt={tx.maroofLabel}
+                              className="h-5 w-auto object-contain"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="font-display font-700">
+                              {tx.maroofLabel}
+                            </span>
+                          )}
+                        </a>
+                      </li>
+                    )}
+
+                    {licenses.map((lic, i) => {
+                      const name =
+                        typeof lic?.name === "string"
+                          ? lic.name
+                          : (lic?.name && (lic.name[lang] || lic.name.en)) || "";
+                      const number =
+                        typeof lic?.number === "string"
+                          ? lic.number.trim()
+                          : "";
+                      const url =
+                        typeof lic?.url === "string" ? lic.url.trim() : "";
+                      if (!name && !number && !lic?.logoUrl) return null;
+
+                      const inner = (
+                        <>
+                          {lic?.logoUrl ? (
+                            <img
+                              src={lic.logoUrl}
+                              alt={name || tx.complianceHeading}
+                              className="h-5 w-auto object-contain"
+                              loading="lazy"
+                            />
+                          ) : (
+                            name && (
+                              <span className="font-display font-700">
+                                {name}
+                              </span>
+                            )
+                          )}
+                          {number !== "" && (
+                            <span dir="ltr" className="font-mono tabular-nums">
+                              {number}
+                            </span>
+                          )}
+                        </>
+                      );
+
+                      const chipClass =
+                        "inline-flex items-center gap-1.5 rounded-md border border-border bg-surfaceElevated px-2 py-1 text-[11px] text-textSecondary";
+
+                      return (
+                        <li key={lic?.id || `${name}-${i}`}>
+                          {url !== "" ? (
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={name || tx.complianceHeading}
+                              title={name || tx.complianceHeading}
+                              className={`${chipClass} transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60`}
+                            >
+                              {inner}
+                            </a>
+                          ) : (
+                            <span className={chipClass} title={name || undefined}>
+                              {inner}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Link columns */}
@@ -895,8 +1063,10 @@ function StorefrontLayout() {
 
       {/* Fixed overlays — sit outside the document flow, inside all providers.
           CheckoutModal (z-[70]) overlays CartDrawer (z-[60]) overlays
-          ProductDetailModal (z-[50]). */}
+          ProductDetailModal (z-[50]). MiniCart is the transient "added to
+          cart" peek that rides alongside the full CartDrawer. */}
       <CartDrawer />
+      <MiniCart />
       <ProductDetailModal />
       <CheckoutModal />
     </div>
@@ -923,6 +1093,8 @@ function AppRoutes() {
         <Route path="returns" element={<InfoPage slug="returns" />} />
         <Route path="shipping" element={<InfoPage slug="shipping" />} />
         <Route path="privacy" element={<InfoPage slug="privacy" />} />
+        <Route path="pdpl" element={<InfoPage slug="pdpl" />} />
+        <Route path="disclaimer" element={<InfoPage slug="disclaimer" />} />
         <Route path="terms" element={<InfoPage slug="terms" />} />
 
         <Route

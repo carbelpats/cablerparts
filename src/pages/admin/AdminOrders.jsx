@@ -11,19 +11,30 @@
 // utilities; ids/emails/dates/prices kept dir="ltr" mono tabular-nums. a11y.
 // -----------------------------------------------------------------------------
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ClipboardList,
   CheckCircle2,
   AlertTriangle,
   Loader2,
   ChevronDown,
+  Truck,
 } from "lucide-react";
 import { useOrders } from "../../context/OrdersContext";
 import { useLang } from "../../context/LanguageContext";
 import { useGeo } from "../../context/GeoContext";
+import { ALL_ORDER_STATUSES } from "../../services/ordersService";
 
-const STATUSES = ["Processing", "Shipped", "Delivered", "Cancelled"];
+// Full lifecycle (in-track + terminal) imported from the service so the admin
+// can drive an order through every stage and the off-track terminal states.
+const STATUSES = ALL_ORDER_STATUSES;
+
+// Statuses at/after which a tracking number is meaningful (Shipped onward).
+const SHIPPED_OR_BEYOND = new Set([
+  "Shipped",
+  "OutForDelivery",
+  "Delivered",
+]);
 
 const STRINGS = {
   en: {
@@ -47,11 +58,26 @@ const STRINGS = {
     updating: "Updating…",
     updated: "Status updated.",
     errorGeneric: "Couldn't update the status. Please try again.",
+    // tracking
+    tracking: "Tracking",
+    trackingNumber: "Tracking number",
+    courier: "Courier",
+    saveTracking: "Save",
+    savingTracking: "Saving…",
+    trackingSaved: "Tracking saved.",
+    trackingError: "Couldn't save tracking. Please try again.",
+    noTracking: "No tracking yet.",
     statusLabel: {
+      Received: "Received",
+      PaymentConfirmed: "Payment confirmed",
       Processing: "Processing",
+      Packed: "Packed",
       Shipped: "Shipped",
+      OutForDelivery: "Out for delivery",
       Delivered: "Delivered",
       Cancelled: "Cancelled",
+      Returned: "Returned",
+      Refunded: "Refunded",
     },
   },
   ar: {
@@ -74,27 +100,56 @@ const STRINGS = {
     updating: "جارٍ التحديث…",
     updated: "تم تحديث الحالة.",
     errorGeneric: "تعذّر تحديث الحالة. حاول مرة أخرى.",
+    // tracking
+    tracking: "التتبّع",
+    trackingNumber: "رقم التتبّع",
+    courier: "شركة الشحن",
+    saveTracking: "حفظ",
+    savingTracking: "جارٍ الحفظ…",
+    trackingSaved: "تم حفظ التتبّع.",
+    trackingError: "تعذّر حفظ التتبّع. حاول مرة أخرى.",
+    noTracking: "لا يوجد تتبّع بعد.",
     statusLabel: {
+      Received: "تم الاستلام",
+      PaymentConfirmed: "تأكيد الدفع",
       Processing: "قيد التجهيز",
+      Packed: "تم التغليف",
       Shipped: "تم الشحن",
+      OutForDelivery: "خارج للتوصيل",
       Delivered: "تم التوصيل",
       Cancelled: "ملغي",
+      Returned: "مرتجع",
+      Refunded: "مسترد",
     },
   },
 };
 
+// Tone groups: early stages = warning/accent, shipping = accent,
+// delivered = success, cancelled/returned = danger, refunded = warning.
 const BADGE_TONE = {
+  Received: "bg-warning/15 text-warning",
+  PaymentConfirmed: "bg-accent/15 text-accent",
   Processing: "bg-warning/15 text-warning",
+  Packed: "bg-accent/15 text-accent",
   Shipped: "bg-accent/15 text-accent",
+  OutForDelivery: "bg-accent/15 text-accent",
   Delivered: "bg-success/15 text-success",
   Cancelled: "bg-danger/15 text-danger",
+  Returned: "bg-danger/15 text-danger",
+  Refunded: "bg-warning/15 text-warning",
 };
 
 const DOT_TONE = {
+  Received: "bg-warning",
+  PaymentConfirmed: "bg-accent",
   Processing: "bg-warning",
+  Packed: "bg-accent",
   Shipped: "bg-accent",
+  OutForDelivery: "bg-accent",
   Delivered: "bg-success",
   Cancelled: "bg-danger",
+  Returned: "bg-danger",
+  Refunded: "bg-warning",
 };
 
 function formatDate(ms, lang) {
@@ -174,6 +229,104 @@ function StatusBadge({ status }) {
   );
 }
 
+// Inline tracking editor — a tracking-number input + courier input + Save that
+// patches the order via updateTracking. Shows the current value if present and
+// reseeds whenever the order's stored tracking changes. Used in both the
+// desktop table (compact) and the mobile cards.
+function TrackingControl({ order, onSave, compact = false }) {
+  const { lang } = useLang();
+  const t = STRINGS[lang] || STRINGS.en;
+  const [trackingNumber, setTrackingNumber] = useState(
+    order.trackingNumber || ""
+  );
+  const [courier, setCourier] = useState(order.courierProvider || "");
+  const [saving, setSaving] = useState(false);
+
+  // Reseed local inputs when the persisted order fields change (e.g. after a
+  // successful save elsewhere or a refresh).
+  useEffect(() => {
+    setTrackingNumber(order.trackingNumber || "");
+    setCourier(order.courierProvider || "");
+  }, [order.trackingNumber, order.courierProvider]);
+
+  const trimmedTn = trackingNumber.trim();
+  const trimmedCourier = courier.trim();
+  const dirty =
+    trimmedTn !== (order.trackingNumber || "") ||
+    trimmedCourier !== (order.courierProvider || "");
+
+  async function handleSave() {
+    if (!dirty || saving) return;
+    setSaving(true);
+    try {
+      await onSave(order, {
+        trackingNumber: trimmedTn,
+        courierProvider: trimmedCourier,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const tnId = `track-num-${order.id}`;
+  const courierId = `track-courier-${order.id}`;
+
+  return (
+    <div className={compact ? "" : "mt-2"}>
+      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-textMuted text-start">
+        <Truck className="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{t.tracking}</span>
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1">
+          <label htmlFor={tnId} className="sr-only">
+            {`${t.trackingNumber} — ${order.id}`}
+          </label>
+          <input
+            id={tnId}
+            type="text"
+            dir="ltr"
+            value={trackingNumber}
+            placeholder={t.trackingNumber}
+            onChange={(e) => setTrackingNumber(e.target.value)}
+            className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-base md:text-xs font-mono tabular-nums text-textPrimary placeholder:font-sans placeholder:text-textMuted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+          />
+        </div>
+        <div className="min-w-0 sm:w-28">
+          <label htmlFor={courierId} className="sr-only">
+            {`${t.courier} — ${order.id}`}
+          </label>
+          <input
+            id={courierId}
+            type="text"
+            value={courier}
+            placeholder={t.courier}
+            onChange={(e) => setCourier(e.target.value)}
+            className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-base md:text-xs text-textPrimary placeholder:text-textMuted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={!dirty || saving}
+          aria-label={`${t.saveTracking} — ${order.id}`}
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {saving ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+          ) : null}
+          {saving ? t.savingTracking : t.saveTracking}
+        </button>
+      </div>
+      {!order.trackingNumber && (
+        <p className="mt-1 text-[11px] text-textMuted text-start">
+          {t.noTracking}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Toast({ tone, message }) {
   if (!message) return null;
   const ok = tone === "success";
@@ -194,7 +347,7 @@ function Toast({ tone, message }) {
 }
 
 export default function AdminOrders() {
-  const { allOrders, updateStatus } = useOrders();
+  const { allOrders, updateStatus, updateTracking } = useOrders();
   const { lang } = useLang();
   const { format } = useGeo();
   const t = STRINGS[lang] || STRINGS.en;
@@ -234,6 +387,15 @@ export default function AdminOrders() {
       showToast("error", t.errorGeneric);
     } finally {
       setBusyId(null);
+    }
+  }
+
+  async function handleSaveTracking(order, fields) {
+    try {
+      await updateTracking(order.id, fields);
+      showToast("success", t.trackingSaved);
+    } catch {
+      showToast("error", t.trackingError);
     }
   }
 
@@ -354,12 +516,23 @@ export default function AdminOrders() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <StatusControl
-                            order={order}
-                            onChange={handleChange}
-                            busy={busyId === order.id}
-                          />
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <StatusControl
+                              order={order}
+                              onChange={handleChange}
+                              busy={busyId === order.id}
+                            />
+                          </div>
+                          {SHIPPED_OR_BEYOND.has(order.status) && (
+                            <div className="min-w-[16rem] max-w-sm">
+                              <TrackingControl
+                                order={order}
+                                onSave={handleSaveTracking}
+                                compact
+                              />
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -432,6 +605,12 @@ export default function AdminOrders() {
                       onChange={handleChange}
                       busy={busyId === order.id}
                     />
+                    {SHIPPED_OR_BEYOND.has(order.status) && (
+                      <TrackingControl
+                        order={order}
+                        onSave={handleSaveTracking}
+                      />
+                    )}
                   </div>
                 </div>
               );

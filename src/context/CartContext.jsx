@@ -30,6 +30,12 @@ export function CartProvider({ children }) {
   const [couponError, setCouponError] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Mini-cart signal: the most recently added line + a monotonic nonce so the
+  // MiniCart re-triggers even when the SAME product is added twice in a row.
+  // This does NOT open the full drawer — that contract is preserved below.
+  const [lastAdded, setLastAdded] = useState(null);
+  const addNonceRef = useRef(0);
+
   // Guards so the load-driven setState doesn't immediately re-persist, and so we
   // don't save before the first load for a given user has resolved.
   const loadedForRef = useRef(undefined); // userId the current state was loaded for
@@ -72,9 +78,11 @@ export function CartProvider({ children }) {
   // ---- line items -----------------------------------------------------------
   const addItem = useCallback((product) => {
     if (!product || !product.id) return;
+    let addedQty = 1;
     setItems((prev) => {
       const existing = prev.find((it) => it.id === product.id);
       if (existing) {
+        addedQty = existing.qty + 1;
         return prev.map((it) =>
           it.id === product.id ? { ...it, qty: it.qty + 1 } : it
         );
@@ -94,8 +102,27 @@ export function CartProvider({ children }) {
         },
       ];
     });
+    // Emit the mini-cart signal (a compact snapshot of the added line + a fresh
+    // nonce). The MiniCart surface watches this; the full drawer stays closed —
+    // UI still calls openCart() explicitly when it wants the drawer.
+    addNonceRef.current += 1;
+    setLastAdded({
+      nonce: addNonceRef.current,
+      item: {
+        id: product.id,
+        name: product.name,
+        nameAr: product.nameAr,
+        brand: product.brand,
+        priceUSD: product.priceUSD,
+        icon: product.icon,
+        accent: product.accent,
+        qty: addedQty,
+      },
+    });
     // NOTE: addItem does NOT auto-open the cart — UI calls openCart() explicitly.
   }, []);
+
+  const clearLastAdded = useCallback(() => setLastAdded(null), []);
 
   const removeItem = useCallback((id) => {
     setItems((prev) => prev.filter((it) => it.id !== id));
@@ -211,6 +238,8 @@ export function CartProvider({ children }) {
     isOpen,
     openCart,
     closeCart,
+    lastAdded,
+    clearLastAdded,
     count,
     subtotalUSD,
     coupon, // stored coupon object (or null); validity is reflected in discountUSD/shippingUSD
