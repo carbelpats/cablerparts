@@ -6,10 +6,13 @@
 // up to a few item thumbnails via <PartIcon>, the item count, the total via
 // useGeo().format, and a localized status badge derived from getOrderStatus.
 //
-// Orders are split across three TABS — Active (Processing/Shipped), Completed
-// (Delivered), and Cancelled — each showing a live count, filtering the list to
-// that bucket, and rendering its own empty state. The global "no orders yet"
-// state still offers a "Start shopping" link to "/".
+// Orders are split across three TABS — Active (any non-terminal stage still in
+// flight: Received..OutForDelivery), Completed (Delivered), and Closed (the
+// terminal off-track states: Cancelled/Returned/Refunded). Buckets are derived
+// from getOrderStatus(order).delivered / .offTrack — NOT hardcoded status
+// strings — each showing a live count, filtering the list to that bucket, and
+// rendering its own empty state. The global "no orders yet" state still offers a
+// "Start shopping" link to "/".
 //
 // Bilingual: own local STRINGS={en,ar} via useLang().lang. RTL via logical
 // utilities; ids/dates/prices kept dir="ltr" mono tabular-nums. Mirror chevrons.
@@ -35,23 +38,29 @@ const STRINGS = {
     total: "Total",
     viewOrder: "View order",
     status: {
+      Received: "Received",
+      PaymentConfirmed: "Payment confirmed",
       Processing: "Processing",
+      Packed: "Packed",
       Shipped: "Shipped",
+      OutForDelivery: "Out for delivery",
       Delivered: "Delivered",
       Cancelled: "Cancelled",
+      Returned: "Returned",
+      Refunded: "Refunded",
     },
     tabs: {
       active: "Active",
       completed: "Completed",
-      cancelled: "Cancelled",
+      closed: "Closed",
     },
     tabEmpty: {
       active: "No active orders",
       activeDesc: "Orders that are processing or on the way will appear here.",
       completed: "No completed orders",
       completedDesc: "Delivered orders will be collected here.",
-      cancelled: "No cancelled orders",
-      cancelledDesc: "Any cancelled orders will be listed here.",
+      closed: "No closed orders",
+      closedDesc: "Cancelled, returned, or refunded orders will be listed here.",
     },
   },
   ar: {
@@ -64,41 +73,59 @@ const STRINGS = {
     total: "الإجمالي",
     viewOrder: "عرض الطلب",
     status: {
+      Received: "تم الاستلام",
+      PaymentConfirmed: "تم تأكيد الدفع",
       Processing: "قيد التجهيز",
+      Packed: "تم التغليف",
       Shipped: "تم الشحن",
+      OutForDelivery: "قيد التوصيل",
       Delivered: "تم التوصيل",
       Cancelled: "أُلغي",
+      Returned: "مُرتجَع",
+      Refunded: "مُستردّ",
     },
     tabs: {
-      active: "النشطة",
-      completed: "المكتملة",
-      cancelled: "الملغاة",
+      active: "قيد التنفيذ",
+      completed: "مكتملة",
+      closed: "منتهية",
     },
     tabEmpty: {
-      active: "لا توجد طلبات نشطة",
+      active: "لا توجد طلبات قيد التنفيذ",
       activeDesc: "ستظهر هنا الطلبات قيد التجهيز أو في الطريق إليك.",
       completed: "لا توجد طلبات مكتملة",
       completedDesc: "سيتم تجميع الطلبات التي تم توصيلها هنا.",
-      cancelled: "لا توجد طلبات ملغاة",
-      cancelledDesc: "ستُدرج هنا أي طلبات تم إلغاؤها.",
+      closed: "لا توجد طلبات منتهية",
+      closedDesc: "ستُدرج هنا الطلبات الملغاة أو المرتجعة أو المستردّة.",
     },
   },
 };
 
+// Badge tone per derived stage. Early linear stages read as "warning" (in
+// progress), shipping stages as "accent" (in motion), Delivered as "success",
+// and every terminal off-track state as "danger". Falls back to warning.
 const BADGE_TONE = {
+  Received: "bg-warning/15 text-warning",
+  PaymentConfirmed: "bg-warning/15 text-warning",
   Processing: "bg-warning/15 text-warning",
+  Packed: "bg-accent/15 text-accent",
   Shipped: "bg-accent/15 text-accent",
+  OutForDelivery: "bg-accent/15 text-accent",
   Delivered: "bg-success/15 text-success",
   Cancelled: "bg-danger/15 text-danger",
+  Returned: "bg-danger/15 text-danger",
+  Refunded: "bg-danger/15 text-danger",
 };
 
-const TAB_KEYS = ["active", "completed", "cancelled"];
+const TAB_KEYS = ["active", "completed", "closed"];
 
-// Bucket an order's derived status into one of the three tabs.
-function tabForStage(stage) {
-  if (stage === "Cancelled") return "cancelled";
-  if (stage === "Delivered") return "completed";
-  return "active"; // Processing / Shipped (and any unknown) -> active
+// Bucket an order's derived status object into one of the three tabs WITHOUT
+// hardcoding status strings: delivered -> completed, terminal off-track
+// (Cancelled/Returned/Refunded) -> closed, anything else still in the linear
+// flow (Received..OutForDelivery) -> active.
+function tabForStatus(status) {
+  if (status?.delivered) return "completed";
+  if (status?.offTrack) return "closed";
+  return "active";
 }
 
 function formatDate(ms, lang) {
@@ -239,10 +266,10 @@ export default function OrderHistory() {
 
   // Group orders by tab once (orders are already newest-first from the service).
   const grouped = useMemo(() => {
-    const buckets = { active: [], completed: [], cancelled: [] };
+    const buckets = { active: [], completed: [], closed: [] };
     for (const order of orders) {
-      const stage = getOrderStatus(order)?.stage;
-      buckets[tabForStage(stage)].push(order);
+      const status = getOrderStatus(order);
+      buckets[tabForStatus(status)].push(order);
     }
     return buckets;
   }, [orders, getOrderStatus]);

@@ -31,6 +31,9 @@ import {
   LogIn,
   ListOrdered,
   Truck,
+  Hash,
+  CalendarClock,
+  CalendarCheck2,
 } from "lucide-react";
 import { useLang } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -62,6 +65,11 @@ const STRINGS = {
       "Enter a valid order ID above to follow your shipment in real time.",
     items: "Items",
     placed: "Placed",
+    // shipment tracking
+    trackingNo: "Tracking number",
+    courier: "Courier",
+    estDelivery: "Estimated delivery",
+    deliveredOn: "Delivered on",
     // auth hints
     signedOutHint: "Want all your orders in one place?",
     signInLink: "Sign in to view your history",
@@ -90,6 +98,11 @@ const STRINGS = {
     notFoundBody: "أدخل رقم طلب صحيحًا بالأعلى لمتابعة شحنتك لحظة بلحظة.",
     items: "القطع",
     placed: "تاريخ الطلب",
+    // shipment tracking
+    trackingNo: "رقم التتبّع",
+    courier: "شركة الشحن",
+    estDelivery: "موعد التوصيل المتوقّع",
+    deliveredOn: "تم التوصيل في",
     // auth hints
     signedOutHint: "تريد كل طلباتك في مكان واحد؟",
     signInLink: "سجّل الدخول لعرض سجلّك",
@@ -109,6 +122,17 @@ function formatDate(ms, lang) {
   } catch {
     return "";
   }
+}
+
+// Has the order reached the "Shipped" stage (or beyond)? Derived from the
+// status steps (no hardcoded index): the Shipped step being done/current, or the
+// order already delivered. Returns false for terminal off-track states.
+function isShippedOrLater(status) {
+  if (!status || status.offTrack) return false;
+  if (status.delivered) return true;
+  const steps = Array.isArray(status.steps) ? status.steps : [];
+  const shipped = steps.find((s) => s.key === "Shipped");
+  return !!(shipped && (shipped.done || shipped.current));
 }
 
 export default function TrackOrder() {
@@ -176,6 +200,15 @@ export default function TrackOrder() {
   const isFound = showResult && result.found;
   const isDemo = showResult && !result.found && result.isDemo;
   const hasStatus = showResult && !!result.status;
+
+  // Surface live shipment details only for a found, real order that has shipped
+  // (or beyond) AND carries a tracking number. The demo order has no real
+  // trackingNumber, so this stays hidden for sample tracking.
+  const trackedOrder = isFound ? result.order : null;
+  const showTracking =
+    isFound &&
+    isShippedOrLater(result.status) &&
+    !!trackedOrder?.trackingNumber;
 
   return (
     <main className="relative isolate min-h-[70vh] overflow-hidden bg-bg">
@@ -335,6 +368,77 @@ export default function TrackOrder() {
 
               {/* Timeline */}
               <OrderStatusTimeline status={result.status} />
+
+              {/* Live shipment tracking — only once shipped, with a real number */}
+              {showTracking && (
+                <div className="mt-6 rounded-xl border border-accent/40 bg-accent/10 p-4 text-start">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="inline-flex items-center gap-2 text-sm font-600 text-textPrimary">
+                      <Truck
+                        className="h-4 w-4 text-accent rtl:-scale-x-100"
+                        aria-hidden="true"
+                      />
+                      <span className="uppercase tracking-wide text-xs text-textMuted">
+                        {t.trackingNo}
+                      </span>
+                    </span>
+                    <span
+                      dir="ltr"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-bg/60 px-2.5 py-1 font-mono text-sm font-700 tracking-wide tabular-nums text-textPrimary ring-1 ring-border"
+                    >
+                      <Hash className="h-3.5 w-3.5 text-textMuted" aria-hidden="true" />
+                      {trackedOrder.trackingNumber}
+                    </span>
+                    {trackedOrder.courierProvider && (
+                      <span className="text-sm text-textSecondary">
+                        {t.courier}:{" "}
+                        <span dir="ltr" className="font-600 text-textPrimary">
+                          {trackedOrder.courierProvider}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+
+                  {(trackedOrder.actualDeliveryDate ||
+                    trackedOrder.estimatedDeliveryDate) && (
+                    <p className="mt-3 inline-flex items-center gap-1.5 text-sm">
+                      {trackedOrder.actualDeliveryDate ? (
+                        <>
+                          <CalendarCheck2
+                            className="h-4 w-4 text-success"
+                            aria-hidden="true"
+                          />
+                          <span className="text-textSecondary">
+                            {t.deliveredOn}:
+                          </span>
+                          <span
+                            dir="ltr"
+                            className="font-600 tabular-nums text-success"
+                          >
+                            {formatDate(trackedOrder.actualDeliveryDate, lang)}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <CalendarClock
+                            className="h-4 w-4 text-accent"
+                            aria-hidden="true"
+                          />
+                          <span className="text-textSecondary">
+                            {t.estDelivery}:
+                          </span>
+                          <span
+                            dir="ltr"
+                            className="font-600 tabular-nums text-textPrimary"
+                          >
+                            {formatDate(trackedOrder.estimatedDeliveryDate, lang)}
+                          </span>
+                        </>
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Real-order summary */}
               {isFound && (

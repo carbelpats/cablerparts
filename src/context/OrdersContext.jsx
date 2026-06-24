@@ -34,26 +34,34 @@ import {
   getOrder as svcGetOrder,
   getAllOrders as svcGetAllOrders,
   updateOrderStatus as svcUpdateOrderStatus,
+  updateOrderFields as svcUpdateOrderFields,
   trackById as svcTrackById,
   ORDER_STATUSES,
   CANCELLED_STATUS,
+  TERMINAL_STATUSES,
 } from "../services/ordersService";
 
 const OrdersContext = createContext(null);
 
-// stable stage keys (pages/timeline localize the labels)
-const STAGES = ORDER_STATUSES; // ["Processing","Shipped","Delivered"]
+// stable stage keys (pages/timeline localize the labels). The linear lifecycle:
+// Received -> PaymentConfirmed -> Processing -> Packed -> Shipped ->
+// OutForDelivery -> Delivered.
+const STAGES = ORDER_STATUSES;
 
 // ---------------------------------------------------------------------------
-// Derive the 3-step timeline from an order's CURRENT status + statusHistory.
+// Derive the timeline from an order's CURRENT status + statusHistory.
 //
 // statusHistory is an append-only list of { status, at } entries (the timestamp
 // recorded when each status was set). We find the timestamp for each known stage
 // and mark stages at/below the current status index as "done"; the highest
 // reached stage (when not yet Delivered) is "current".
+//
+// The step count is DYNAMIC (driven by STAGES) so adding/removing lifecycle
+// stages needs no change here. Cancelled/Returned/Refunded are terminal,
+// OFF-track statuses rendered as a distinct badge.
 // ---------------------------------------------------------------------------
 function deriveStatus(order) {
-  const status = order?.status || "Processing";
+  const status = order?.status || STAGES[0];
 
   const history = Array.isArray(order?.statusHistory)
     ? order.statusHistory
@@ -71,20 +79,36 @@ function deriveStatus(order) {
     return null;
   }
 
-  // Cancelled is OFF the linear track — report a distinct shape so the UI can
-  // render a danger-toned terminal state instead of the progress dots.
-  if (status === CANCELLED_STATUS) {
+  // Highest linear stage the order reached before any terminal status (so a
+  // returned order still shows it got as far as, say, Delivered).
+  function highestReachedIndex() {
+    let max = -1;
+    for (const h of history) {
+      const idx = STAGES.indexOf(h?.status);
+      if (idx > max) max = idx;
+    }
+    return max;
+  }
+
+  // Terminal (off-track) statuses — report a distinct shape so the UI can render
+  // a terminal state instead of the progress dots. `cancelled`/`cancelledAt` are
+  // kept for back-compat; `terminalStatus`/`terminalAt`/`offTrack` are general.
+  if (TERMINAL_STATUSES.includes(status)) {
+    const reached = highestReachedIndex();
     return {
-      stage: CANCELLED_STATUS,
+      stage: status,
       stageIndex: -1,
-      cancelled: true,
-      cancelledAt: atFor(CANCELLED_STATUS),
+      offTrack: true,
+      terminalStatus: status,
+      terminalAt: atFor(status),
+      // back-compat aliases (older consumers only know "cancelled")
+      cancelled: status === CANCELLED_STATUS,
+      cancelledAt: status === CANCELLED_STATUS ? atFor(status) : null,
       delivered: false,
-      // expose the linear steps too so consumers that map over them stay safe
-      steps: STAGES.map((key) => ({
+      steps: STAGES.map((key, i) => ({
         key,
         at: atFor(key),
-        done: false,
+        done: i <= reached,
         current: false,
       })),
     };
@@ -109,7 +133,11 @@ function deriveStatus(order) {
     stageIndex,
     steps,
     delivered,
+    offTrack: false,
+    terminalStatus: null,
+    terminalAt: null,
     cancelled: false,
+    cancelledAt: null,
   };
 }
 
@@ -221,7 +249,15 @@ export function OrdersProvider({ children }) {
   );
 
   // -- id-scoped tracking (service handles real-vs-demo) ---------------------
-  const trackById = useCallback((orderId) => svcTrackById(orderId), []);
+  // Enrich the service result with the derived timeline (`status`) so the Track
+  // Order page can render <OrderStatusTimeline> for both real and demo orders.
+  const trackById = useCallback(async (orderId) => {
+    const res = await svcTrackById(orderId);
+    if (res && res.order) {
+      return { ...res, status: deriveStatus(res.order) };
+    }
+    return res;
+  }, []);
 
   // -- admin: change an order's status, then reflect everywhere --------------
   const updateStatus = useCallback(
@@ -238,6 +274,18 @@ export function OrdersProvider({ children }) {
     []
   );
 
+  // -- admin: patch shipping/tracking fields on an order ---------------------
+  const updateTracking = useCallback(async (id, fields) => {
+    const updated = await svcUpdateOrderFields(id, fields);
+    if (mountedRef.current && updated) {
+      const matches = (o) =>
+        String(o.id).toLowerCase() === String(id).toLowerCase();
+      setAllOrders((prev) => prev.map((o) => (matches(o) ? updated : o)));
+      setOrders((prev) => prev.map((o) => (matches(o) ? updated : o)));
+    }
+    return updated;
+  }, []);
+
   const value = useMemo(
     () => ({
       orders,
@@ -251,6 +299,7 @@ export function OrdersProvider({ children }) {
       // admin surface
       allOrders,
       updateStatus,
+      updateTracking,
     }),
     [
       orders,
@@ -263,6 +312,7 @@ export function OrdersProvider({ children }) {
       refresh,
       allOrders,
       updateStatus,
+      updateTracking,
     ]
   );
 

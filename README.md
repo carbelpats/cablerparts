@@ -210,6 +210,66 @@ shows a localized `role="alert"` error and **stays on the step** — and (3) on 
 `useOrders().placeOrder({ ..., paymentId })`, landing the success screen with the **real**
 order id.
 
+### Payments — swapping in a real provider
+
+The mock processor is a drop-in seam, not a dead end. `paymentService.js` exposes
+`PAYMENT_METHODS` (mada, Visa/Mastercard via `card`, Apple Pay, STC Pay, Tamara, Tabby,
+and COD) and a single `createPayment({ method, amountUSD, currency, card })` entry point.
+To go live:
+
+1. **Create a merchant account** with a processor — `moyasar`, `stripe`, `hyperpay`, or
+   `tap` (Moyasar/HyperPay/Tap have first-class mada + STC Pay + Apple Pay coverage for KSA;
+   Stripe is the global fallback). Enable the methods you want in their dashboard.
+2. **Put the PUBLISHABLE key in env** — set `VITE_PAYMENT_PROVIDER` and the matching
+   `VITE_MOYASAR_PUBLISHABLE_KEY` / `VITE_STRIPE_PUBLISHABLE_KEY` (see `.env.example`).
+   Only the publishable key goes on the client.
+3. **Implement the provider branch** in `createPayment` (`src/services/paymentService.js`):
+   load the provider SDK, **tokenize the card client-side** (the raw PAN never hits our
+   servers — PCI), then hand the one-time token to your backend.
+4. **Server-side secret + webhooks** — the actual charge/capture, refunds, and the
+   payment-status webhook live in a serverless function holding the **secret** key, never
+   in the bundle. The webhook flips the order's `paymentStatus` and can advance its status.
+
+> Cards are tokenized and **never stored**. Treat every `VITE_*` value as public.
+
+### Shipping — connecting a courier
+
+`shippingService.js` mirrors the same seam. `SHIPPING_METHODS` defines **Standard**
+(Aramex, 1–3 days) and **Express** (SMSA, next-day); `createShipment(order)` returns
+`{ trackingNumber, courierProvider, estimatedDeliveryDate }`. To connect a real courier:
+
+1. **Create a courier account** — `aramex`, `smsa`, `tryoto`, or `imile` (TryOTO is an
+   aggregator that fans out to several couriers from one integration).
+2. **Put the rate/read key in env** — set `VITE_SHIPPING_PROVIDER` and, *only if it is a
+   read-only quote key*, `VITE_SHIPPING_API_KEY`. A key that **creates** shipments is a
+   write credential and must be **server-side / proxied**, never client-side.
+3. **Implement the provider branch** in `createShipment` (`src/services/shippingService.js`):
+   call the courier to book the shipment and return its real tracking number, courier name,
+   and ETA. Rate/ETA quotes may run client-side; label/booking calls go through the server.
+4. Admin then patches the order via `useOrders().updateTracking(id, { trackingNumber,
+   courierProvider, shippingMethod, estimatedDeliveryDate })`, which the customer's Track
+   Order page reflects live.
+
+### Order lifecycle
+
+Orders now progress through a richer on-track timeline (index = progression):
+**Received → PaymentConfirmed → Processing → Packed → Shipped → OutForDelivery →
+Delivered**. Three terminal off-track states exist alongside it — **Cancelled**,
+**Returned**, **Refunded**. New orders start at **Received**; admins advance status from
+**Admin → Orders**, and each order also carries `paymentMethod`, `paymentStatus`,
+`shippingMethod`, `courierProvider`, `trackingNumber`, `estimatedDeliveryDate`, and
+`actualDeliveryDate` (see `src/services/ordersService.js`).
+
+### Compliance & legal
+
+Trust/compliance fields are **CMS-editable** in **Admin → Settings → Compliance** and
+render in the footer: the registered **domain**, **CR** (commercial registration) number,
+**VAT** number, the **Maroof** verification URL + badge, and a list of **licenses**
+(name/number/badge). These ship blank — **fill in real values before launch**. Two new
+legal pages back this up: **`/pdpl`** (Saudi Personal Data Protection Law notice) and
+**`/disclaimer`**, both bilingual and editable via the `pages.pdpl` / `pages.disclaimer`
+settings.
+
 ### Admin dashboard (`/admin`, role-gated)
 
 A separate route group `<AdminRoute><AdminLayout/></AdminRoute>` (lazy-loaded), mounted

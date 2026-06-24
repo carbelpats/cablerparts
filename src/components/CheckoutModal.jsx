@@ -24,7 +24,24 @@ import { useLang } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { useOrders } from "../context/OrdersContext";
 import { PART_ICONS } from "../lib/partIcons";
-import { createPayment, PAYMENT_TEST_CARDS } from "../services/paymentService";
+import {
+  createPayment,
+  PAYMENT_TEST_CARDS,
+  PAYMENT_METHODS,
+} from "../services/paymentService";
+import {
+  validateEmail,
+  validatePhone,
+  cardNumberValid,
+  expiryValid,
+  cvcValid,
+  detectCardBrand,
+} from "../lib/validation";
+import {
+  getShippingMethods,
+  getShippingMethod,
+  estimateDelivery,
+} from "../services/shippingService";
 
 // ---- Localized copy (component-local per project convention) ----------------
 const STRINGS = {
@@ -55,9 +72,26 @@ const STRINGS = {
     city: "City",
     cityPh: "e.g. Riyadh",
     region: "Region",
+    // shipping-method selector
+    shipMethodLabel: "Delivery speed",
+    shipEta: (a, b) =>
+      a === b ? `${a} business day` : `${a}–${b} business days`,
     // step 3 — payment
     paymentTitle: "Payment",
     paymentHint: "Demo only — no real card is charged.",
+    // payment-method selector
+    payMethodLabel: "Payment method",
+    payMethods: {
+      mada: "مدى",
+      card: "Visa / Mastercard",
+      applepay: "Apple Pay",
+      stcpay: "STC Pay",
+      tabby: "Tabby",
+      tamara: "Tamara",
+      cod: "Cash on delivery",
+    },
+    codNote: "Pay in cash when your order is delivered.",
+    redirectNote: (m) => `You'll be redirected to complete payment via ${m}.`,
     cardNumber: "Card number",
     cardPh: "4242 4242 4242 4242",
     expiry: "Expiry",
@@ -103,8 +137,8 @@ const STRINGS = {
     errRequired: "Required",
     errEmail: "Enter a valid email",
     errPhone: "Enter a valid phone",
-    errCard: "Enter a 16-digit card number",
-    errExpiry: "Use MM/YY",
+    errCard: "Enter a valid card number",
+    errExpiry: "Use MM/YY (not expired)",
     errCvc: "3–4 digits",
   },
   ar: {
@@ -130,8 +164,25 @@ const STRINGS = {
     city: "المدينة",
     cityPh: "مثال: الرياض",
     region: "المنطقة",
+    // shipping-method selector
+    shipMethodLabel: "سرعة التوصيل",
+    shipEta: (a, b) =>
+      a === b ? `يوم عمل واحد` : `${a}–${b} أيام عمل`,
     paymentTitle: "الدفع",
     paymentHint: "للعرض فقط — لن يتم خصم أي بطاقة فعلية.",
+    // payment-method selector
+    payMethodLabel: "طريقة الدفع",
+    payMethods: {
+      mada: "مدى",
+      card: "بطاقة Visa/Mastercard",
+      applepay: "Apple Pay",
+      stcpay: "STC Pay",
+      tabby: "تابي",
+      tamara: "تمارا",
+      cod: "الدفع عند الاستلام",
+    },
+    codNote: "ادفع نقداً عند الاستلام.",
+    redirectNote: (m) => `ستُحوّل لإتمام الدفع عبر ${m}.`,
     cardNumber: "رقم البطاقة",
     cardPh: "4242 4242 4242 4242",
     expiry: "تاريخ الانتهاء",
@@ -171,14 +222,22 @@ const STRINGS = {
     errRequired: "مطلوب",
     errEmail: "أدخل بريداً صحيحاً",
     errPhone: "أدخل رقماً صحيحاً",
-    errCard: "أدخل رقم بطاقة من 16 رقماً",
-    errExpiry: "استخدم MM/YY",
+    errCard: "أدخل رقم بطاقة صحيحاً",
+    errExpiry: "استخدم MM/YY (غير منتهية)",
     errCvc: "3–4 أرقام",
   },
 };
 
 // Map the cart line icon keys -> shared part artwork (mini thumbs).
 const STEP_ICONS = [User, Truck, CreditCard];
+
+// Display labels for the detected card brand badge (Latin, shown dir="ltr").
+const CARD_BRAND_LABEL = {
+  mada: "mada",
+  visa: "Visa",
+  mastercard: "Mastercard",
+  amex: "Amex",
+};
 
 // ---- Boost gauge ------------------------------------------------------------
 // A semicircular turbo/RPM gauge. `value` is 0..1 (fraction of the flow done).
@@ -454,11 +513,44 @@ export default function CheckoutModal() {
     cvc: "",
   });
   const [touched, setTouched] = useState({});
+  // Selected payment + shipping methods (defaults: card / standard).
+  const [payMethod, setPayMethod] = useState("card");
+  const [shipMethod, setShipMethod] = useState("standard");
 
   const setField = useCallback(
     (k) => (v) => setForm((prev) => ({ ...prev, [k]: v })),
     []
   );
+
+  // Payment methods available for the active region. `region:"*"` is global;
+  // region-specific methods (mada / STC Pay are SA-only) drop out elsewhere.
+  const payMethodsForRegion = useMemo(
+    () =>
+      PAYMENT_METHODS.filter(
+        (m) => m.region === "*" || m.region === region.code
+      ),
+    [region.code]
+  );
+
+  // The definition of the currently selected method (drives card-field display).
+  const activePayMethod = useMemo(
+    () =>
+      payMethodsForRegion.find((m) => m.id === payMethod) ||
+      payMethodsForRegion[0],
+    [payMethodsForRegion, payMethod]
+  );
+  const needsCard = !!activePayMethod?.needsCard;
+
+  // Shipping methods (cost + ETA) shown on the shipping step.
+  const shipMethods = useMemo(() => getShippingMethods(), []);
+
+  // If the region change removed the selected payment method, fall back to a
+  // still-available one (keeps the selector + card gating consistent).
+  useEffect(() => {
+    if (!payMethodsForRegion.some((m) => m.id === payMethod)) {
+      setPayMethod(payMethodsForRegion[0]?.id || "card");
+    }
+  }, [payMethodsForRegion, payMethod]);
 
   // Reset the flow each time the modal opens fresh; prefill contact from the
   // signed-in user (name/email) when authed.
@@ -470,6 +562,8 @@ export default function CheckoutModal() {
       setPaying(false);
       setPayError(null);
       setTouched({});
+      setShipMethod("standard");
+      setPayMethod("card");
       setForm((prev) => ({
         ...prev,
         name: user?.name || prev.name,
@@ -479,37 +573,57 @@ export default function CheckoutModal() {
   }, [isOpen, user]);
 
   // ---- Validation ----------------------------------------------------------
+  // Backed by the shared validators in lib/validation.js so checkout enforces
+  // the exact same email / phone / card rules as the rest of the app. Each
+  // validator returns a STABLE error CODE which we map to localized copy here.
+  // Empty fields collapse to `errRequired`; a present-but-bad value gets its
+  // field-specific message. Card fields are only validated when the selected
+  // payment method needs a card (mada / Visa-Mastercard).
   const errors = useMemo(() => {
     const e = {};
     const need = (v) => !String(v || "").trim();
+
     if (need(form.name)) e.name = tx.errRequired;
-    if (need(form.email)) e.email = tx.errRequired;
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
-      e.email = tx.errEmail;
-    const digits = (s) => String(s || "").replace(/\D/g, "");
-    if (need(form.phone)) e.phone = tx.errRequired;
-    else if (digits(form.phone).length < 7) e.phone = tx.errPhone;
+
+    // Email — validateEmail -> "required" | "format".
+    const emailRes = validateEmail(form.email);
+    if (!emailRes.ok)
+      e.email = emailRes.error === "required" ? tx.errRequired : tx.errEmail;
+
+    // Phone — validatePhone(value, region.code) -> "required" | "format".
+    const phoneRes = validatePhone(form.phone, region.code);
+    if (!phoneRes.ok)
+      e.phone = phoneRes.error === "required" ? tx.errRequired : tx.errPhone;
 
     if (need(form.address)) e.address = tx.errRequired;
     if (need(form.city)) e.city = tx.errRequired;
 
-    if (need(form.card)) e.card = tx.errRequired;
-    else if (digits(form.card).length !== 16) e.card = tx.errCard;
-    if (need(form.expiry)) e.expiry = tx.errRequired;
-    else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(form.expiry.trim()))
-      e.expiry = tx.errExpiry;
-    if (need(form.cvc)) e.cvc = tx.errRequired;
-    else if (!/^\d{3,4}$/.test(digits(form.cvc))) e.cvc = tx.errCvc;
+    // Card fields — skipped entirely for non-card methods (COD / wallet / BNPL).
+    if (needsCard) {
+      if (need(form.card)) e.card = tx.errRequired;
+      else if (!cardNumberValid(form.card)) e.card = tx.errCard;
+
+      if (need(form.expiry)) e.expiry = tx.errRequired;
+      else if (!expiryValid(form.expiry)) e.expiry = tx.errExpiry;
+
+      if (need(form.cvc)) e.cvc = tx.errRequired;
+      else if (!cvcValid(form.cvc, form.card)) e.cvc = tx.errCvc;
+    }
     return e;
-  }, [form, tx]);
+  }, [form, tx, region.code, needsCard]);
+
+  // Detected brand for the inline badge near the card-number field.
+  const cardBrand = useMemo(() => detectCardBrand(form.card), [form.card]);
 
   const STEP_FIELDS = useMemo(
     () => [
       ["name", "email", "phone"],
       ["address", "city"],
-      ["card", "expiry", "cvc"],
+      // Card fields are only gating when the method needs a card; otherwise the
+      // payment step validates with no card inputs at all.
+      needsCard ? ["card", "expiry", "cvc"] : [],
     ],
-    []
+    [needsCard]
   );
 
   const stepValid = useMemo(
@@ -560,14 +674,19 @@ export default function CheckoutModal() {
     let payment;
     try {
       payment = await createPayment({
+        // Pass the chosen method so non-card flows (COD / wallet / BNPL) skip
+        // the card processor; card is only sent when the method needs one.
+        method: payMethod,
         amountUSD: totalUSD,
         currency: region.currency,
-        card: {
-          number: form.card,
-          expiry: form.expiry,
-          cvc: form.cvc,
-          name: form.name.trim(),
-        },
+        card: needsCard
+          ? {
+              number: form.card,
+              expiry: form.expiry,
+              cvc: form.cvc,
+              name: form.name.trim(),
+            }
+          : undefined,
       });
     } catch {
       payment = { ok: false, error: "generic" };
@@ -583,6 +702,10 @@ export default function CheckoutModal() {
     }
 
     try {
+      // Resolve the chosen shipping tier + a delivery estimate (upper-bound ETA
+      // from now). Tracking number is assigned later by the admin (left null).
+      const shippingDef = getShippingMethod(shipMethod);
+      const estimatedDeliveryDate = estimateDelivery(shipMethod, Date.now());
       const order = await placeOrder({
         items,
         subtotalUSD,
@@ -590,6 +713,12 @@ export default function CheckoutModal() {
         shippingUSD,
         totalUSD,
         paymentId: payment.id,
+        // New order lifecycle fields.
+        paymentMethod: payMethod,
+        paymentStatus: payment.status,
+        shippingMethod: shipMethod,
+        courierProvider: shippingDef.courier,
+        estimatedDeliveryDate,
         contact: {
           name: form.name.trim(),
           email: form.email.trim(),
@@ -622,6 +751,9 @@ export default function CheckoutModal() {
     form,
     region,
     tx,
+    payMethod,
+    needsCard,
+    shipMethod,
   ]);
 
   const goNext = useCallback(() => {
@@ -1068,6 +1200,70 @@ export default function CheckoutModal() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Shipping-method selector — name/desc/ETA/price per tier.
+                          Radiogroup of selectable cards; the chosen id drives the
+                          courier + delivery estimate at order placement. */}
+                      <div
+                        role="radiogroup"
+                        aria-label={tx.shipMethodLabel}
+                        className="space-y-2"
+                      >
+                        <p className="font-sans text-xs font-medium text-textSecondary">
+                          {tx.shipMethodLabel}
+                        </p>
+                        {shipMethods.map((m) => {
+                          const selected = shipMethod === m.id;
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              role="radio"
+                              aria-checked={selected}
+                              onClick={() => setShipMethod(m.id)}
+                              className={`flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-start transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+                                selected
+                                  ? "border-primary/60 bg-primary/5 ring-1 ring-inset ring-primary/30"
+                                  : "border-border bg-surface hover:border-primary/40"
+                              }`}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 transition-colors duration-200 ${
+                                  selected
+                                    ? "border-primary"
+                                    : "border-border"
+                                }`}
+                              >
+                                {selected && (
+                                  <span className="h-2 w-2 rounded-full bg-primary" />
+                                )}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="flex items-center justify-between gap-2">
+                                  <span className="font-display text-sm font-bold text-textPrimary">
+                                    {m.name[lang] || m.name.en}
+                                  </span>
+                                  <span className="shrink-0 font-mono text-xs font-semibold tabular-nums text-textPrimary">
+                                    {m.priceUSD === 0 ? tx.free : format(m.priceUSD)}
+                                  </span>
+                                </span>
+                                <span className="mt-0.5 block font-sans text-[11px] text-textMuted">
+                                  {m.desc[lang] || m.desc.en}
+                                </span>
+                                <span className="mt-1 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-textSecondary">
+                                  <Truck
+                                    size={11}
+                                    aria-hidden="true"
+                                    className="rtl:-scale-x-100"
+                                  />
+                                  {tx.shipEta(m.etaDays[0], m.etaDays[1])}
+                                </span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </fieldset>
                   )}
 
@@ -1084,103 +1280,186 @@ export default function CheckoutModal() {
                         />
                         {tx.paymentHint}
                       </p>
-                      <Field
-                        id="co-card"
-                        label={tx.cardNumber}
-                        value={form.card}
-                        onChange={(v) => {
-                          // Group into 4s, mask to digits+spaces, max 19 chars.
-                          const digits = v.replace(/\D/g, "").slice(0, 16);
-                          const grouped = digits.replace(
-                            /(.{4})/g,
-                            "$1 "
-                          ).trim();
-                          setField("card")(grouped);
-                          markTouched("card");
-                          if (payError) setPayError(null);
-                        }}
-                        placeholder={tx.cardPh}
-                        inputMode="numeric"
-                        autoComplete="cc-number"
-                        ltr
-                        maxLength={19}
-                        error={showErr("card")}
-                      />
-                      <div className="grid grid-cols-2 gap-3.5">
-                        <Field
-                          id="co-expiry"
-                          label={tx.expiry}
-                          value={form.expiry}
-                          onChange={(v) => {
-                            let d = v.replace(/\D/g, "").slice(0, 4);
-                            if (d.length >= 3)
-                              d = `${d.slice(0, 2)}/${d.slice(2)}`;
-                            setField("expiry")(d);
-                            markTouched("expiry");
-                            if (payError) setPayError(null);
-                          }}
-                          placeholder={tx.expiryPh}
-                          inputMode="numeric"
-                          autoComplete="cc-exp"
-                          ltr
-                          maxLength={5}
-                          error={showErr("expiry")}
-                        />
-                        <Field
-                          id="co-cvc"
-                          label={tx.cvc}
-                          type="password"
-                          value={form.cvc}
-                          onChange={(v) => {
-                            setField("cvc")(v.replace(/\D/g, "").slice(0, 4));
-                            markTouched("cvc");
-                            if (payError) setPayError(null);
-                          }}
-                          placeholder={tx.cvcPh}
-                          inputMode="numeric"
-                          autoComplete="cc-csc"
-                          ltr
-                          maxLength={4}
-                          error={showErr("cvc")}
-                        />
-                      </div>
-                      {/* Test-card hint (from paymentService). */}
-                      <div className="rounded-lg border border-border bg-surfaceElevated/60 px-3 py-2.5">
-                        <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-textMuted">
-                          <CreditCard
-                            size={12}
-                            aria-hidden="true"
-                            className="text-primary"
-                          />
-                          {tx.testCardsTitle}
+
+                      {/* Payment-method selector — segmented buttons sourced from
+                          PAYMENT_METHODS (region-filtered). Selecting a method
+                          toggles whether the card fields render below. */}
+                      <div
+                        role="radiogroup"
+                        aria-label={tx.payMethodLabel}
+                        className="space-y-2"
+                      >
+                        <p className="font-sans text-xs font-medium text-textSecondary">
+                          {tx.payMethodLabel}
                         </p>
-                        <ul className="space-y-1">
-                          {PAYMENT_TEST_CARDS.map((tc) => (
-                            <li
-                              key={tc.number}
-                              className="flex items-center justify-between gap-2"
-                            >
-                              <span
-                                className="font-mono text-[11px] tabular-nums tracking-wide text-textPrimary"
-                                dir="ltr"
-                              >
-                                {tc.number}
-                              </span>
-                              <span
-                                className={`font-sans text-[10px] font-semibold uppercase tracking-wide ${
-                                  tc.outcome === "success"
-                                    ? "text-success"
-                                    : "text-danger"
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                          {payMethodsForRegion.map((m) => {
+                            const selected = payMethod === m.id;
+                            return (
+                              <button
+                                key={m.id}
+                                type="button"
+                                role="radio"
+                                aria-checked={selected}
+                                onClick={() => {
+                                  setPayMethod(m.id);
+                                  if (payError) setPayError(null);
+                                }}
+                                className={`flex items-center justify-center rounded-lg border px-2.5 py-2 text-center font-sans text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+                                  selected
+                                    ? "border-primary/60 bg-primary/10 text-primary ring-1 ring-inset ring-primary/30"
+                                    : "border-border bg-surface text-textSecondary hover:border-primary/40 hover:text-textPrimary"
                                 }`}
                               >
-                                {tc.outcome === "success"
-                                  ? tx.testCardSuccess
-                                  : tx.testCardDeclined}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
+                                {tx.payMethods[m.id] || m.id}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
+
+                      {needsCard ? (
+                        <>
+                          <div>
+                            <Field
+                              id="co-card"
+                              label={tx.cardNumber}
+                              value={form.card}
+                              onChange={(v) => {
+                                // Group into 4s, mask to digits+spaces, max 19 chars.
+                                const digits = v
+                                  .replace(/\D/g, "")
+                                  .slice(0, 16);
+                                const grouped = digits
+                                  .replace(/(.{4})/g, "$1 ")
+                                  .trim();
+                                setField("card")(grouped);
+                                markTouched("card");
+                                if (payError) setPayError(null);
+                              }}
+                              placeholder={tx.cardPh}
+                              inputMode="numeric"
+                              autoComplete="cc-number"
+                              ltr
+                              maxLength={19}
+                              error={showErr("card")}
+                            />
+                            {/* Detected-brand badge — appears once the number maps
+                                to a known scheme (mada / visa / mastercard / amex). */}
+                            {cardBrand !== "unknown" && (
+                              <span
+                                className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-border bg-surfaceElevated px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-textSecondary"
+                                aria-label={cardBrand}
+                              >
+                                <CreditCard
+                                  size={11}
+                                  aria-hidden="true"
+                                  className="text-primary"
+                                />
+                                <span dir="ltr">{CARD_BRAND_LABEL[cardBrand]}</span>
+                              </span>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-2 gap-3.5">
+                            <Field
+                              id="co-expiry"
+                              label={tx.expiry}
+                              value={form.expiry}
+                              onChange={(v) => {
+                                let d = v.replace(/\D/g, "").slice(0, 4);
+                                if (d.length >= 3)
+                                  d = `${d.slice(0, 2)}/${d.slice(2)}`;
+                                setField("expiry")(d);
+                                markTouched("expiry");
+                                if (payError) setPayError(null);
+                              }}
+                              placeholder={tx.expiryPh}
+                              inputMode="numeric"
+                              autoComplete="cc-exp"
+                              ltr
+                              maxLength={5}
+                              error={showErr("expiry")}
+                            />
+                            <Field
+                              id="co-cvc"
+                              label={tx.cvc}
+                              type="password"
+                              value={form.cvc}
+                              onChange={(v) => {
+                                setField("cvc")(
+                                  v.replace(/\D/g, "").slice(0, 4)
+                                );
+                                markTouched("cvc");
+                                if (payError) setPayError(null);
+                              }}
+                              placeholder={tx.cvcPh}
+                              inputMode="numeric"
+                              autoComplete="cc-csc"
+                              ltr
+                              maxLength={4}
+                              error={showErr("cvc")}
+                            />
+                          </div>
+                          {/* Test-card hint (from paymentService). */}
+                          <div className="rounded-lg border border-border bg-surfaceElevated/60 px-3 py-2.5">
+                            <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-textMuted">
+                              <CreditCard
+                                size={12}
+                                aria-hidden="true"
+                                className="text-primary"
+                              />
+                              {tx.testCardsTitle}
+                            </p>
+                            <ul className="space-y-1">
+                              {PAYMENT_TEST_CARDS.map((tc) => (
+                                <li
+                                  key={tc.number}
+                                  className="flex items-center justify-between gap-2"
+                                >
+                                  <span
+                                    className="font-mono text-[11px] tabular-nums tracking-wide text-textPrimary"
+                                    dir="ltr"
+                                  >
+                                    {tc.number}
+                                  </span>
+                                  <span
+                                    className={`font-sans text-[10px] font-semibold uppercase tracking-wide ${
+                                      tc.outcome === "success"
+                                        ? "text-success"
+                                        : "text-danger"
+                                    }`}
+                                  >
+                                    {tc.outcome === "success"
+                                      ? tx.testCardSuccess
+                                      : tx.testCardDeclined}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </>
+                      ) : (
+                        // Non-card methods: a short localized note instead of the
+                        // card form (COD pays on delivery; wallet/BNPL redirect).
+                        <p className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 font-sans text-[12px] font-medium text-textSecondary">
+                          {payMethod === "cod" ? (
+                            <Truck
+                              size={15}
+                              aria-hidden="true"
+                              className="mt-px shrink-0 text-primary rtl:-scale-x-100"
+                            />
+                          ) : (
+                            <CreditCard
+                              size={15}
+                              aria-hidden="true"
+                              className="mt-px shrink-0 text-primary"
+                            />
+                          )}
+                          {payMethod === "cod"
+                            ? tx.codNote
+                            : tx.redirectNote(tx.payMethods[payMethod] || payMethod)}
+                        </p>
+                      )}
 
                       {/* Decline / invalid charge error — localized live alert. */}
                       {payError && (
@@ -1197,9 +1476,11 @@ export default function CheckoutModal() {
                         </p>
                       )}
 
-                      <p className="rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 font-sans text-[11px] text-textMuted">
-                        {tx.mockNote}
-                      </p>
+                      {needsCard && (
+                        <p className="rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 font-sans text-[11px] text-textMuted">
+                          {tx.mockNote}
+                        </p>
+                      )}
                     </fieldset>
                   )}
                 </div>

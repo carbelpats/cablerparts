@@ -23,12 +23,46 @@ import { isSupabaseConfigured, getSupabase } from "./supabaseClient";
 
 const ORDERS_KEY = "almeyar:orders";
 
-// Progress statuses (drive the 3-step tracker + the deterministic demo track).
-// "Cancelled" is a terminal off-track status handled separately everywhere.
-export const ORDER_STATUSES = ["Processing", "Shipped", "Delivered"];
+// Progress statuses — the realistic, sequential fulfilment lifecycle that drives
+// the dynamic timeline + the deterministic demo track. Order is load-bearing:
+// the index in this array IS the stage progression.
+//
+//   Received         -> we received the order (set at placeOrder)
+//   PaymentConfirmed -> payment captured / confirmed
+//   Processing       -> picking + preparing the parts
+//   Packed           -> packed and ready to hand to the courier
+//   Shipped          -> handed to the courier, tracking number issued
+//   OutForDelivery   -> on the delivery vehicle
+//   Delivered        -> delivered to the customer
+//
+// Back-compat: the legacy statuses "Processing"/"Shipped"/"Delivered" remain in
+// this array (at indices 2/4/6) so already-persisted orders keep mapping.
+export const ORDER_STATUSES = [
+  "Received",
+  "PaymentConfirmed",
+  "Processing",
+  "Packed",
+  "Shipped",
+  "OutForDelivery",
+  "Delivered",
+];
+
+// Terminal, OFF-track statuses — each ends the order outside the linear flow and
+// renders as a distinct badge everywhere (never as a progress dot).
 export const CANCELLED_STATUS = "Cancelled";
+export const RETURNED_STATUS = "Returned";
+export const REFUNDED_STATUS = "Refunded";
+export const TERMINAL_STATUSES = [
+  CANCELLED_STATUS,
+  RETURNED_STATUS,
+  REFUNDED_STATUS,
+];
+
 // Every status an admin may set / persist.
-export const ALL_ORDER_STATUSES = [...ORDER_STATUSES, CANCELLED_STATUS];
+export const ALL_ORDER_STATUSES = [...ORDER_STATUSES, ...TERMINAL_STATUSES];
+
+// The first linear stage — new orders start here.
+const INITIAL_STATUS = ORDER_STATUSES[0]; // "Received"
 const HOUR = 60 * 60 * 1000;
 
 // ---- id / hash helpers ------------------------------------------------------
@@ -57,7 +91,7 @@ function hashId(str) {
 // Normalize an order payload into the canonical Order shape.
 function normalizeOrder(payload = {}, { id, createdAt } = {}) {
   const at = createdAt ?? Date.now();
-  const status = payload.status || "Processing";
+  const status = payload.status || INITIAL_STATUS;
   const statusHistory =
     Array.isArray(payload.statusHistory) && payload.statusHistory.length
       ? payload.statusHistory
@@ -76,7 +110,35 @@ function normalizeOrder(payload = {}, { id, createdAt } = {}) {
     contact: payload.contact || { name: "", email: "", phone: "" },
     shipping: payload.shipping || { address: "", city: "", regionCode: "" },
     paymentId: payload.paymentId ?? null,
+    // Payment + fulfilment metadata (all nullable; admin/courier fill them in).
+    paymentMethod: payload.paymentMethod ?? null,
+    paymentStatus: payload.paymentStatus ?? null,
+    shippingMethod: payload.shippingMethod ?? null,
+    courierProvider: payload.courierProvider ?? null,
+    trackingNumber: payload.trackingNumber ?? null,
+    estimatedDeliveryDate: payload.estimatedDeliveryDate ?? null,
+    actualDeliveryDate: payload.actualDeliveryDate ?? null,
   };
+}
+
+// Fields a later update is allowed to patch onto an order (besides status).
+const PATCHABLE_FIELDS = [
+  "paymentMethod",
+  "paymentStatus",
+  "shippingMethod",
+  "courierProvider",
+  "trackingNumber",
+  "estimatedDeliveryDate",
+  "actualDeliveryDate",
+];
+
+// Keep only known, defined patch fields (so an admin form can't inject keys).
+function pickPatch(fields = {}) {
+  const out = {};
+  for (const key of PATCHABLE_FIELDS) {
+    if (fields[key] !== undefined) out[key] = fields[key];
+  }
+  return out;
 }
 
 // ===========================================================================
@@ -147,7 +209,27 @@ const localAdapter = {
         ? o.statusHistory.slice()
         : [];
       history.push({ status, at: Date.now() });
-      updated = { ...o, status, statusHistory: history };
+      // When an order is marked Delivered, stamp the actual delivery date if it
+      // hasn't been set yet — keeps the timeline + tracking page honest.
+      const deliveredPatch =
+        status === "Delivered" && !o.actualDeliveryDate
+          ? { actualDeliveryDate: Date.now() }
+          : {};
+      updated = { ...o, status, statusHistory: history, ...deliveredPatch };
+      return updated;
+    });
+    if (!updated) throw new Error("order_not_found");
+    writeAllOrders(next);
+    return updated;
+  },
+
+  async updateOrderFields(id, fields) {
+    const patch = pickPatch(fields);
+    const all = readAllOrders();
+    let updated = null;
+    const next = all.map((o) => {
+      if (String(o.id).toLowerCase() !== String(id).toLowerCase()) return o;
+      updated = { ...o, ...patch };
       return updated;
     });
     if (!updated) throw new Error("order_not_found");
@@ -185,7 +267,7 @@ function rowToOrder(row) {
     id: row.id,
     userId: row.user_id ?? null,
     createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
-    status: row.status || "Processing",
+    status: row.status || INITIAL_STATUS,
     statusHistory: Array.isArray(row.status_history) ? row.status_history : [],
     items: Array.isArray(row.items) ? row.items : [],
     subtotalUSD: row.subtotal_usd ?? 0,
@@ -195,7 +277,23 @@ function rowToOrder(row) {
     contact: row.contact || { name: "", email: "", phone: "" },
     shipping: row.shipping || { address: "", city: "", regionCode: "" },
     paymentId: row.payment_id ?? null,
+    paymentMethod: row.payment_method ?? null,
+    paymentStatus: row.payment_status ?? null,
+    shippingMethod: row.shipping_method ?? null,
+    courierProvider: row.courier_provider ?? null,
+    trackingNumber: row.tracking_number ?? null,
+    estimatedDeliveryDate: row.estimated_delivery_date
+      ? new Date(row.estimated_delivery_date).getTime()
+      : null,
+    actualDeliveryDate: row.actual_delivery_date
+      ? new Date(row.actual_delivery_date).getTime()
+      : null,
   };
+}
+
+// ms epoch (or null) -> ISO string (or null) for timestamptz columns.
+function msToIso(ms) {
+  return ms == null ? null : new Date(ms).toISOString();
 }
 
 function orderToRow(order) {
@@ -212,8 +310,33 @@ function orderToRow(order) {
     contact: order.contact,
     shipping: order.shipping,
     payment_id: order.paymentId,
+    payment_method: order.paymentMethod ?? null,
+    payment_status: order.paymentStatus ?? null,
+    shipping_method: order.shippingMethod ?? null,
+    courier_provider: order.courierProvider ?? null,
+    tracking_number: order.trackingNumber ?? null,
+    estimated_delivery_date: msToIso(order.estimatedDeliveryDate),
+    actual_delivery_date: msToIso(order.actualDeliveryDate),
     created_at: new Date(order.createdAt).toISOString(),
   };
+}
+
+// Translate a canonical-field patch into snake_case DB columns (for updates).
+function patchToRow(patch = {}) {
+  const out = {};
+  if (patch.paymentMethod !== undefined) out.payment_method = patch.paymentMethod;
+  if (patch.paymentStatus !== undefined) out.payment_status = patch.paymentStatus;
+  if (patch.shippingMethod !== undefined)
+    out.shipping_method = patch.shippingMethod;
+  if (patch.courierProvider !== undefined)
+    out.courier_provider = patch.courierProvider;
+  if (patch.trackingNumber !== undefined)
+    out.tracking_number = patch.trackingNumber;
+  if (patch.estimatedDeliveryDate !== undefined)
+    out.estimated_delivery_date = msToIso(patch.estimatedDeliveryDate);
+  if (patch.actualDeliveryDate !== undefined)
+    out.actual_delivery_date = msToIso(patch.actualDeliveryDate);
+  return out;
 }
 
 const supabaseAdapter = {
@@ -274,9 +397,24 @@ const supabaseAdapter = {
       ? cur.status_history.slice()
       : [];
     history.push({ status, at: Date.now() });
+    const update = { status, status_history: history };
+    if (status === "Delivered") update.actual_delivery_date = msToIso(Date.now());
     const { data, error } = await sb
       .from("orders")
-      .update({ status, status_history: history })
+      .update(update)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return rowToOrder(data);
+  },
+
+  async updateOrderFields(id, fields) {
+    const sb = await getSupabase();
+    const row = patchToRow(pickPatch(fields));
+    const { data, error } = await sb
+      .from("orders")
+      .update(row)
       .eq("id", id)
       .select()
       .single();
@@ -325,6 +463,9 @@ export async function getAllOrders() {
 }
 export async function updateOrderStatus(id, status) {
   return adapter.updateOrderStatus(id, status);
+}
+export async function updateOrderFields(id, fields) {
+  return adapter.updateOrderFields(id, fields);
 }
 export async function trackById(id) {
   return adapter.trackById(id);

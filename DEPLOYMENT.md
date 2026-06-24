@@ -56,6 +56,24 @@ Open **SQL Editor** in the Supabase dashboard and run, in order:
 > psql "$DATABASE_URL" -f supabase/seed.sql
 > ```
 
+> **Richer order lifecycle (Supabase adapter only):** the order object now carries
+> extra payment/shipping fields. When using the Supabase `orders` table, add these
+> **nullable** columns (the localStorage adapter needs no migration — it stores the
+> whole object as-is):
+> ```sql
+> alter table public.orders
+>   add column if not exists payment_method text,
+>   add column if not exists payment_status text,
+>   add column if not exists shipping_method text,
+>   add column if not exists courier_provider text,
+>   add column if not exists tracking_number text,
+>   add column if not exists estimated_delivery_date timestamptz,
+>   add column if not exists actual_delivery_date timestamptz;
+> ```
+> Status itself now spans Received → PaymentConfirmed → Processing → Packed →
+> Shipped → OutForDelivery → Delivered, plus the terminal Cancelled / Returned /
+> Refunded states.
+
 ---
 
 ## 3. Copy the API keys
@@ -127,9 +145,11 @@ prefix) — publishable/anon keys only.
 | --- | --- | --- |
 | `VITE_SUPABASE_URL` | for backend | From step 3 |
 | `VITE_SUPABASE_ANON_KEY` | for backend | anon/public key |
-| `VITE_PAYMENT_PROVIDER` | no | `mock` (default) \| `moyasar` \| `stripe` |
-| `VITE_MOYASAR_PUBLISHABLE_KEY` | if moyasar | publishable key |
+| `VITE_PAYMENT_PROVIDER` | no | `mock` (default) \| `moyasar` \| `stripe` \| `hyperpay` \| `tap` |
+| `VITE_MOYASAR_PUBLISHABLE_KEY` | if moyasar | publishable key, `pk_...` |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | if stripe | `pk_...` |
+| `VITE_SHIPPING_PROVIDER` | no | `mock` (default) \| `aramex` \| `smsa` \| `tryoto` \| `imile` |
+| `VITE_SHIPPING_API_KEY` | if shipping | **rate/read key only** — a shipment-*creating* (write) key must stay server-side/proxied |
 | `VITE_ADMIN_EMAILS` | recommended | comma-separated admin emails |
 
 ### Vercel
@@ -159,12 +179,44 @@ Test cards:
 - `4000 0000 0000 0002` → **declined**
 - anything failing validation → **invalid card**
 
+Supported methods (subject to your merchant account + region): mada, Visa,
+Mastercard, Apple Pay, STC Pay, Cash on Delivery (COD), Tamara, Tabby.
+
 To go live:
-1. Set `VITE_PAYMENT_PROVIDER=moyasar` or `stripe`.
-2. Add the matching publishable key (`VITE_MOYASAR_PUBLISHABLE_KEY` or
-   `VITE_STRIPE_PUBLISHABLE_KEY`).
-3. Real charge confirmation / webhooks must be handled **server-side** with the
-   secret key (a serverless function), never in the client bundle.
+1. Create a merchant account with `moyasar`, `stripe`, `hyperpay`, or `tap`
+   (Moyasar/HyperPay/Tap give first-class mada + STC Pay + Apple Pay for KSA;
+   Stripe is the global fallback). Enable the methods you want in its dashboard.
+2. Set `VITE_PAYMENT_PROVIDER` and add the matching **publishable** key
+   (`VITE_MOYASAR_PUBLISHABLE_KEY` or `VITE_STRIPE_PUBLISHABLE_KEY`).
+3. Implement the provider branch in `createPayment`
+   (`src/services/paymentService.js`): load the SDK, **tokenize the card
+   client-side** (the PAN never reaches our servers — PCI), pass the token to
+   your backend.
+4. Real charge/capture, refunds, and webhook verification must be handled
+   **server-side** with the **secret** key (a serverless function), never in the
+   client bundle. Cards are tokenized and never stored.
+
+---
+
+## 6b. Connect a courier (optional)
+
+Out of the box `VITE_SHIPPING_PROVIDER=mock` uses the built-in deterministic
+estimator (local tracking number + ETA, no network). `SHIPPING_METHODS` ship
+with **Standard** (Aramex, 1–3 days) and **Express** (SMSA, next-day).
+
+To connect a real courier:
+1. Create a courier account with `aramex`, `smsa`, `tryoto`, or `imile`
+   (TryOTO aggregates several couriers behind one integration).
+2. Set `VITE_SHIPPING_PROVIDER`, and add `VITE_SHIPPING_API_KEY` **only if it is
+   a read-only rate/tracking key**. A shipment-creating (write) key must live
+   server-side / behind a proxy — never in a `VITE_*` var.
+3. Implement the provider branch in `createShipment`
+   (`src/services/shippingService.js`): book the shipment and return its real
+   tracking number, courier name, and ETA. Quotes/ETAs may run client-side;
+   label/booking calls go through the server.
+
+Admin then patches the order's shipping fields from **Admin → Orders**
+(`updateTracking`), and the customer's Track Order page reflects them live.
 
 ---
 
@@ -200,6 +252,14 @@ Run through this on the live URL:
      customer's Track Order / Order Detail reflects the new status.
 8. **SEO**: view source → `<title>`, meta description, Open Graph tags present;
    `/robots.txt` and `/sitemap.xml` resolve.
+9. **Compliance & legal**: in **Admin → Settings → Compliance**, fill real values
+   for the domain, **CR** number, **VAT** number, the **Maroof** URL + badge, and
+   any **licenses** — then confirm they render in the footer. Author the legal
+   pages and check **`/pdpl`** and **`/disclaimer`** resolve in both EN and AR.
+
+> **Pre-launch must-do:** the compliance fields and legal pages ship **blank**.
+> Fill the CR, VAT, Maroof URL, and licenses, and author the PDPL + disclaimer
+> copy, **before** going live — these are trust/legal requirements, not optional.
 
 If all green — you're launched. 🚀
 

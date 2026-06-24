@@ -31,6 +31,7 @@ import {
 import { useAuth, AUTH_ERRORS } from "../context/AuthContext";
 import { useLang } from "../context/LanguageContext";
 import { useDocumentMeta } from "../hooks/useDocumentMeta";
+import { validateEmail } from "../lib/validation";
 
 /* ----------------------------------------------------------------------------
    Local copy — component-specific strings stay out of i18n.js (project rule).
@@ -149,7 +150,6 @@ const STRINGS = {
   },
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD = 6;
 const DEFAULT_DEST = "/account/orders";
 
@@ -360,8 +360,7 @@ export default function AuthPage() {
   const fieldErrors = useMemo(() => {
     const e = {};
     if (isSignUp && !name.trim()) e.name = AUTH_ERRORS.NAME_REQUIRED;
-    if (!EMAIL_RE.test(email.trim().toLowerCase()))
-      e.email = AUTH_ERRORS.INVALID_EMAIL;
+    if (!validateEmail(email).ok) e.email = AUTH_ERRORS.INVALID_EMAIL;
     if (password.length < MIN_PASSWORD) e.password = AUTH_ERRORS.WEAK_PASSWORD;
     return e;
   }, [isSignUp, name, email, password]);
