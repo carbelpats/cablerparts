@@ -73,7 +73,14 @@ export function AuthProvider({ children }) {
 
     (async () => {
       try {
-        const current = await svcGetCurrentUser();
+        // Never let a hung session-restore (e.g. a stale token for a deleted
+        // user, or a wedged auth lock) freeze the whole app: cap it and fall
+        // back to logged-out. A real session still arrives via the
+        // onAuthChange subscription below once it resolves.
+        const current = await Promise.race([
+          svcGetCurrentUser(),
+          new Promise((resolve) => setTimeout(() => resolve(null), 8000)),
+        ]);
         if (!cancelled && mountedRef.current) setUser(current || null);
       } catch {
         if (!cancelled && mountedRef.current) setUser(null);

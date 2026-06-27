@@ -32,6 +32,7 @@ import { useAuth, AUTH_ERRORS } from "../context/AuthContext";
 import { useLang } from "../context/LanguageContext";
 import { useDocumentMeta } from "../hooks/useDocumentMeta";
 import { validateEmail } from "../lib/validation";
+import { isSupabaseConfigured } from "../services/supabaseClient";
 
 /* ----------------------------------------------------------------------------
    Local copy — component-specific strings stay out of i18n.js (project rule).
@@ -82,6 +83,7 @@ const STRINGS = {
     signInInstead: "Sign in",
     // trust / footer
     secureNote: "Demo account — stored locally on this device only.",
+    secureNoteCloud: "Secured by encrypted cloud accounts.",
     backHome: "Back to storefront",
     // error codes -> localized messages
     errors: {
@@ -134,6 +136,7 @@ const STRINGS = {
     haveAccount: "لديك حساب بالفعل؟",
     signInInstead: "سجّل الدخول",
     secureNote: "حساب تجريبي — يُخزَّن محليًا على هذا الجهاز فقط.",
+    secureNoteCloud: "حساب آمن محفوظ في السحابة المشفّرة.",
     backHome: "العودة إلى المتجر",
     errors: {
       [AUTH_ERRORS.NAME_REQUIRED]: "يرجى إدخال اسمك.",
@@ -624,7 +627,7 @@ export default function AuthPage() {
         {/* Trust note */}
         <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-textMuted">
           <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span>{tx.secureNote}</span>
+          <span>{isSupabaseConfigured ? tx.secureNoteCloud : tx.secureNote}</span>
         </p>
       </div>
     </main>
