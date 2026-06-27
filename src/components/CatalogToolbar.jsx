@@ -163,6 +163,8 @@ export default function CatalogToolbar({
           <Search className="h-4 w-4" strokeWidth={2} />
         </span>
         <input
+          id="catalog-search"
+          name="catalog-search"
           type="text"
           inputMode="search"
           value={searchQuery}
@@ -193,6 +195,8 @@ export default function CatalogToolbar({
             <ArrowDownUp className="h-4 w-4" strokeWidth={2} />
           </span>
           <select
+            id="catalog-sort"
+            name="catalog-sort"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             aria-label={tx.sortLabel}
