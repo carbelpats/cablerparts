@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  Copy,
   User,
   Truck,
   CreditCard,
@@ -26,7 +27,6 @@ import { useOrders } from "../context/OrdersContext";
 import { PART_ICONS } from "../lib/partIcons";
 import {
   createPayment,
-  PAYMENT_TEST_CARDS,
   PAYMENT_METHODS,
 } from "../services/paymentService";
 import {
@@ -93,7 +93,7 @@ const STRINGS = {
     codNote: "Pay in cash when your order is delivered.",
     redirectNote: (m) => `You'll be redirected to complete payment via ${m}.`,
     cardNumber: "Card number",
-    cardPh: "4242 4242 4242 4242",
+    cardPh: "•••• •••• •••• ••••",
     expiry: "Expiry",
     expiryPh: "MM/YY",
     cvc: "CVC",
@@ -130,6 +130,8 @@ const STRINGS = {
     successTitle: "Order confirmed!",
     successBody: "Your parts are being prepared for GCC dispatch.",
     orderNo: "Order number",
+    copyOrder: "Copy order number",
+    copyDone: "Copied",
     trackOrder: "Track order",
     continueShopping: "Continue shopping",
     successVehicle: (v) => `Heading to your ${v}.`,
@@ -184,7 +186,7 @@ const STRINGS = {
     codNote: "ادفع نقداً عند الاستلام.",
     redirectNote: (m) => `ستُحوّل لإتمام الدفع عبر ${m}.`,
     cardNumber: "رقم البطاقة",
-    cardPh: "4242 4242 4242 4242",
+    cardPh: "•••• •••• •••• ••••",
     expiry: "تاريخ الانتهاء",
     expiryPh: "MM/YY",
     cvc: "CVC",
@@ -216,6 +218,8 @@ const STRINGS = {
     successTitle: "تم تأكيد الطلب!",
     successBody: "يتم تجهيز قطعك للشحن داخل دول الخليج.",
     orderNo: "رقم الطلب",
+    copyOrder: "نسخ رقم الطلب",
+    copyDone: "تم النسخ",
     trackOrder: "تتبّع الطلب",
     continueShopping: "متابعة التسوّق",
     successVehicle: (v) => `في طريقها إلى سيارتك ${v}.`,
@@ -499,6 +503,7 @@ export default function CheckoutModal() {
   const [placed, setPlaced] = useState(false);
   // The REAL order returned by placeOrder() — drives the success screen.
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [copiedOrder, setCopiedOrder] = useState(false);
   // Payment processing state (charge runs before the order is placed).
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState(null); // localized message | null
@@ -794,6 +799,19 @@ export default function CheckoutModal() {
     else navigate("/account/orders");
   }, [placedOrder, closeCheckout, navigate]);
 
+  // Success -> copy the order number to the clipboard (brief confirmation).
+  const handleCopyOrder = useCallback(() => {
+    const id = placedOrder?.id || orderNumber;
+    if (!id) return;
+    try {
+      navigator.clipboard?.writeText(String(id));
+      setCopiedOrder(true);
+      setTimeout(() => setCopiedOrder(false), 2000);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }, [placedOrder, orderNumber]);
+
   // Success -> keep shopping (clears the cart as before).
   const handleFinish = useCallback(() => {
     clearCart();
@@ -1007,12 +1025,31 @@ export default function CheckoutModal() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-textMuted">
                     {tx.orderNo}
                   </p>
-                  <p
-                    className="mt-1 font-mono text-lg font-bold tracking-wide text-primary"
-                    dir="ltr"
-                  >
-                    {placedOrder?.id || orderNumber}
-                  </p>
+                  <div className="mt-1 flex items-center justify-center gap-2">
+                    <p
+                      className="font-mono text-lg font-bold tracking-wide text-primary"
+                      dir="ltr"
+                    >
+                      {placedOrder?.id || orderNumber}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCopyOrder}
+                      aria-label={tx.copyOrder}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border text-textMuted transition-colors hover:bg-surface hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+                    >
+                      {copiedOrder ? (
+                        <Check size={14} aria-hidden="true" className="text-success" />
+                      ) : (
+                        <Copy size={14} aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                  {copiedOrder && (
+                    <p className="mt-1 font-sans text-[11px] font-semibold text-success">
+                      {tx.copyDone}
+                    </p>
+                  )}
                 </div>
                 <div className="mt-6 flex w-full max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
                   <button
@@ -1400,43 +1437,6 @@ export default function CheckoutModal() {
                               error={showErr("cvc")}
                             />
                           </div>
-                          {/* Test-card hint (from paymentService). */}
-                          <div className="rounded-lg border border-border bg-surfaceElevated/60 px-3 py-2.5">
-                            <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-textMuted">
-                              <CreditCard
-                                size={12}
-                                aria-hidden="true"
-                                className="text-primary"
-                              />
-                              {tx.testCardsTitle}
-                            </p>
-                            <ul className="space-y-1">
-                              {PAYMENT_TEST_CARDS.map((tc) => (
-                                <li
-                                  key={tc.number}
-                                  className="flex items-center justify-between gap-2"
-                                >
-                                  <span
-                                    className="font-mono text-[11px] tabular-nums tracking-wide text-textPrimary"
-                                    dir="ltr"
-                                  >
-                                    {tc.number}
-                                  </span>
-                                  <span
-                                    className={`font-sans text-[10px] font-semibold uppercase tracking-wide ${
-                                      tc.outcome === "success"
-                                        ? "text-success"
-                                        : "text-danger"
-                                    }`}
-                                  >
-                                    {tc.outcome === "success"
-                                      ? tx.testCardSuccess
-                                      : tx.testCardDeclined}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
                         </>
                       ) : (
                         // Non-card methods: a short localized note instead of the
@@ -1476,11 +1476,6 @@ export default function CheckoutModal() {
                         </p>
                       )}
 
-                      {needsCard && (
-                        <p className="rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 font-sans text-[11px] text-textMuted">
-                          {tx.mockNote}
-                        </p>
-                      )}
                     </fieldset>
                   )}
                 </div>

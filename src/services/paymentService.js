@@ -40,8 +40,7 @@ export const PAYMENT_METHODS = [
   { id: "card", needsCard: true, kind: "card", region: "*" },
   { id: "applepay", needsCard: false, kind: "wallet", region: "*" },
   { id: "stcpay", needsCard: false, kind: "wallet", region: "SA" },
-  { id: "tabby", needsCard: false, kind: "bnpl", region: "*" },
-  { id: "tamara", needsCard: false, kind: "bnpl", region: "*" },
+  // Tabby + Tamara (BNPL) intentionally removed for now — to be re-added later.
   { id: "cod", needsCard: false, kind: "cod", region: "*" },
 ];
 
