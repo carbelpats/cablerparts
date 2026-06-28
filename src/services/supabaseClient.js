@@ -19,13 +19,45 @@ export const isSupabaseConfigured = Boolean(url && key);
 
 let _clientPromise = null;
 
+// In-memory, per-tab auth lock.
+//
+// supabase-js defaults to a navigator.locks-based lock to coordinate token
+// refresh ACROSS tabs. In some browsers / multi-tab / restored-session states
+// that lock can DEADLOCK: the network request returns 200 but the JS promise
+// that's waiting to acquire the lock never resolves — which freezes BOTH auth
+// (sign-in stuck on "loading") AND data reads that attach the session token
+// (the product grid stays on skeletons forever), even though every request
+// succeeded server-side. This is the classic "works on a fresh browser, frozen
+// on the user's" signature.
+//
+// We replace it with a promise-chain lock that serialises auth operations
+// WITHIN the tab (so concurrent refreshes don't race) but has no cross-tab
+// dependency, so it can never wedge. Trade-off: two tabs may each refresh their
+// own token independently — harmless compared to a fully frozen app.
+let _authLockChain = Promise.resolve();
+function inMemoryLock(_name, _acquireTimeout, fn) {
+  const run = _authLockChain.then(() => fn(), () => fn());
+  _authLockChain = run.then(
+    () => undefined,
+    () => undefined
+  );
+  return run;
+}
+
 // Memoized factory — resolves to a configured Supabase client, or null when the
 // environment is not configured. Never throws for the unconfigured case.
 export async function getSupabase() {
   if (!isSupabaseConfigured) return null;
   if (!_clientPromise) {
     _clientPromise = import("@supabase/supabase-js").then(({ createClient }) =>
-      createClient(url, key, { auth: { persistSession: true } })
+      createClient(url, key, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          lock: inMemoryLock,
+        },
+      })
     );
   }
   return _clientPromise;
