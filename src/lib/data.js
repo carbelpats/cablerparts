@@ -10,67 +10,53 @@
  * Chinese makes relevant to the business + popular GCC makes with compatible parts.
  */
 export const CARS = {
-  Chery: {
-    Tiggo: [2024, 2023, 2022, 2021, 2020],
-    Arrizo: [2024, 2023, 2022, 2021, 2020],
-    Omoda: [2024, 2023, 2022, 2021],
-  },
-  Geely: {
-    Coolray: [2024, 2023, 2022, 2021, 2020],
-    Emgrand: [2024, 2023, 2022, 2021, 2020],
-    Tugella: [2024, 2023, 2022, 2021],
-  },
-  Haval: {
-    H6: [2024, 2023, 2022, 2021, 2020],
-    Jolion: [2024, 2023, 2022, 2021],
-    Dargo: [2024, 2023, 2022],
+  Changan: {
+    Eado: [2025, 2024, 2023, 2022, 2021, 2020],
+    Alsvin: [2025, 2024, 2023, 2022, 2021],
+    "CS35 Plus": [2025, 2024, 2023, 2022, 2021, 2020],
+    "CS75 Plus": [2025, 2024, 2023, 2022, 2021, 2020],
   },
   MG: {
-    "MG5": [2024, 2023, 2022, 2021, 2020],
-    "MG ZS": [2024, 2023, 2022, 2021, 2020],
-    "RX5": [2024, 2023, 2022, 2021],
-    "HS": [2024, 2023, 2022, 2021],
+    "MG5": [2025, 2024, 2023, 2022, 2021, 2020],
+    "MG3": [2025, 2024, 2023, 2022],
+    ZS: [2025, 2024, 2023, 2022, 2021, 2020],
+    HS: [2025, 2024, 2023, 2022, 2021],
+    "MG4 EV": [2025, 2024, 2023],
   },
-  Changan: {
-    "CS35": [2024, 2023, 2022, 2021, 2020],
-    "CS75": [2024, 2023, 2022, 2021, 2020],
-    Eado: [2024, 2023, 2022, 2021],
+  Geely: {
+    Emgrand: [2025, 2024, 2023, 2022, 2021, 2020],
+    Coolray: [2025, 2024, 2023, 2022, 2021, 2020],
+    "GX3 Pro": [2025, 2024, 2023, 2022],
+    Tugella: [2025, 2024, 2023, 2022, 2021],
+  },
+  Jetour: {
+    T2: [2025, 2024, 2023],
+    T1: [2025, 2024],
+    Dashing: [2025, 2024, 2023, 2022],
+    X70: [2025, 2024, 2023, 2022, 2021],
+  },
+  Haval: {
+    H6: [2025, 2024, 2023, 2022, 2021, 2020],
+    Jolion: [2025, 2024, 2023, 2022, 2021],
+    H9: [2025, 2024, 2023, 2022, 2021],
+    Dargo: [2025, 2024, 2023, 2022],
+  },
+  Chery: {
+    "Tiggo 8 Pro Max": [2025, 2024, 2023, 2022, 2021],
+    "Tiggo 7 Pro": [2025, 2024, 2023, 2022, 2021],
+    "Tiggo 4": [2025, 2024, 2023, 2022, 2021],
+    "Arrizo 5": [2025, 2024, 2023, 2022],
   },
   BYD: {
-    "Atto 3": [2024, 2023, 2022],
-    Han: [2024, 2023, 2022, 2021],
-    Tang: [2024, 2023, 2022, 2021],
+    "Atto 3": [2025, 2024, 2023, 2022],
+    Seal: [2025, 2024, 2023],
+    Han: [2025, 2024, 2023, 2022, 2021],
+    "Song Plus": [2025, 2024, 2023, 2022],
   },
   GAC: {
-    GS3: [2024, 2023, 2022, 2021],
-    GS8: [2024, 2023, 2022, 2021, 2020],
-    Emkoo: [2024, 2023, 2022],
-  },
-  Toyota: {
-    "Land Cruiser": [2024, 2023, 2022, 2021, 2020],
-    Camry: [2024, 2023, 2022, 2021, 2020],
-    Hilux: [2024, 2023, 2022, 2021, 2020],
-    Corolla: [2024, 2023, 2022, 2021, 2020],
-  },
-  Nissan: {
-    Patrol: [2024, 2023, 2022, 2021, 2020],
-    Altima: [2024, 2023, 2022, 2021, 2020],
-    "X-Trail": [2024, 2023, 2022, 2021],
-  },
-  Lexus: {
-    "LX": [2024, 2023, 2022, 2021, 2020],
-    "RX": [2024, 2023, 2022, 2021, 2020],
-    "ES": [2024, 2023, 2022, 2021],
-  },
-  Hyundai: {
-    "Tucson": [2024, 2023, 2022, 2021, 2020],
-    "Sonata": [2024, 2023, 2022, 2021, 2020],
-    "Santa Fe": [2024, 2023, 2022, 2021],
-  },
-  Mitsubishi: {
-    Pajero: [2024, 2023, 2022, 2021, 2020],
-    "L200": [2024, 2023, 2022, 2021, 2020],
-    "Outlander": [2024, 2023, 2022, 2021],
+    Emkoo: [2025, 2024, 2023, 2022],
+    GS3: [2025, 2024, 2023, 2022, 2021],
+    GS8: [2025, 2024, 2023, 2022, 2021, 2020],
   },
 };
 
@@ -114,1089 +100,976 @@ export function getYears(make, model) {
  */
 export const PRODUCTS = [
   {
-    id: "MR-BRK-001",
-    name: "Cabler Track Big Brake Kit — 6-Piston Front",
-    nameAr: "طقم فرامل كابلر تراك الكبير — كاليبر أمامي 6 مكابس",
-    brand: "Cabler Performance",
-    category: "Braking",
-    priceUSD: 689,
-    compareAtUSD: 829,
-    rating: 4.8,
-    reviews: 214,
-    stock: 6,
-    viewing: 38,
-    fitment: ["Toyota", "Nissan", "Lexus", "Haval"],
-    badges: ["OEM-Grade", "Track-Tested", "2-Yr Warranty"],
-    accent: "primary",
-    icon: "brake",
-    image:
-      "https://images.unsplash.com/photo-1600790142055-619df03207e6?w=600&auto=format&fit=crop",
-    descriptionEn:
-      "A forged 6-piston front big brake kit engineered for repeatable stopping power under hard GCC driving. Slotted two-piece rotors shed heat fast and resist fade lap after lap.",
-    descriptionAr:
-      "طقم فرامل أمامي كبير بكاليبر مطروق 6 مكابس مصمم لقوة إيقاف ثابتة تحت ظروف القيادة القاسية في الخليج. أقراص مشقوقة من قطعتين تبدد الحرارة بسرعة وتقاوم الضعف لفة بعد لفة.",
-    highlightsEn: [
-      "Forged 6-piston monobloc calipers",
-      "Slotted 2-piece floating rotors",
-      "Stainless braided brake lines included",
+    "id": "CB-BRK-PAD",
+    "name": "Cabler Ceramic Brake Pad Set (Front + Rear)",
+    "nameAr": "طقم تيل فرامل سيراميك كابلر (أمامي + خلفي)",
+    "brand": "Cabler",
+    "category": "Braking",
+    "priceUSD": 64,
+    "compareAtUSD": 79,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 42,
+    "viewing": 23,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "كاليبرات مطروقة أحادية الكتلة 6 مكابس",
-      "أقراص عائمة مشقوقة من قطعتين",
-      "خراطيم فرامل مجدولة من الستانلس ستيل",
+    "badges": [
+      "OEM-Grade",
+      "2-Yr Warranty",
+      "Fast-Moving"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "Forged 6061-T6 Aluminum" },
-      { labelEn: "Rotor Diameter", labelAr: "قطر القرص", value: "356 mm" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ECE R90 Approved" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Designed in UAE" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "2 Calipers, 2 Rotors, Pads, Lines" },
+    "accent": "primary",
+    "icon": "brake",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Full front and rear ceramic brake pad set engineered for quiet, low-dust stopping on Chinese SUVs and sedans. Includes shims and wear sensors where applicable for a clean factory-style fit.",
+    "descriptionAr": "طقم كامل من تيل الفرامل السيراميك الأمامي والخلفي مصمم لإيقاف هادئ وأتربة أقل للسيارات الصينية. يشمل العوازل وحساسات التآكل عند الحاجة لتركيب مطابق للمصنع.",
+    "highlightsEn": [
+      "Ceramic compound for low noise and minimal brake dust",
+      "Complete front and rear set in one box",
+      "Includes anti-rattle shims and hardware"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Caliper front view", captionAr: "منظر أمامي للكاليبر" },
-      { zoom: 1.25, rotate: 18, captionEn: "Rotor detail", captionAr: "تفاصيل القرص" },
-      { zoom: 1.4, rotate: -22, captionEn: "Mounting bracket", captionAr: "حامل التثبيت" },
-      { zoom: 1.15, rotate: 45, captionEn: "Full kit angle", captionAr: "زاوية الطقم الكامل" },
+    "highlightsAr": [
+      "خلطة سيراميك لتقليل الصوت وأتربة الفرامل",
+      "طقم كامل أمامي وخلفي في علبة واحدة",
+      "يشمل العوازل المانعة للاهتزاز وقطع التركيب"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-brk-1",
-        author: "Faisal A.",
-        authorAr: "فيصل أ.",
-        rating: 5,
-        dateEn: "3 weeks ago",
-        dateAr: "قبل 3 أسابيع",
-        titleEn: "Night-and-day stopping power",
-        titleAr: "قوة إيقاف مذهلة",
-        bodyEn: "Fitted to my Land Cruiser and the pedal feel is firm and confident even after a desert run.",
-        bodyAr: "ركبته على اللاندكروزر خاصتي وأصبح الدواسة ثابتة وواثقة حتى بعد جولة في الصحراء.",
-        verified: true,
+        "labelEn": "Material",
+        "labelAr": "الخامة",
+        "value": "Ceramic"
       },
       {
-        id: "rv-brk-2",
-        author: "Mohammed S.",
-        authorAr: "محمد س.",
-        rating: 5,
-        dateEn: "2 months ago",
-        dateAr: "قبل شهرين",
-        titleEn: "Worth every riyal",
-        titleAr: "يستحق كل ريال",
-        bodyEn: "No more brake fade on the highway. Install was straightforward with the included hardware.",
-        bodyAr: "لا مزيد من ضعف الفرامل على الطريق السريع. التركيب كان سهلاً مع القطع المرفقة.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Front + Rear (axle set)"
       },
       {
-        id: "rv-brk-3",
-        author: "Khalid M.",
-        authorAr: "خالد م.",
-        rating: 4,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Great kit, slight squeal cold",
-        titleAr: "طقم ممتاز مع صرير بسيط على البارد",
-        bodyEn: "Excellent bite once warm; minor cold squeal in the mornings but it disappears quickly.",
-        bodyAr: "عضّة ممتازة بعد التسخين؛ صرير بسيط في الصباح لكنه يختفي بسرعة.",
-        verified: true,
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "2 Years / 40,000 km"
       },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العلبة",
+        "value": "8 pads + shims + sensors"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد الصنع",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-TUR-014",
-    name: "Stage-2 Bolt-On Turbocharger Assembly",
-    nameAr: "مجموعة شاحن توربيني مرحلة 2 قابلة للتركيب المباشر",
-    brand: "Garrett Apex",
-    category: "Engine",
-    priceUSD: 1245,
-    compareAtUSD: 1490,
-    rating: 4.9,
-    reviews: 96,
-    stock: 3,
-    viewing: 52,
-    fitment: ["Haval", "Geely", "Chery", "MG"],
-    badges: ["OEM-Grade", "ISO 9001", "Track-Tested"],
-    accent: "primary",
-    icon: "pump",
-    image:
-      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=600&auto=format&fit=crop",
-    descriptionEn:
-      "A complete Stage-2 bolt-on turbocharger assembly with a billet compressor wheel for faster spool and reliable peak boost. Direct-fit flanges make it a true weekend upgrade.",
-    descriptionAr:
-      "مجموعة شاحن توربيني كاملة مرحلة 2 قابلة للتركيب المباشر مع عجلة ضاغط من البيليت لاستجابة أسرع وضغط ثابت في الذروة. شفّات مطابقة تجعله ترقية تنجزها في عطلة نهاية الأسبوع.",
-    highlightsEn: [
-      "Billet 7+7 compressor wheel",
-      "Dual ceramic ball-bearing core",
-      "Direct-fit OEM flanges",
+    "id": "CB-BRK-ROT",
+    "name": "Cabler Vented Brake Rotor Pair",
+    "nameAr": "زوج أقراص فرامل مهواة كابلر",
+    "brand": "Cabler",
+    "category": "Braking",
+    "priceUSD": 88,
+    "compareAtUSD": 109,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 30,
+    "viewing": 17,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "GAC"
     ],
-    highlightsAr: [
-      "عجلة ضاغط من البيليت 7+7",
-      "محور بكرات سيراميكية مزدوجة",
-      "شفّات مطابقة لمواصفات المصنع",
+    "badges": [
+      "OEM-Grade",
+      "Heat-Rated",
+      "2-Yr Warranty"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "Billet Aluminum & Inconel" },
-      { labelEn: "Max Boost", labelAr: "أقصى ضغط", value: "22 psi" },
-      { labelEn: "Bearing", labelAr: "المحور", value: "Dual Ceramic Ball" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "1 Year" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in USA" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "Turbo, Gaskets, Studs" },
+    "accent": "accent",
+    "icon": "brake",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Pair of vented, anti-corrosion coated brake rotors designed to resist warping under repeated heavy braking. Balanced for smooth, vibration-free stops on GCC roads.",
+    "descriptionAr": "زوج من أقراص الفرامل المهواة بطلاء مقاوم للصدأ مصمم لمقاومة الاعوجاج عند الكبح المتكرر الشديد. متوازن لإيقاف سلس بدون اهتزاز على طرقات الخليج.",
+    "highlightsEn": [
+      "Vented design for faster heat dissipation",
+      "Anti-corrosion coating for GCC humidity and dust",
+      "Precision-balanced to reduce steering vibration"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Compressor housing", captionAr: "غلاف الضاغط" },
-      { zoom: 1.3, rotate: 30, captionEn: "Turbine side", captionAr: "جانب التوربين" },
-      { zoom: 1.45, rotate: -15, captionEn: "Wastegate actuator", captionAr: "مشغّل صمام التصريف" },
+    "highlightsAr": [
+      "تصميم مهوى لتصريف الحرارة بشكل أسرع",
+      "طلاء مقاوم للصدأ يناسب رطوبة وغبار الخليج",
+      "متوازن بدقة لتقليل اهتزاز المقود"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-tur-1",
-        author: "Ahmed R.",
-        authorAr: "أحمد ر.",
-        rating: 5,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Spools fast, pulls hard",
-        titleAr: "استجابة سريعة وسحب قوي",
-        bodyEn: "Massive difference on my Haval H6. Boost comes in early and the build quality is superb.",
-        bodyAr: "فرق هائل على هافال H6. الضغط يأتي مبكراً وجودة التصنيع رائعة.",
-        verified: true,
+        "labelEn": "Material",
+        "labelAr": "الخامة",
+        "value": "G3000 cast iron"
       },
       {
-        id: "rv-tur-2",
-        author: "Yousef K.",
-        authorAr: "يوسف ك.",
-        rating: 5,
-        dateEn: "6 weeks ago",
-        dateAr: "قبل 6 أسابيع",
-        titleEn: "True bolt-on",
-        titleAr: "تركيب مباشر فعلاً",
-        bodyEn: "Flanges lined up perfectly, no fabrication needed. Highly recommend with a proper tune.",
-        bodyAr: "الشفّات تطابقت تماماً دون أي تعديل. أنصح به بشدة مع برمجة مناسبة.",
-        verified: true,
+        "labelEn": "Type",
+        "labelAr": "النوع",
+        "value": "Vented disc"
       },
+      {
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Front axle (pair)"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "2 Years"
+      },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العلبة",
+        "value": "2 rotors"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد الصنع",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-SUS-007",
-    name: "Adjustable Coilover Suspension Set",
-    nameAr: "طقم تعليق كويلأوفر قابل للتعديل",
-    brand: "Tein DampX",
-    category: "Suspension",
-    priceUSD: 932,
-    compareAtUSD: null,
-    rating: 4.7,
-    reviews: 158,
-    stock: 9,
-    viewing: 21,
-    fitment: ["Toyota", "Hyundai", "Nissan", "Changan"],
-    badges: ["2-Yr Warranty", "Track-Tested"],
-    accent: "accent",
-    icon: "suspension",
-    image:
-      "https://images.unsplash.com/photo-1635823288719-93f2c8ac7f3c?w=600&auto=format&fit=crop",
-    descriptionEn:
-      "A fully adjustable coilover set with 32-way damping and ride-height control for the perfect balance of comfort and grip. Monotube design copes with GCC heat without fade.",
-    descriptionAr:
-      "طقم كويلأوفر قابل للتعديل بالكامل مع 32 مستوى تخميد وتحكم في ارتفاع السيارة لتوازن مثالي بين الراحة والتماسك. تصميم أحادي الأنبوب يتحمل حرارة الخليج دون ضعف.",
-    highlightsEn: [
-      "32-way damping adjustment",
-      "Independent ride-height control",
-      "Monotube high-temp valving",
+    "id": "CB-BAT-12V",
+    "name": "Cabler 12V 72Ah Calcium Car Battery",
+    "nameAr": "بطارية سيارة كابلر 12 فولت 72 أمبير كالسيوم",
+    "brand": "Cabler",
+    "category": "Electrical",
+    "priceUSD": 119,
+    "compareAtUSD": 145,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 24,
+    "viewing": 31,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "تخميد قابل للتعديل 32 مستوى",
-      "تحكم مستقل في ارتفاع السيارة",
-      "صمامات أحادية الأنبوب لدرجات الحرارة العالية",
+    "badges": [
+      "Heat-Rated",
+      "2-Yr Warranty",
+      "Fast-Moving"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "Zinc-Coated Steel" },
-      { labelEn: "Damping", labelAr: "التخميد", value: "32-Way Adjustable" },
-      { labelEn: "Spring Rate", labelAr: "معدل النابض", value: "8K / 6K" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "TUV Tested" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in Japan" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "4 Coilovers, Tool, Manual" },
+    "accent": "success",
+    "icon": "battery",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Maintenance-free 12V calcium battery built for extreme GCC summer heat with strong cold-cranking power and long service life. Sealed design resists fluid loss in high temperatures for reliable daily starts.",
+    "descriptionAr": "بطارية كالسيوم 12 فولت بدون صيانة مصممة لتحمل حرارة صيف الخليج الشديدة مع قدرة تدوير عالية وعمر تشغيلي طويل. تصميم مغلق يقاوم تبخر السائل في درجات الحرارة العالية لتشغيل يومي موثوق.",
+    "highlightsEn": [
+      "Calcium plates engineered for high-heat GCC climate",
+      "Maintenance-free sealed design, no topping up",
+      "Strong cold-cranking amps for instant starts"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Full strut", captionAr: "الدعامة الكاملة" },
-      { zoom: 1.2, rotate: 25, captionEn: "Damping dial", captionAr: "قرص التخميد" },
-      { zoom: 1.35, rotate: -20, captionEn: "Spring perch", captionAr: "قاعدة النابض" },
-      { zoom: 1.5, rotate: 40, captionEn: "Top mount", captionAr: "الحامل العلوي" },
+    "highlightsAr": [
+      "ألواح كالسيوم مصممة لحرارة الخليج المرتفعة",
+      "تصميم مغلق بدون صيانة، لا حاجة لإضافة الماء",
+      "أمبير تدوير عالٍ لتشغيل فوري للمحرك"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-sus-1",
-        author: "Saud T.",
-        authorAr: "سعود ت.",
-        rating: 5,
-        dateEn: "2 weeks ago",
-        dateAr: "قبل أسبوعين",
-        titleEn: "Transformed the handling",
-        titleAr: "غيّر القيادة تماماً",
-        bodyEn: "Dialed in a comfortable daily setting and a stiffer weekend setup. Outstanding value.",
-        bodyAr: "ضبطت إعداداً مريحاً للاستخدام اليومي وآخر أكثر صلابة لعطلة الأسبوع. قيمة استثنائية.",
-        verified: true,
+        "labelEn": "Voltage",
+        "labelAr": "الجهد",
+        "value": "12V"
       },
       {
-        id: "rv-sus-2",
-        author: "Nora H.",
-        authorAr: "نورة ح.",
-        rating: 4,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Great but firm on rough roads",
-        titleAr: "ممتاز لكنه صلب على الطرق الوعرة",
-        bodyEn: "Cornering is fantastic. On the softest setting it is still a touch firm over broken tarmac.",
-        bodyAr: "الانعطاف رائع. حتى على أنعم إعداد يبقى صلباً قليلاً على الإسفلت المتشقق.",
-        verified: true,
+        "labelEn": "Capacity",
+        "labelAr": "السعة",
+        "value": "72Ah"
       },
       {
-        id: "rv-sus-3",
-        author: "Bandar Q.",
-        authorAr: "بندر ق.",
-        rating: 5,
-        dateEn: "3 months ago",
-        dateAr: "قبل 3 أشهر",
-        titleEn: "Holds up to the heat",
-        titleAr: "يتحمل الحرارة",
-        bodyEn: "No fade even in midsummer traffic. Build quality feels premium throughout.",
-        bodyAr: "لا ضعف حتى في زحام منتصف الصيف. جودة التصنيع تبدو فاخرة بالكامل.",
-        verified: true,
+        "labelEn": "Cold Cranking",
+        "labelAr": "تيار التدوير البارد",
+        "value": "680 CCA"
       },
+      {
+        "labelEn": "Technology",
+        "labelAr": "التقنية",
+        "value": "Calcium, maintenance-free"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "2 Years"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد الصنع",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-ECU-021",
-    name: "Plug-N-Play Performance ECU Tune Module",
-    nameAr: "وحدة برمجة أداء ECU بالتوصيل المباشر",
-    brand: "Cabler Labs",
-    category: "Engine",
-    priceUSD: 415,
-    compareAtUSD: 499,
-    rating: 4.6,
-    reviews: 73,
-    stock: 14,
-    viewing: 17,
-    fitment: ["MG", "Geely", "Chery", "Changan", "GAC"],
-    badges: ["ISO 9001", "2-Yr Warranty"],
-    accent: "accent",
-    icon: "spark",
-    descriptionEn:
-      "A plug-and-play tuning module that safely unlocks extra power and torque without touching factory wiring. Switchable maps let you toggle between economy and performance on the fly.",
-    descriptionAr:
-      "وحدة برمجة بالتوصيل المباشر تطلق طاقة وعزماً إضافياً بأمان دون المساس بأسلاك المصنع. خرائط قابلة للتبديل تتيح التنقل بين الاقتصاد والأداء فوراً.",
-    highlightsEn: [
-      "Up to +28% torque gain",
-      "Switchable eco / sport maps",
-      "Reversible, leaves no trace",
+    "id": "CB-FIL-AIR",
+    "name": "Cabler Engine Air Filter",
+    "nameAr": "فلتر هواء المحرك من كابلر",
+    "brand": "Cabler",
+    "category": "Filtration",
+    "priceUSD": 14.5,
+    "compareAtUSD": 19,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 48,
+    "viewing": 27,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "زيادة عزم تصل إلى +28%",
-      "خرائط قابلة للتبديل اقتصاد / رياضي",
-      "قابل للإزالة دون أي أثر",
+    "badges": [
+      "OEM-Grade",
+      "Fast-Moving",
+      "Heat-Rated"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "ABS Sealed Housing" },
-      { labelEn: "Power Gain", labelAr: "زيادة القوة", value: "Up to +22%" },
-      { labelEn: "Connection", labelAr: "التوصيل", value: "OEM Plug-and-Play" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Designed in UAE" },
+    "accent": "primary",
+    "icon": "filter",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "High-capacity engine air filter engineered for Gulf desert dust and fine sand. Multi-layer pleated media protects the engine while maintaining strong airflow.",
+    "descriptionAr": "فلتر هواء عالي السعة مصمم لمواجهة غبار وأتربة الخليج والرمال الناعمة. وسط مطوي متعدد الطبقات يحمي المحرك مع الحفاظ على تدفق هواء قوي.",
+    "highlightsEn": [
+      "Captures fine desert dust and sand",
+      "High airflow for full engine power",
+      "Reinforced frame resists heat warping"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Module top", captionAr: "أعلى الوحدة" },
-      { zoom: 1.25, rotate: 20, captionEn: "Harness plug", captionAr: "قابس الضفيرة" },
-      { zoom: 1.4, rotate: -25, captionEn: "Map switch", captionAr: "مفتاح الخرائط" },
+    "highlightsAr": [
+      "يلتقط غبار ورمال الصحراء الناعمة",
+      "تدفق هواء عالٍ لأداء كامل للمحرك",
+      "إطار معزز يقاوم التشوه الحراري"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-ecu-1",
-        author: "Tariq B.",
-        authorAr: "طارق ب.",
-        rating: 5,
-        dateEn: "3 weeks ago",
-        dateAr: "قبل 3 أسابيع",
-        titleEn: "Noticeable mid-range punch",
-        titleAr: "دفعة ملحوظة في المدى المتوسط",
-        bodyEn: "Overtaking is effortless now and fuel economy on eco mode is unchanged. Easy 10-minute install.",
-        bodyAr: "التجاوز أصبح سهلاً والاستهلاك على الوضع الاقتصادي لم يتغير. تركيب سهل في 10 دقائق.",
-        verified: true,
+        "labelEn": "Filter Media",
+        "labelAr": "وسط الترشيح",
+        "value": "Multi-layer pleated paper"
       },
       {
-        id: "rv-ecu-2",
-        author: "Hessa A.",
-        authorAr: "حصة أ.",
-        rating: 4,
-        dateEn: "2 months ago",
-        dateAr: "قبل شهرين",
-        titleEn: "Solid gains, wanted more docs",
-        titleAr: "مكاسب جيدة مع رغبة في دليل أوفى",
-        bodyEn: "Works well on my MG ZS. The instructions could be more detailed for first-timers.",
-        bodyAr: "يعمل جيداً على MG ZS. التعليمات قد تكون أكثر تفصيلاً للمبتدئين.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Engine air intake box"
       },
+      {
+        "labelEn": "Efficiency",
+        "labelAr": "كفاءة الترشيح",
+        "value": "99% @ 5 microns"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "12 months"
+      },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "1 air filter"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد المنشأ",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-FIL-003",
-    name: "High-Flow Performance Air Filter",
-    nameAr: "فلتر هواء أداء عالي التدفق",
-    brand: "K&N FlowMax",
-    category: "Filtration",
-    priceUSD: 64,
-    compareAtUSD: 79,
-    rating: 4.5,
-    reviews: 402,
-    stock: 36,
-    viewing: 12,
-    fitment: ["Toyota", "Nissan", "Lexus", "Hyundai", "Mitsubishi"],
-    badges: ["OEM-Grade", "ISO 9001"],
-    accent: "success",
-    icon: "filter",
-    descriptionEn:
-      "A washable, reusable high-flow air filter that boosts intake airflow while trapping fine GCC desert dust. One filter lasts the life of your car with periodic cleaning.",
-    descriptionAr:
-      "فلتر هواء عالي التدفق قابل للغسل وإعادة الاستخدام يزيد تدفق الهواء مع حجز غبار الصحراء الدقيق. فلتر واحد يدوم طوال عمر السيارة مع التنظيف الدوري.",
-    highlightsEn: [
-      "Washable & reusable design",
-      "Up to 50% more airflow",
-      "Drop-in OEM replacement",
+    "id": "CB-FIL-CAB",
+    "name": "Cabler Cabin AC Filter",
+    "nameAr": "فلتر مكيف المقصورة من كابلر",
+    "brand": "Cabler",
+    "category": "Filtration",
+    "priceUSD": 11,
+    "compareAtUSD": null,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 55,
+    "viewing": 31,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "تصميم قابل للغسل وإعادة الاستخدام",
-      "تدفق هواء أكبر يصل إلى 50%",
-      "بديل مباشر لفلتر المصنع",
+    "badges": [
+      "OEM-Grade",
+      "Fast-Moving",
+      "2-Yr Warranty"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "Cotton Gauze, 4-Layer" },
-      { labelEn: "Filtration", labelAr: "الترشيح", value: "99% @ 5 microns" },
-      { labelEn: "Service Life", labelAr: "عمر الخدمة", value: "Lifetime (washable)" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "Million-Mile" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in USA" },
+    "accent": "accent",
+    "icon": "filter",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Activated-carbon cabin filter that blocks dust, pollen and odors for cleaner AC air. Keeps the cabin fresh during long, dusty Gulf summers.",
+    "descriptionAr": "فلتر مقصورة بالكربون المنشط يحجب الغبار وحبوب اللقاح والروائح لهواء مكيف أنقى. يحافظ على انتعاش المقصورة خلال صيف الخليج الطويل والمغبر.",
+    "highlightsEn": [
+      "Activated carbon removes odors",
+      "Blocks dust, sand and pollen",
+      "Improves AC airflow and cooling"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Filter face", captionAr: "وجه الفلتر" },
-      { zoom: 1.3, rotate: 22, captionEn: "Pleat detail", captionAr: "تفاصيل الطيات" },
-      { zoom: 1.45, rotate: -18, captionEn: "Sealing edge", captionAr: "حافة الإحكام" },
+    "highlightsAr": [
+      "كربون منشط يزيل الروائح",
+      "يحجب الغبار والرمل وحبوب اللقاح",
+      "يحسن تدفق المكيف والتبريد"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-fil3-1",
-        author: "Omar F.",
-        authorAr: "عمر ف.",
-        rating: 5,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Cleaner throttle response",
-        titleAr: "استجابة دواسة أنظف",
-        bodyEn: "Throttle feels crisper and I love that I can just wash it instead of buying replacements.",
-        bodyAr: "الدواسة أصبحت أكثر حدة وأحب أنه يمكنني غسله بدلاً من شراء بدائل.",
-        verified: true,
+        "labelEn": "Filter Media",
+        "labelAr": "وسط الترشيح",
+        "value": "Activated carbon + non-woven"
       },
       {
-        id: "rv-fil3-2",
-        author: "Layla M.",
-        authorAr: "ليلى م.",
-        rating: 4,
-        dateEn: "5 weeks ago",
-        dateAr: "قبل 5 أسابيع",
-        titleEn: "Good but needs regular cleaning",
-        titleAr: "جيد لكنه يحتاج تنظيفاً منتظماً",
-        bodyEn: "Works great in dusty conditions as long as you stay on top of cleaning it.",
-        bodyAr: "يعمل بشكل رائع في الأجواء المغبرة طالما تحافظ على تنظيفه بانتظام.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Behind glove box / HVAC inlet"
       },
+      {
+        "labelEn": "Function",
+        "labelAr": "الوظيفة",
+        "value": "Dust, pollen & odor filtration"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "24 months"
+      },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "1 cabin filter"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد المنشأ",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-FIL-009",
-    name: "Synthetic-Media Engine Oil Filter (3-Pack)",
-    nameAr: "فلتر زيت محرك بوسط صناعي (عبوة 3)",
-    brand: "Bosch Premium",
-    category: "Filtration",
-    priceUSD: 38,
-    compareAtUSD: null,
-    rating: 4.7,
-    reviews: 611,
-    stock: 40,
-    viewing: 8,
-    fitment: ["Toyota", "Nissan", "Lexus", "Hyundai", "Mitsubishi", "Haval"],
-    badges: ["OEM-Grade"],
-    accent: "success",
-    icon: "filter",
-    descriptionEn:
-      "A three-pack of premium oil filters with synthetic media for superior contaminant capture and extended drain intervals. Built-in anti-drainback valve protects on cold starts.",
-    descriptionAr:
-      "عبوة من ثلاثة فلاتر زيت فاخرة بوسط صناعي لالتقاط أفضل للملوثات وفترات تغيير أطول. صمام منع الارتداد المدمج يحمي عند التشغيل البارد.",
-    highlightsEn: [
-      "Synthetic high-capacity media",
-      "Anti-drainback valve",
-      "Value 3-pack",
+    "id": "CB-FIL-OIL",
+    "name": "Cabler Engine Oil Filter",
+    "nameAr": "فلتر زيت المحرك من كابلر",
+    "brand": "Cabler",
+    "category": "Filtration",
+    "priceUSD": 8.5,
+    "compareAtUSD": 12,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 60,
+    "viewing": 35,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "وسط صناعي عالي السعة",
-      "صمام منع ارتداد الزيت",
-      "عبوة 3 قطع موفّرة",
+    "badges": [
+      "OEM-Grade",
+      "Fast-Moving",
+      "Heat-Rated"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "Synthetic Blend Media" },
-      { labelEn: "Efficiency", labelAr: "الكفاءة", value: "99.4% @ 20 microns" },
-      { labelEn: "Service Interval", labelAr: "فترة الخدمة", value: "Up to 15,000 km" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "OEM-Grade" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "1 Year" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "3 Filters, 3 O-Rings" },
+    "accent": "success",
+    "icon": "filter",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Spin-on engine oil filter with a built-in anti-drainback valve for reliable cold starts. High-flow media keeps oil clean between service intervals.",
+    "descriptionAr": "فلتر زيت محرك لولبي مزود بصمام منع الرجوع لضمان تشغيل بارد موثوق. وسط ترشيح عالي التدفق يحافظ على نظافة الزيت بين مواعيد الصيانة.",
+    "highlightsEn": [
+      "Anti-drainback valve for cold starts",
+      "High-flow media protects the engine",
+      "Sealed gasket prevents oil leaks"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Filter canister", captionAr: "علبة الفلتر" },
-      { zoom: 1.25, rotate: 30, captionEn: "Gasket seal", captionAr: "إحكام الجوان" },
-      { zoom: 1.4, rotate: -20, captionEn: "Thread base", captionAr: "قاعدة اللولب" },
+    "highlightsAr": [
+      "صمام منع الرجوع لتشغيل بارد سلس",
+      "وسط عالي التدفق يحمي المحرك",
+      "جوان محكم يمنع تسرب الزيت"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-fil9-1",
-        author: "Abdullah N.",
-        authorAr: "عبدالله ن.",
-        rating: 5,
-        dateEn: "2 weeks ago",
-        dateAr: "قبل أسبوعين",
-        titleEn: "OEM quality, better price",
-        titleAr: "جودة المصنع بسعر أفضل",
-        bodyEn: "Three changes sorted for the year. Fit and finish are identical to the dealer part.",
-        bodyAr: "ثلاث تغييرات مؤمنة للسنة. التركيب والجودة مطابقان لقطعة الوكالة.",
-        verified: true,
+        "labelEn": "Filter Type",
+        "labelAr": "نوع الفلتر",
+        "value": "Spin-on full-flow"
       },
       {
-        id: "rv-fil9-2",
-        author: "Reem S.",
-        authorAr: "ريم س.",
-        rating: 5,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Great value pack",
-        titleAr: "عبوة قيّمة جداً",
-        bodyEn: "No leaks, perfect threads, and the three-pack saves a trip every oil change.",
-        bodyAr: "لا تسريب، لوالب مثالية، والعبوة الثلاثية توفر رحلة عند كل تغيير زيت.",
-        verified: true,
+        "labelEn": "Valve",
+        "labelAr": "الصمام",
+        "value": "Anti-drainback + bypass"
       },
       {
-        id: "rv-fil9-3",
-        author: "Majid H.",
-        authorAr: "ماجد ح.",
-        rating: 4,
-        dateEn: "6 weeks ago",
-        dateAr: "قبل 6 أسابيع",
-        titleEn: "Reliable choice",
-        titleAr: "خيار موثوق",
-        bodyEn: "Used these for two changes now with no issues. Solid everyday filter.",
-        bodyAr: "استخدمتها في تغييرين دون أي مشكلة. فلتر يومي ممتاز.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Engine oil filter housing"
       },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "12 months"
+      },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "1 oil filter + seal"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد المنشأ",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-SPK-011",
-    name: "Iridium Spark Plug Set (4)",
-    nameAr: "طقم بواجي إيريديوم (4 قطع)",
-    brand: "NGK Iridium IX",
-    category: "Engine",
-    priceUSD: 56,
-    compareAtUSD: 72,
-    rating: 4.8,
-    reviews: 528,
-    stock: 28,
-    viewing: 15,
-    fitment: ["Chery", "Geely", "MG", "Changan", "Toyota"],
-    badges: ["OEM-Grade", "ISO 9001"],
-    accent: "primary",
-    icon: "spark",
-    image:
-      "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&auto=format&fit=crop",
-    descriptionEn:
-      "A set of four iridium spark plugs with a fine 0.6mm center electrode for a stronger spark, smoother idle, and quicker cold starts. Long service life reduces maintenance.",
-    descriptionAr:
-      "طقم من أربعة بواجي إيريديوم بقطب مركزي رفيع 0.6 ملم لشرارة أقوى وتشغيل أكثر سلاسة وبدء أسرع على البارد. عمر خدمة طويل يقلل الصيانة.",
-    highlightsEn: [
-      "0.6mm iridium center electrode",
-      "Stronger, more stable spark",
-      "Up to 100,000 km service life",
+    "id": "CB-SPK-IRID",
+    "name": "Iridium Spark Plug Set (4-Pack) — 1.4T/1.5T Turbo",
+    "nameAr": "طقم بوجيهات إيريديوم (4 حبات) — لمحركات 1.4T/1.5T تيربو",
+    "brand": "Cabler",
+    "category": "Engine",
+    "priceUSD": 38,
+    "compareAtUSD": 46,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 52,
+    "viewing": 31,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "قطب مركزي إيريديوم 0.6 ملم",
-      "شرارة أقوى وأكثر ثباتاً",
-      "عمر خدمة يصل إلى 100,000 كم",
+    "badges": [
+      "OEM-Grade",
+      "Heat-Rated",
+      "Fast-Moving"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "Iridium Tip" },
-      { labelEn: "Gap", labelAr: "الفجوة", value: "0.8 mm (pre-set)" },
-      { labelEn: "Service Life", labelAr: "عمر الخدمة", value: "Up to 100,000 km" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in Japan" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "4 Plugs" },
+    "accent": "primary",
+    "icon": "spark",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Fine-wire iridium spark plug set engineered for the high cylinder pressures of 1.4T and 1.5T turbocharged engines. Delivers stable ignition, smoother idle, and reliable cold starts in Gulf heat.",
+    "descriptionAr": "طقم بوجيهات إيريديوم بطرف دقيق مصمم لتحمل الضغط العالي في محركات 1.4T و1.5T التيربو. يعطي شرارة ثابتة، تشغيل أنعم، وبدء موثوق حتى في حرارة الخليج.",
+    "highlightsEn": [
+      "0.6mm fine iridium tip for a strong, consistent spark",
+      "Optimized heat range for turbo 1.4T/1.5T engines",
+      "Anti-seize coated threads for easy fitting and removal"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Plug profile", captionAr: "هيكل البوجي" },
-      { zoom: 1.3, rotate: 24, captionEn: "Electrode tip", captionAr: "طرف القطب" },
-      { zoom: 1.45, rotate: -22, captionEn: "Thread detail", captionAr: "تفاصيل اللولب" },
+    "highlightsAr": [
+      "طرف إيريديوم دقيق 0.6 ملم لشرارة قوية وثابتة",
+      "نطاق حراري مناسب لمحركات التيربو 1.4T و1.5T",
+      "أسنان بطلاء مانع للالتصاق لسهولة التركيب والفك"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-spk-1",
-        author: "Salem D.",
-        authorAr: "سالم د.",
-        rating: 5,
-        dateEn: "2 weeks ago",
-        dateAr: "قبل أسبوعين",
-        titleEn: "Idle is silky now",
-        titleAr: "التشغيل أصبح ناعماً",
-        bodyEn: "Smoother idle and the engine starts instantly even in cold mornings. Genuine NGK quality.",
-        bodyAr: "تشغيل أنعم والمحرك يبدأ فوراً حتى في الصباح البارد. جودة NGK أصلية.",
-        verified: true,
+        "labelEn": "Center Electrode",
+        "labelAr": "القطب المركزي",
+        "value": "Iridium, 0.6mm"
       },
       {
-        id: "rv-spk-2",
-        author: "Fatima Z.",
-        authorAr: "فاطمة ز.",
-        rating: 5,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Perfect fit, great price",
-        titleAr: "تركيب مثالي وسعر ممتاز",
-        bodyEn: "Correct gap out of the box and a noticeable improvement in throttle smoothness.",
-        bodyAr: "الفجوة صحيحة من العلبة وتحسن ملحوظ في سلاسة الدواسة.",
-        verified: true,
+        "labelEn": "Heat Range",
+        "labelAr": "النطاق الحراري",
+        "value": "Turbo-rated (1.4T / 1.5T)"
       },
+      {
+        "labelEn": "Gap (Pre-Set)",
+        "labelAr": "فتحة الشرارة (مضبوطة مسبقاً)",
+        "value": "0.8mm"
+      },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "4 spark plugs"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "12 months"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-BAT-005",
-    name: "AGM Deep-Cycle Performance Battery 80Ah",
-    nameAr: "بطارية أداء AGM دورة عميقة 80 أمبير/ساعة",
-    brand: "Varta SilverDyn",
-    category: "Electrical",
-    priceUSD: 198,
-    compareAtUSD: 239,
-    rating: 4.6,
-    reviews: 187,
-    stock: 11,
-    viewing: 19,
-    fitment: ["Toyota", "Nissan", "Lexus", "BYD", "GAC"],
-    badges: ["2-Yr Warranty", "ISO 9001"],
-    accent: "accent",
-    icon: "battery",
-    descriptionEn:
-      "An AGM deep-cycle battery built for high-draw electronics and start-stop systems in extreme GCC heat. Sealed, maintenance-free, and vibration resistant for long life.",
-    descriptionAr:
-      "بطارية AGM ذات دورة عميقة مصممة للإلكترونيات عالية السحب وأنظمة التشغيل والإيقاف في حرارة الخليج الشديدة. مغلقة وخالية من الصيانة ومقاومة للاهتزاز لعمر أطول.",
-    highlightsEn: [
-      "AGM sealed, maintenance-free",
-      "Optimized for start-stop systems",
-      "High heat & vibration resistance",
+    "id": "CB-AC-COMP",
+    "name": "AC Compressor — Heavy-Duty Max-Cooling",
+    "nameAr": "كمبروسر مكيف — تبريد أقصى للعمل الشاق",
+    "brand": "Cabler",
+    "category": "Cooling",
+    "priceUSD": 245,
+    "compareAtUSD": 289,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 18,
+    "viewing": 27,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "GAC"
     ],
-    highlightsAr: [
-      "AGM مغلقة وخالية من الصيانة",
-      "محسّنة لأنظمة التشغيل والإيقاف",
-      "مقاومة عالية للحرارة والاهتزاز",
+    "badges": [
+      "OEM-Grade",
+      "2-Yr Warranty",
+      "Heat-Rated"
     ],
-    specs: [
-      { labelEn: "Capacity", labelAr: "السعة", value: "80 Ah" },
-      { labelEn: "Cold Crank", labelAr: "تيار البدء البارد", value: "800 CCA" },
-      { labelEn: "Technology", labelAr: "التقنية", value: "AGM Sealed" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in Germany" },
+    "accent": "accent",
+    "icon": "pump",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Heavy-duty AC compressor built for constant maximum-cooling duty in Gulf summers. Pre-filled with the correct oil charge and bench-tested for clutch engagement and pressure output.",
+    "descriptionAr": "كمبروسر مكيف للخدمة الشاقة مصمم للعمل على أقصى تبريد بشكل مستمر في صيف الخليج. يأتي معبأً بكمية الزيت الصحيحة ومفحوص لضمان عمل القابض وضغط التبريد.",
+    "highlightsEn": [
+      "Reinforced clutch and bearing for continuous max-cooling load",
+      "Pre-charged with PAG oil — ready to install",
+      "Each unit pressure-tested before packing"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Battery front", captionAr: "واجهة البطارية" },
-      { zoom: 1.25, rotate: 20, captionEn: "Terminal detail", captionAr: "تفاصيل الأقطاب" },
-      { zoom: 1.4, rotate: -18, captionEn: "Handle & label", captionAr: "المقبض والملصق" },
+    "highlightsAr": [
+      "قابض ومحمل معزز لتحمل حمل التبريد الأقصى المستمر",
+      "معبأ مسبقاً بزيت PAG — جاهز للتركيب",
+      "كل قطعة مفحوصة بالضغط قبل التغليف"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-bat-1",
-        author: "Nasser A.",
-        authorAr: "ناصر أ.",
-        rating: 5,
-        dateEn: "3 weeks ago",
-        dateAr: "قبل 3 أسابيع",
-        titleEn: "Cranks strong in the heat",
-        titleAr: "بدء قوي في الحرارة",
-        bodyEn: "Replaced a dead OEM battery and the start is instant even after sitting in 48°C sun.",
-        bodyAr: "استبدلت بطارية مصنع تالفة والبدء فوري حتى بعد الوقوف تحت شمس 48 درجة.",
-        verified: true,
+        "labelEn": "Refrigerant",
+        "labelAr": "غاز التبريد",
+        "value": "R134a compatible"
       },
       {
-        id: "rv-bat-2",
-        author: "Huda K.",
-        authorAr: "هدى ك.",
-        rating: 4,
-        dateEn: "2 months ago",
-        dateAr: "قبل شهرين",
-        titleEn: "Reliable, a bit heavy",
-        titleAr: "موثوقة لكنها ثقيلة قليلاً",
-        bodyEn: "Performs flawlessly. It is heavier than my old battery but that is the AGM tradeoff.",
-        bodyAr: "أداء لا تشوبه شائبة. أثقل من بطاريتي القديمة لكن هذا مقابل تقنية AGM.",
-        verified: true,
+        "labelEn": "Clutch",
+        "labelAr": "القابض",
+        "value": "Electromagnetic, reinforced"
       },
+      {
+        "labelEn": "Oil Charge",
+        "labelAr": "شحنة الزيت",
+        "value": "PAG, pre-filled"
+      },
+      {
+        "labelEn": "Duty Rating",
+        "labelAr": "تصنيف التشغيل",
+        "value": "Continuous max-cooling"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "24 months"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد المنشأ",
+        "value": "OEM-grade aftermarket"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-ALT-018",
-    name: "High-Output 180A Alternator",
-    nameAr: "دينمو عالي الإخراج 180 أمبير",
-    brand: "Denso ProCharge",
-    category: "Electrical",
-    priceUSD: 274,
-    compareAtUSD: null,
-    rating: 4.5,
-    reviews: 64,
-    stock: 5,
-    viewing: 23,
-    fitment: ["Toyota", "Nissan", "Mitsubishi", "Hyundai"],
-    badges: ["OEM-Grade", "2-Yr Warranty"],
-    accent: "success",
-    icon: "battery",
-    descriptionEn:
-      "A 180-amp high-output alternator that keeps the battery charged under the load of audio systems, lights, and accessories. Heavy-duty diodes handle sustained GCC heat.",
-    descriptionAr:
-      "دينمو عالي الإخراج 180 أمبير يبقي البطارية مشحونة تحت حمل أنظمة الصوت والإضاءة والملحقات. ثنائيات شاقة تتحمل حرارة الخليج المستمرة.",
-    highlightsEn: [
-      "180A high-output rating",
-      "Heavy-duty rectifier diodes",
-      "Direct OEM-fit pulley",
+    "id": "CB-COOL-RAD",
+    "name": "Radiator with Integrated Water Pump Assembly",
+    "nameAr": "رديتر مع طرمبة ماء مدمجة",
+    "brand": "Cabler",
+    "category": "Cooling",
+    "priceUSD": 198,
+    "compareAtUSD": null,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 14,
+    "viewing": 22,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "GAC"
     ],
-    highlightsAr: [
-      "إخراج عالي 180 أمبير",
-      "ثنائيات تقويم شاقة",
-      "بكرة مطابقة لمواصفات المصنع",
+    "badges": [
+      "OEM-Grade",
+      "2-Yr Warranty",
+      "Heat-Rated"
     ],
-    specs: [
-      { labelEn: "Output", labelAr: "الإخراج", value: "180 A" },
-      { labelEn: "Voltage", labelAr: "الجهد", value: "12 V" },
-      { labelEn: "Pulley", labelAr: "البكرة", value: "6-Rib Clutch" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "OEM-Grade" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in Japan" },
+    "accent": "success",
+    "icon": "pump",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Complete cooling solution pairing an aluminum-core radiator with a matched water pump for full coolant circulation. Sized for high ambient temperatures to keep engine temps stable in stop-and-go Gulf traffic.",
+    "descriptionAr": "حل تبريد متكامل يجمع رديتر بقلب ألمنيوم مع طرمبة ماء متوافقة لدوران كامل لسائل التبريد. مصمم لتحمل درجات الحرارة العالية للحفاظ على ثبات حرارة المحرك في زحمة الخليج.",
+    "highlightsEn": [
+      "Aluminum core with high-density fins for fast heat rejection",
+      "Matched water pump for balanced coolant flow",
+      "Leak-tested seals rated for high-heat operation"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Alternator body", captionAr: "جسم الدينمو" },
-      { zoom: 1.3, rotate: 26, captionEn: "Pulley side", captionAr: "جانب البكرة" },
-      { zoom: 1.45, rotate: -20, captionEn: "Connector plug", captionAr: "قابس التوصيل" },
+    "highlightsAr": [
+      "قلب ألمنيوم بزعانف عالية الكثافة لتبريد أسرع",
+      "طرمبة ماء متوافقة لتدفق متوازن لسائل التبريد",
+      "جوانات مفحوصة ضد التسريب ومصممة للحرارة العالية"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-alt-1",
-        author: "Rashid M.",
-        authorAr: "راشد م.",
-        rating: 5,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "No more dimming lights",
-        titleAr: "لا مزيد من خفوت الأضواء",
-        bodyEn: "Runs my upgraded sound system without any voltage drop. Bolted right in.",
-        bodyAr: "يشغّل نظام الصوت المطور دون أي انخفاض في الجهد. تركيب مباشر.",
-        verified: true,
+        "labelEn": "Core Material",
+        "labelAr": "مادة القلب",
+        "value": "Aluminum"
       },
       {
-        id: "rv-alt-2",
-        author: "Aisha B.",
-        authorAr: "عائشة ب.",
-        rating: 4,
-        dateEn: "2 months ago",
-        dateAr: "قبل شهرين",
-        titleEn: "Strong charging, pricey",
-        titleAr: "شحن قوي لكنه مكلف",
-        bodyEn: "Charging is rock solid. A little expensive but the Denso reliability is worth it.",
-        bodyAr: "الشحن ثابت تماماً. مكلف قليلاً لكن موثوقية دينسو تستحق.",
-        verified: true,
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "Radiator + water pump + gaskets"
       },
+      {
+        "labelEn": "Tanks",
+        "labelAr": "الخزانات",
+        "value": "Reinforced composite"
+      },
+      {
+        "labelEn": "Heat Rating",
+        "labelAr": "تحمل الحرارة",
+        "value": "High-ambient (Gulf-spec)"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "24 months"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-BLT-022",
-    name: "Reinforced Timing Belt Kit w/ Tensioner",
-    nameAr: "طقم سير توقيت معزز مع شدّاد",
-    brand: "Gates RacingLine",
-    category: "Drivetrain",
-    priceUSD: 142,
-    compareAtUSD: 169,
-    rating: 4.7,
-    reviews: 139,
-    stock: 17,
-    viewing: 10,
-    fitment: ["Chery", "Geely", "Changan", "Hyundai", "Mitsubishi"],
-    badges: ["OEM-Grade", "ISO 9001"],
-    accent: "primary",
-    icon: "belt",
-    descriptionEn:
-      "A complete timing belt kit with a reinforced HNBR belt, tensioner, and idler pulleys for precise valve timing and quiet running. Everything needed for a full service in one box.",
-    descriptionAr:
-      "طقم سير توقيت كامل بسير HNBR معزز وشدّاد وبكرات توجيه لضبط توقيت دقيق للصمامات وتشغيل هادئ. كل ما يلزم لخدمة كاملة في علبة واحدة.",
-    highlightsEn: [
-      "Reinforced HNBR belt",
-      "Includes tensioner & idlers",
-      "Complete service kit",
+    "id": "CB-SUS-SHOCK",
+    "name": "Front Shock Absorber Strut Pair",
+    "nameAr": "زوج مساعدات أمامية (كومبليت)",
+    "brand": "Cabler",
+    "category": "Suspension",
+    "priceUSD": 89,
+    "compareAtUSD": 109,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 34,
+    "viewing": 22,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "سير HNBR معزز",
-      "يشمل الشدّاد وبكرات التوجيه",
-      "طقم خدمة كامل",
+    "badges": [
+      "OEM-Grade",
+      "2-Yr Warranty",
+      "Fast-Moving"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "HNBR Reinforced Rubber" },
-      { labelEn: "Teeth", labelAr: "الأسنان", value: "141T" },
-      { labelEn: "Service Interval", labelAr: "فترة الخدمة", value: "Up to 100,000 km" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "Belt, Tensioner, 2 Idlers" },
+    "accent": "primary",
+    "icon": "suspension",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Gas-charged front strut pair engineered for a controlled ride and steady handling on GCC roads. Twin-tube design with consistent damping from cold mornings to summer heat.",
+    "descriptionAr": "زوج مساعدات أمامية بضغط الغاز مصمم لراحة أعلى وثبات في القيادة على طرق الخليج. تصميم ثنائي الأنبوب يحافظ على أداء التخميد في البرودة وحرارة الصيف.",
+    "highlightsEn": [
+      "Gas-charged twin-tube for stable damping",
+      "Sold as a matched front pair",
+      "Heat-tolerant seals for Gulf climate"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Belt & pulleys", captionAr: "السير والبكرات" },
-      { zoom: 1.25, rotate: 22, captionEn: "Tensioner", captionAr: "الشدّاد" },
-      { zoom: 1.4, rotate: -24, captionEn: "Tooth profile", captionAr: "شكل الأسنان" },
+    "highlightsAr": [
+      "تصميم ثنائي الأنبوب بضغط الغاز لتخميد ثابت",
+      "يُباع كزوج أمامي متطابق",
+      "حشوات مقاومة لحرارة الخليج"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-blt-1",
-        author: "Waleed S.",
-        authorAr: "وليد س.",
-        rating: 5,
-        dateEn: "3 weeks ago",
-        dateAr: "قبل 3 أسابيع",
-        titleEn: "Everything in one box",
-        titleAr: "كل شيء في علبة واحدة",
-        bodyEn: "Belt, tensioner, idlers all included and the engine runs noticeably quieter after the swap.",
-        bodyAr: "السير والشدّاد والبكرات كلها مرفقة والمحرك أصبح أهدأ بوضوح بعد التغيير.",
-        verified: true,
+        "labelEn": "Type",
+        "labelAr": "النوع",
+        "value": "Gas-charged twin-tube"
       },
       {
-        id: "rv-blt-2",
-        author: "Mona A.",
-        authorAr: "منى أ.",
-        rating: 4,
-        dateEn: "2 months ago",
-        dateAr: "قبل شهرين",
-        titleEn: "Quality kit",
-        titleAr: "طقم عالي الجودة",
-        bodyEn: "Gates quality is obvious. My mechanic said it fit perfectly with no adjustments.",
-        bodyAr: "جودة Gates واضحة. قال الميكانيكي إنه تطابق تماماً دون تعديلات.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Front axle (left + right)"
       },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "2 struts (pair)"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "2 years"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد الصنع",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-LGT-006",
-    name: "LED Matrix Headlight Upgrade Pair",
-    nameAr: "زوج كشافات أمامية LED مصفوفة مطورة",
-    brand: "Osram NightBreaker",
-    category: "Lighting",
-    priceUSD: 311,
-    compareAtUSD: 379,
-    rating: 4.6,
-    reviews: 245,
-    stock: 8,
-    viewing: 41,
-    fitment: ["MG", "Haval", "Geely", "GAC", "BYD"],
-    badges: ["2-Yr Warranty", "Track-Tested"],
-    accent: "accent",
-    icon: "light",
-    descriptionEn:
-      "A pair of LED matrix headlights delivering crisp 6000K white light and a precise beam pattern for safer night driving. Plug-and-play with built-in canbus error cancellers.",
-    descriptionAr:
-      "زوج من الكشافات الأمامية LED المصفوفة يقدم ضوءاً أبيض نقياً 6000 كلفن ونمط شعاع دقيق لقيادة ليلية أكثر أماناً. تركيب مباشر مع موازنات أخطاء كانباس مدمجة.",
-    highlightsEn: [
-      "6000K crisp white output",
-      "Plug-and-play canbus ready",
-      "Precise cutoff beam pattern",
+    "id": "CB-SUS-ARM",
+    "name": "Lower Control Arm & Bushing Kit",
+    "nameAr": "طقم مقص سفلي مع الجلب",
+    "brand": "Cabler",
+    "category": "Suspension",
+    "priceUSD": 64,
+    "compareAtUSD": 79,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 28,
+    "viewing": 17,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Haval",
+      "Chery",
+      "GAC"
     ],
-    highlightsAr: [
-      "ضوء أبيض نقي 6000 كلفن",
-      "تركيب مباشر متوافق مع كانباس",
-      "نمط شعاع بحد قطع دقيق",
+    "badges": [
+      "OEM-Grade",
+      "2-Yr Warranty"
     ],
-    specs: [
-      { labelEn: "Color Temp", labelAr: "درجة اللون", value: "6000 K" },
-      { labelEn: "Lumens", labelAr: "اللومن", value: "12,000 lm / pair" },
-      { labelEn: "Connection", labelAr: "التوصيل", value: "Plug-and-Play, Canbus" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ECE Approved" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "2 Headlights, 2 Adapters" },
+    "accent": "accent",
+    "icon": "suspension",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Complete lower control arm with pre-pressed bushings and integrated ball joint, ready to bolt on. Restores precise steering and eliminates front-end knocking.",
+    "descriptionAr": "مقص سفلي كامل مع جلب مركبة مسبقًا وكرة عمود مدمجة، جاهز للتركيب مباشرة. يعيد دقة التوجيه ويُنهي أصوات الطقطقة في المقدمة.",
+    "highlightsEn": [
+      "Bushings and ball joint pre-installed",
+      "Stamped-steel arm for durability",
+      "Direct bolt-on replacement"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Lens front", captionAr: "واجهة العدسة" },
-      { zoom: 1.3, rotate: 25, captionEn: "Reflector array", captionAr: "مصفوفة العاكس" },
-      { zoom: 1.45, rotate: -20, captionEn: "Heat sink", captionAr: "مشتت الحرارة" },
-      { zoom: 1.2, rotate: 40, captionEn: "Connector", captionAr: "الموصّل" },
+    "highlightsAr": [
+      "الجلب وكرة العمود مركّبة مسبقًا",
+      "ذراع من الفولاذ المضغوط لمتانة أعلى",
+      "تركيب مباشر بدون تعديل"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-lgt-1",
-        author: "Hamad R.",
-        authorAr: "حمد ر.",
-        rating: 5,
-        dateEn: "2 weeks ago",
-        dateAr: "قبل أسبوعين",
-        titleEn: "Night driving transformed",
-        titleAr: "قيادة ليلية مختلفة تماماً",
-        bodyEn: "The beam is wide and bright with a clean cutoff that does not blind oncoming traffic.",
-        bodyAr: "الشعاع واسع وساطع بحد قطع نظيف لا يبهر السيارات القادمة.",
-        verified: true,
+        "labelEn": "Material",
+        "labelAr": "الخامة",
+        "value": "Stamped steel arm, rubber bushings"
       },
       {
-        id: "rv-lgt-2",
-        author: "Sara T.",
-        authorAr: "سارة ت.",
-        rating: 4,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Bright, minor fitment tweak",
-        titleAr: "ساطعة مع تعديل تركيب بسيط",
-        bodyEn: "Hugely brighter than stock. Needed a small adapter tweak on my GAC but worth it.",
-        bodyAr: "أسطع بكثير من الأصلية. احتجت تعديل محول بسيط على GAC لكنها تستحق.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Front lower (per side)"
       },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "1 control arm + bushings + ball joint"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "2 years"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد الصنع",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-TIR-015",
-    name: "UHP Summer Performance Tire 245/40R19",
-    nameAr: "إطار أداء صيفي فائق 245/40R19",
-    brand: "Michelin PilotSport",
-    category: "Tires",
-    priceUSD: 246,
-    compareAtUSD: null,
-    rating: 4.9,
-    reviews: 332,
-    stock: 22,
-    viewing: 27,
-    fitment: ["Toyota", "Nissan", "Lexus", "Hyundai", "BYD"],
-    badges: ["Track-Tested", "ISO 9001"],
-    accent: "primary",
-    icon: "tire",
-    image:
-      "https://images.unsplash.com/photo-1526726538690-5cbf956ae2fd?w=600&auto=format&fit=crop",
-    descriptionEn:
-      "An ultra-high-performance summer tire with a hybrid compound that grips hard in the heat and stays planted through fast corners. Engineered for precise steering and short braking.",
-    descriptionAr:
-      "إطار أداء فائق صيفي بخلطة هجينة تتماسك بقوة في الحرارة وتبقى ثابتة في المنعطفات السريعة. مصمم لتوجيه دقيق ومسافة فرملة أقصر.",
-    highlightsEn: [
-      "Hybrid high-grip compound",
-      "Stiff sidewall for precise steering",
-      "Short dry braking distances",
+    "id": "CB-LGT-HEAD",
+    "name": "LED Headlight Assembly Unit",
+    "nameAr": "وحدة شمعة أمامية LED",
+    "brand": "Cabler",
+    "category": "Lighting",
+    "priceUSD": 135,
+    "compareAtUSD": 169,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 19,
+    "viewing": 31,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "خلطة هجينة عالية التماسك",
-      "جدار جانبي صلب لتوجيه دقيق",
-      "مسافة فرملة قصيرة على الجاف",
+    "badges": [
+      "OEM-Grade",
+      "Heat-Rated",
+      "Fast-Moving"
     ],
-    specs: [
-      { labelEn: "Size", labelAr: "المقاس", value: "245/40 R19" },
-      { labelEn: "Load / Speed", labelAr: "الحمل / السرعة", value: "98Y" },
-      { labelEn: "Treadwear", labelAr: "تآكل المداس", value: "300 AA A" },
-      { labelEn: "Season", labelAr: "الموسم", value: "Summer UHP" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in France" },
+    "accent": "success",
+    "icon": "light",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Plug-and-play LED headlight assembly with crisp white output and a sharp beam cutoff for safe night driving. Sealed housing resists dust and humidity.",
+    "descriptionAr": "وحدة شمعة أمامية LED بتركيب مباشر (بلَق آند بلاي) بإضاءة بيضاء واضحة وحد قطع دقيق للرؤية الليلية الآمنة. هيكل محكم يقاوم الغبار والرطوبة.",
+    "highlightsEn": [
+      "Plug-and-play OEM-style connector",
+      "Bright white beam with clean cutoff",
+      "Sealed against dust and humidity"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Tread pattern", captionAr: "نقش المداس" },
-      { zoom: 1.3, rotate: 24, captionEn: "Sidewall", captionAr: "الجدار الجانبي" },
-      { zoom: 1.45, rotate: -22, captionEn: "Shoulder block", captionAr: "كتلة الكتف" },
+    "highlightsAr": [
+      "موصل أصلي بتركيب مباشر",
+      "شعاع أبيض ساطع بحد قطع نظيف",
+      "محكم ضد الغبار والرطوبة"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-tir-1",
-        author: "Turki A.",
-        authorAr: "تركي أ.",
-        rating: 5,
-        dateEn: "3 weeks ago",
-        dateAr: "قبل 3 أسابيع",
-        titleEn: "Glued to the road",
-        titleAr: "ملتصق بالطريق",
-        bodyEn: "Incredible grip even on hot asphalt. Steering response is razor sharp now.",
-        bodyAr: "تماسك مذهل حتى على الإسفلت الساخن. استجابة التوجيه أصبحت حادة جداً.",
-        verified: true,
+        "labelEn": "Light Source",
+        "labelAr": "مصدر الإضاءة",
+        "value": "Integrated LED"
       },
       {
-        id: "rv-tir-2",
-        author: "Latifa M.",
-        authorAr: "لطيفة م.",
-        rating: 5,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Quiet and confident",
-        titleAr: "هادئ وواثق",
-        bodyEn: "Quieter than I expected for a UHP tire and braking is noticeably shorter.",
-        bodyAr: "أهدأ مما توقعت لإطار أداء فائق والفرملة أقصر بوضوح.",
-        verified: true,
+        "labelEn": "Color Temperature",
+        "labelAr": "درجة حرارة اللون",
+        "value": "6000K white"
       },
       {
-        id: "rv-tir-3",
-        author: "Ziad K.",
-        authorAr: "زياد ك.",
-        rating: 5,
-        dateEn: "2 months ago",
-        dateAr: "قبل شهرين",
-        titleEn: "Best tire I have owned",
-        titleAr: "أفضل إطار امتلكته",
-        bodyEn: "Worth the premium. Cornering confidence is on another level versus my old tires.",
-        bodyAr: "يستحق سعره. الثقة في المنعطفات بمستوى آخر مقارنة بإطاراتي القديمة.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Front headlight (per side)"
       },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "1 headlight assembly"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "2 years"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد الصنع",
+        "value": "China"
+      }
     ],
+    "gallery": [],
+    "reviewList": []
   },
   {
-    id: "MR-EXH-019",
-    name: "Cat-Back Stainless Sport Exhaust System",
-    nameAr: "نظام عادم رياضي ستانلس ستيل كات-باك",
-    brand: "Akrapovic Slip-On",
-    category: "Exhaust",
-    priceUSD: 874,
-    compareAtUSD: 999,
-    rating: 4.8,
-    reviews: 88,
-    stock: 4,
-    viewing: 49,
-    fitment: ["Haval", "MG", "Geely", "Changan"],
-    badges: ["OEM-Grade", "Track-Tested", "2-Yr Warranty"],
-    accent: "accent",
-    icon: "exhaust",
-    descriptionEn:
-      "A mandrel-bent T304 stainless cat-back exhaust that frees up flow for a deeper, sportier note and modest power gains. Bolt-on fitment with a refined, drone-free tone.",
-    descriptionAr:
-      "نظام عادم كات-باك من الستانلس T304 منحني بالمندريل يحرر التدفق لصوت أعمق وأكثر رياضية مع مكاسب قوة معتدلة. تركيب مباشر بنغمة راقية خالية من الرنين المزعج.",
-    highlightsEn: [
-      "T304 mandrel-bent stainless",
-      "Deeper sport tone, no drone",
-      "Bolt-on cat-back fitment",
+    "id": "CB-ENG-BELT",
+    "name": "Serpentine Drive Belt",
+    "nameAr": "سير الدينمو (السير المتعرج)",
+    "brand": "Cabler",
+    "category": "Engine",
+    "priceUSD": 22,
+    "compareAtUSD": null,
+    "rating": 0,
+    "reviews": 0,
+    "stock": 52,
+    "viewing": 14,
+    "fitment": [
+      "Changan",
+      "MG",
+      "Geely",
+      "Jetour",
+      "Haval",
+      "Chery",
+      "BYD",
+      "GAC"
     ],
-    highlightsAr: [
-      "ستانلس T304 منحني بالمندريل",
-      "نغمة رياضية أعمق بلا رنين",
-      "تركيب مباشر كات-باك",
+    "badges": [
+      "OEM-Grade",
+      "Heat-Rated",
+      "Fast-Moving"
     ],
-    specs: [
-      { labelEn: "Material", labelAr: "الخامة", value: "T304 Stainless Steel" },
-      { labelEn: "Pipe Diameter", labelAr: "قطر الأنبوب", value: "2.5 in" },
-      { labelEn: "Tips", labelAr: "الأطراف", value: "Dual Carbon-Tipped" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "TUV Compliant" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Origin", labelAr: "المنشأ", value: "Made in Slovenia" },
+    "accent": "primary",
+    "icon": "belt",
+    "image": "/part-placeholder.svg",
+    "descriptionEn": "Multi-rib serpentine belt made from heat-resistant EPDM rubber for quiet, slip-free power to the alternator, A/C and pumps. Built to last in high-temperature Gulf conditions.",
+    "descriptionAr": "سير متعدد الأضلاع مصنوع من مطاط EPDM المقاوم للحرارة لنقل قدرة هادئ وبدون انزلاق للدينمو والمكيف والطلمبات. مصمم ليتحمل أجواء الخليج الحارة.",
+    "highlightsEn": [
+      "Heat-resistant EPDM construction",
+      "Multi-rib design for slip-free grip",
+      "Quiet, vibration-damping operation"
     ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Muffler & tips", captionAr: "الكاتم والأطراف" },
-      { zoom: 1.3, rotate: 26, captionEn: "Mid pipe", captionAr: "الأنبوب الأوسط" },
-      { zoom: 1.45, rotate: -20, captionEn: "Tip detail", captionAr: "تفاصيل الطرف" },
+    "highlightsAr": [
+      "تركيب من مطاط EPDM مقاوم للحرارة",
+      "تصميم متعدد الأضلاع لمنع الانزلاق",
+      "تشغيل هادئ يقلل الاهتزاز"
     ],
-    reviewList: [
+    "specs": [
       {
-        id: "rv-exh-1",
-        author: "Fahad N.",
-        authorAr: "فهد ن.",
-        rating: 5,
-        dateEn: "2 weeks ago",
-        dateAr: "قبل أسبوعين",
-        titleEn: "Sounds incredible",
-        titleAr: "صوت رائع",
-        bodyEn: "Deep and aggressive under throttle but calm and drone-free on the highway. Build is flawless.",
-        bodyAr: "عميق وعدواني عند الضغط لكنه هادئ بلا رنين على الطريق السريع. التصنيع مثالي.",
-        verified: true,
+        "labelEn": "Material",
+        "labelAr": "الخامة",
+        "value": "EPDM rubber"
       },
       {
-        id: "rv-exh-2",
-        author: "Dana S.",
-        authorAr: "دانة س.",
-        rating: 4,
-        dateEn: "1 month ago",
-        dateAr: "قبل شهر",
-        titleEn: "Premium quality, premium price",
-        titleAr: "جودة فاخرة بسعر فاخر",
-        bodyEn: "Stainless finish is gorgeous and it bolted right up. Pricey but it is Akrapovic.",
-        bodyAr: "لمسة الستانلس رائعة والتركيب مباشر. مكلف لكنه أكرابوفيتش.",
-        verified: true,
-      },
-    ],
-  },
-  {
-    id: "MR-PMP-024",
-    name: "Performance Aluminum Water Pump",
-    nameAr: "طرمبة ماء ألمنيوم عالية الأداء",
-    brand: "Aisin ProCool",
-    category: "Cooling",
-    priceUSD: 168,
-    compareAtUSD: 199,
-    rating: 4.6,
-    reviews: 117,
-    stock: 13,
-    viewing: 16,
-    fitment: ["Chery", "Geely", "MG", "Toyota", "Nissan"],
-    badges: ["OEM-Grade", "ISO 9001"],
-    accent: "success",
-    icon: "pump",
-    descriptionEn:
-      "A high-flow aluminum water pump with a forged impeller and sealed bearing that holds engine temperatures stable under sustained load and Gulf heat. Direct-fit replacement with gasket included.",
-    descriptionAr:
-      "طرمبة ماء من الألمنيوم عالية التدفق بمروحة مطروقة ومحمل محكم تحافظ على ثبات حرارة المحرك تحت الحمل المستمر وحرارة الخليج. بديل مباشر التركيب مع جوان مرفق.",
-    highlightsEn: [
-      "Forged high-flow impeller",
-      "Stable temps under sustained load",
-      "Direct-fit with gasket included",
-    ],
-    highlightsAr: [
-      "مروحة مطروقة عالية التدفق",
-      "حرارة ثابتة تحت الحمل المستمر",
-      "تركيب مباشر مع جوان مرفق",
-    ],
-    specs: [
-      { labelEn: "Flow Rate", labelAr: "معدل التدفق", value: "+22% vs OEM" },
-      { labelEn: "Material", labelAr: "الخامة", value: "Die-Cast Aluminum" },
-      { labelEn: "Impeller", labelAr: "المروحة", value: "Forged 7-Vane" },
-      { labelEn: "Standard", labelAr: "المواصفة", value: "ISO 9001" },
-      { labelEn: "Warranty", labelAr: "الضمان", value: "2 Years" },
-      { labelEn: "Box Contents", labelAr: "محتويات العلبة", value: "Pump, Gasket, Bolts" },
-    ],
-    gallery: [
-      { zoom: 1.0, rotate: 0, captionEn: "Pump housing", captionAr: "جسم الطرمبة" },
-      { zoom: 1.3, rotate: 24, captionEn: "Forged impeller", captionAr: "المروحة المطروقة" },
-      { zoom: 1.45, rotate: -22, captionEn: "Sealed bearing", captionAr: "المحمل المحكم" },
-    ],
-    reviewList: [
-      {
-        id: "rv-pmp-1",
-        author: "Sultan A.",
-        authorAr: "سلطان أ.",
-        rating: 5,
-        dateEn: "3 weeks ago",
-        dateAr: "قبل 3 أسابيع",
-        titleEn: "Temps rock steady in summer",
-        titleAr: "حرارة ثابتة تماماً في الصيف",
-        bodyEn: "Coolant temps hold steady even in peak Gulf heat and stop-go traffic. Easy direct-fit install.",
-        bodyAr: "حرارة سائل التبريد تبقى ثابتة حتى في ذروة حر الخليج وزحام السير. تركيب مباشر سهل.",
-        verified: true,
+        "labelEn": "Type",
+        "labelAr": "النوع",
+        "value": "Multi-rib serpentine"
       },
       {
-        id: "rv-pmp-2",
-        author: "Maha K.",
-        authorAr: "مها ك.",
-        rating: 4,
-        dateEn: "2 months ago",
-        dateAr: "قبل شهرين",
-        titleEn: "Strong flow, quality casting",
-        titleAr: "تدفق قوي وصبّ عالي الجودة",
-        bodyEn: "Noticeably better flow than the OEM unit and the aluminum casting is excellent. Temps dropped a few degrees.",
-        bodyAr: "تدفق أفضل بوضوح من القطعة الأصلية وصبّ الألمنيوم ممتاز. انخفضت الحرارة عدة درجات.",
-        verified: true,
+        "labelEn": "Fitment Position",
+        "labelAr": "موضع التركيب",
+        "value": "Accessory drive"
       },
+      {
+        "labelEn": "Pack Contents",
+        "labelAr": "محتويات العبوة",
+        "value": "1 belt"
+      },
+      {
+        "labelEn": "Warranty",
+        "labelAr": "الضمان",
+        "value": "2 years"
+      },
+      {
+        "labelEn": "Origin",
+        "labelAr": "بلد الصنع",
+        "value": "China"
+      }
     ],
-  },
+    "gallery": [],
+    "reviewList": []
+  }
 ];
-
-/**
- * Discount coupons.
- * @type {Array<{
- *   code: string, type: "percent"|"shipping", value: number,
- *   minUSD: number, label: string, requiresGarage: boolean, exclusive: boolean
- * }>}
- */
 export const COUPONS = [
   {
     code: "MEYAR10",
