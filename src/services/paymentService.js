@@ -121,6 +121,7 @@ export function expiryValid(expiry) {
   const curMonth = now.getMonth() + 1; // 1-12
   if (year < curYear) return false;
   if (year === curYear && month < curMonth) return false;
+  if (year > curYear + 20) return false; // reject absurd far-future expiry
   return true;
 }
 
@@ -129,7 +130,10 @@ export function cvcValid(cvc, number) {
   const s = digits(cvc);
   const brand = number ? detectCardBrand(number) : null;
   if (brand === "amex") return s.length === 4;
-  return s.length === 3 || s.length === 4;
+  // Visa/Mastercard/mada CVCs are exactly 3 digits; tolerate 4 only when the
+  // brand is unknown (could be an unrecognised Amex BIN).
+  if (brand === "unknown") return s.length === 3 || s.length === 4;
+  return s.length === 3;
 }
 
 // Just the card-number rule (Luhn + length), without expiry/cvc.
@@ -231,11 +235,10 @@ export async function createPayment({
     case "stripe":
     case "hyperpay":
     case "tap":
-      // TODO: replace with the provider's tokenize + charge call. Keep the same
-      // { ok, id, status, error } contract so the checkout UI is unchanged.
-      return isCard
-        ? mockChargeCard({ amountUSD, currency, card })
-        : mockAlternative(method);
+      // A real PSP requires a SERVER-SIDE tokenize + charge + webhook (see the
+      // header). Until that endpoint is wired, FAIL LOUDLY — never silently fall
+      // back to the mock, or orders would record as "paid" with no money taken.
+      return { ok: false, error: "provider_not_configured" };
     case "mock":
     default:
       return isCard

@@ -267,7 +267,10 @@ async function fetchProfile(sb, authUser) {
   if (!authUser) return null;
   let name =
     authUser.user_metadata?.name || authUser.email?.split("@")[0] || "";
-  let role = roleForEmail(authUser.email);
+  // DB profiles.role is the SOLE source of truth for admin in cloud mode — never
+  // derive admin from the public, build-time VITE_ADMIN_EMAILS list. Default to
+  // non-admin; only a row that explicitly says role==='admin' elevates.
+  let role = "user";
   try {
     const { data } = await sb
       .from("profiles")
@@ -276,10 +279,10 @@ async function fetchProfile(sb, authUser) {
       .single();
     if (data) {
       if (data.name) name = data.name;
-      if (data.role) role = data.role;
+      if (data.role === "admin") role = "admin";
     }
   } catch {
-    /* fall back to metadata-derived values */
+    /* no profile row / read failed -> stay non-admin */
   }
   return { id: authUser.id, name, email: authUser.email, role };
 }
@@ -303,22 +306,29 @@ const supabaseAdapter = {
       if (error)
         return { ok: false, error: mapSupabaseAuthError(error, AUTH_ERRORS.EMAIL_TAKEN) };
       const authUser = data?.user;
-      const role = roleForEmail(normEmail);
-      // best-effort profile upsert (a DB trigger may also create the row)
-      if (authUser) {
+      // best-effort profile upsert — ONLY when a session exists (auth.uid() must
+      // be set for the RLS insert/update to pass). The DB trigger also creates
+      // the row, and forces role='user' for non-admins server-side regardless.
+      if (authUser && data?.session) {
         try {
           await sb
             .from("profiles")
             .upsert(
-              { id: authUser.id, name: normName, email: normEmail, role },
+              { id: authUser.id, name: normName, email: normEmail, role: "user" },
               { onConflict: "id" }
             );
         } catch {
           /* ignore — trigger may own this */
         }
       }
+      // Email-confirmation enabled => signUp returns NO session. Do NOT flip
+      // isAuthed (that produced the broken, RLS-blocked, bounce-to-login state).
+      // Signal the UI to prompt for confirmation + sign-in instead.
+      if (!data?.session) {
+        return { ok: true, needsConfirmation: true, user: null };
+      }
       const user = authUser
-        ? { id: authUser.id, name: normName, email: normEmail, role }
+        ? { id: authUser.id, name: normName, email: normEmail, role: "user" }
         : null;
       return { ok: true, user };
     } catch {
