@@ -1,0 +1,14 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shock absorber">
+  <circle cx="128" cy="40" r="22" fill="#8B97A4"/>
+  <circle cx="128" cy="40" r="9" fill="#2A323C"/>
+  <rect x="122" y="54" width="12" height="156" fill="#4A555F"/>
+  <g fill="none" stroke="#FF7A1A" stroke-width="11" stroke-linecap="round">
+    <ellipse cx="128" cy="82" rx="42" ry="13"/>
+    <ellipse cx="128" cy="108" rx="42" ry="13"/>
+    <ellipse cx="128" cy="134" rx="42" ry="13"/>
+    <ellipse cx="128" cy="160" rx="42" ry="13"/>
+    <ellipse cx="128" cy="186" rx="42" ry="13"/>
+  </g>
+  <circle cx="128" cy="216" r="20" fill="#8B97A4"/>
+  <circle cx="128" cy="216" r="9" fill="#2A323C"/>
+</svg>
