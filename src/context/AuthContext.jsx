@@ -130,7 +130,7 @@ export function AuthProvider({ children }) {
       const res = await svcSignUp(payload);
       if (res?.ok) {
         if (mountedRef.current && res.user) setUser(res.user);
-        return { ok: true, user: res.user };
+        return { ok: true, user: res.user, needsConfirmation: res.needsConfirmation || false };
       }
       if (mountedRef.current) setError(res?.error || AUTH_ERRORS.STORAGE);
       return { ok: false, error: res?.error || AUTH_ERRORS.STORAGE };

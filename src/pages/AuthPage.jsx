@@ -84,6 +84,7 @@ const STRINGS = {
     // trust / footer
     secureNote: "Demo account — stored locally on this device only.",
     secureNoteCloud: "Secured by encrypted cloud accounts.",
+    confirmEmailNotice: "Account created — check your email to confirm it, then sign in.",
     backHome: "Back to storefront",
     // error codes -> localized messages
     errors: {
@@ -137,6 +138,7 @@ const STRINGS = {
     signInInstead: "سجّل الدخول",
     secureNote: "حساب تجريبي — يُخزَّن محليًا على هذا الجهاز فقط.",
     secureNoteCloud: "حساب آمن محفوظ في السحابة المشفّرة.",
+    confirmEmailNotice: "تم إنشاء الحساب — تحقّق من بريدك لتأكيده ثم سجّل الدخول.",
     backHome: "العودة إلى المتجر",
     errors: {
       [AUTH_ERRORS.NAME_REQUIRED]: "يرجى إدخال اسمك.",
@@ -338,6 +340,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState(false); // submitted at least once
+  const [notice, setNotice] = useState(""); // post-signup confirmation message
 
   const loading = status === "loading";
   const isSignUp = mode === "signup";
@@ -354,6 +357,7 @@ export default function AuthPage() {
   useEffect(() => {
     clearError();
     setTouched(false);
+    setNotice("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
@@ -390,6 +394,12 @@ export default function AuthPage() {
       : await signIn(email, password);
 
     if (result?.ok) {
+      // Email-confirmation flow: no session yet — show a notice instead of
+      // pretending the user is signed in (that caused the bounce-to-login loop).
+      if (result.needsConfirmation) {
+        setNotice(tx.confirmEmailNotice);
+        return;
+      }
       navigate(dest, { replace: true });
     }
   };
@@ -502,6 +512,17 @@ export default function AuthPage() {
               {isSignUp ? tx.signUpSub : tx.signInSub}
             </p>
           </div>
+
+          {/* Post-signup confirmation notice */}
+          {notice && (
+            <div
+              role="status"
+              className="mb-4 flex items-start gap-2 rounded-xl border border-accent/40 bg-accent/10 px-3 py-2.5 text-start text-sm text-accent"
+            >
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{notice}</span>
+            </div>
+          )}
 
           {/* Server-level auth error */}
           {localizedAuthError && (
