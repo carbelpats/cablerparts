@@ -129,6 +129,7 @@ export const PRODUCTS = [
     "accent": "primary",
     "icon": "brake",
     "image": "/parts/brake.svg",
+    "weightKg": 6,
     "descriptionEn": "Full front and rear ceramic brake pad set engineered for quiet, low-dust stopping on Chinese SUVs and sedans. Includes shims and wear sensors where applicable for a clean factory-style fit.",
     "descriptionAr": "طقم كامل من تيل الفرامل السيراميك الأمامي والخلفي مصمم لإيقاف هادئ وأتربة أقل للسيارات الصينية. يشمل العوازل وحساسات التآكل عند الحاجة لتركيب مطابق للمصنع.",
     "highlightsEn": [
@@ -200,6 +201,7 @@ export const PRODUCTS = [
     "accent": "accent",
     "icon": "brake",
     "image": "/parts/brake.svg",
+    "weightKg": 6,
     "descriptionEn": "Pair of vented, anti-corrosion coated brake rotors designed to resist warping under repeated heavy braking. Balanced for smooth, vibration-free stops on GCC roads.",
     "descriptionAr": "زوج من أقراص الفرامل المهواة بطلاء مقاوم للصدأ مصمم لمقاومة الاعوجاج عند الكبح المتكرر الشديد. متوازن لإيقاف سلس بدون اهتزاز على طرقات الخليج.",
     "highlightsEn": [
@@ -277,6 +279,7 @@ export const PRODUCTS = [
     "accent": "success",
     "icon": "battery",
     "image": "/parts/battery.svg",
+    "weightKg": 16,
     "descriptionEn": "Maintenance-free 12V calcium battery built for extreme GCC summer heat with strong cold-cranking power and long service life. Sealed design resists fluid loss in high temperatures for reliable daily starts.",
     "descriptionAr": "بطارية كالسيوم 12 فولت بدون صيانة مصممة لتحمل حرارة صيف الخليج الشديدة مع قدرة تدوير عالية وعمر تشغيلي طويل. تصميم مغلق يقاوم تبخر السائل في درجات الحرارة العالية لتشغيل يومي موثوق.",
     "highlightsEn": [
@@ -354,6 +357,7 @@ export const PRODUCTS = [
     "accent": "primary",
     "icon": "filter",
     "image": "/parts/filter.svg",
+    "weightKg": 0.6,
     "descriptionEn": "High-capacity engine air filter engineered for Gulf desert dust and fine sand. Multi-layer pleated media protects the engine while maintaining strong airflow.",
     "descriptionAr": "فلتر هواء عالي السعة مصمم لمواجهة غبار وأتربة الخليج والرمال الناعمة. وسط مطوي متعدد الطبقات يحمي المحرك مع الحفاظ على تدفق هواء قوي.",
     "highlightsEn": [
@@ -431,6 +435,7 @@ export const PRODUCTS = [
     "accent": "accent",
     "icon": "filter",
     "image": "/parts/filter.svg",
+    "weightKg": 0.6,
     "descriptionEn": "Activated-carbon cabin filter that blocks dust, pollen and odors for cleaner AC air. Keeps the cabin fresh during long, dusty Gulf summers.",
     "descriptionAr": "فلتر مقصورة بالكربون المنشط يحجب الغبار وحبوب اللقاح والروائح لهواء مكيف أنقى. يحافظ على انتعاش المقصورة خلال صيف الخليج الطويل والمغبر.",
     "highlightsEn": [
@@ -508,6 +513,7 @@ export const PRODUCTS = [
     "accent": "success",
     "icon": "filter",
     "image": "/parts/filter.svg",
+    "weightKg": 0.6,
     "descriptionEn": "Spin-on engine oil filter with a built-in anti-drainback valve for reliable cold starts. High-flow media keeps oil clean between service intervals.",
     "descriptionAr": "فلتر زيت محرك لولبي مزود بصمام منع الرجوع لضمان تشغيل بارد موثوق. وسط ترشيح عالي التدفق يحافظ على نظافة الزيت بين مواعيد الصيانة.",
     "highlightsEn": [
@@ -585,6 +591,7 @@ export const PRODUCTS = [
     "accent": "primary",
     "icon": "spark",
     "image": "/parts/spark.svg",
+    "weightKg": 0.4,
     "descriptionEn": "Fine-wire iridium spark plug set engineered for the high cylinder pressures of 1.4T and 1.5T turbocharged engines. Delivers stable ignition, smoother idle, and reliable cold starts in Gulf heat.",
     "descriptionAr": "طقم بوجيهات إيريديوم بطرف دقيق مصمم لتحمل الضغط العالي في محركات 1.4T و1.5T التيربو. يعطي شرارة ثابتة، تشغيل أنعم، وبدء موثوق حتى في حرارة الخليج.",
     "highlightsEn": [
@@ -656,6 +663,7 @@ export const PRODUCTS = [
     "accent": "accent",
     "icon": "pump",
     "image": "/parts/pump.svg",
+    "weightKg": 6,
     "descriptionEn": "Heavy-duty AC compressor built for constant maximum-cooling duty in Gulf summers. Pre-filled with the correct oil charge and bench-tested for clutch engagement and pressure output.",
     "descriptionAr": "كمبروسر مكيف للخدمة الشاقة مصمم للعمل على أقصى تبريد بشكل مستمر في صيف الخليج. يأتي معبأً بكمية الزيت الصحيحة ومفحوص لضمان عمل القابض وضغط التبريد.",
     "highlightsEn": [
@@ -732,6 +740,7 @@ export const PRODUCTS = [
     "accent": "success",
     "icon": "pump",
     "image": "/parts/pump.svg",
+    "weightKg": 6,
     "descriptionEn": "Complete cooling solution pairing an aluminum-core radiator with a matched water pump for full coolant circulation. Sized for high ambient temperatures to keep engine temps stable in stop-and-go Gulf traffic.",
     "descriptionAr": "حل تبريد متكامل يجمع رديتر بقلب ألمنيوم مع طرمبة ماء متوافقة لدوران كامل لسائل التبريد. مصمم لتحمل درجات الحرارة العالية للحفاظ على ثبات حرارة المحرك في زحمة الخليج.",
     "highlightsEn": [
@@ -804,6 +813,7 @@ export const PRODUCTS = [
     "accent": "primary",
     "icon": "suspension",
     "image": "/parts/suspension.svg",
+    "weightKg": 5,
     "descriptionEn": "Gas-charged front strut pair engineered for a controlled ride and steady handling on GCC roads. Twin-tube design with consistent damping from cold mornings to summer heat.",
     "descriptionAr": "زوج مساعدات أمامية بضغط الغاز مصمم لراحة أعلى وثبات في القيادة على طرق الخليج. تصميم ثنائي الأنبوب يحافظ على أداء التخميد في البرودة وحرارة الصيف.",
     "highlightsEn": [
@@ -873,6 +883,7 @@ export const PRODUCTS = [
     "accent": "accent",
     "icon": "suspension",
     "image": "/parts/suspension.svg",
+    "weightKg": 5,
     "descriptionEn": "Complete lower control arm with pre-pressed bushings and integrated ball joint, ready to bolt on. Restores precise steering and eliminates front-end knocking.",
     "descriptionAr": "مقص سفلي كامل مع جلب مركبة مسبقًا وكرة عمود مدمجة، جاهز للتركيب مباشرة. يعيد دقة التوجيه ويُنهي أصوات الطقطقة في المقدمة.",
     "highlightsEn": [
@@ -945,6 +956,7 @@ export const PRODUCTS = [
     "accent": "success",
     "icon": "light",
     "image": "/parts/light.svg",
+    "weightKg": 2.5,
     "descriptionEn": "Plug-and-play LED headlight assembly with crisp white output and a sharp beam cutoff for safe night driving. Sealed housing resists dust and humidity.",
     "descriptionAr": "وحدة شمعة أمامية LED بتركيب مباشر (بلَق آند بلاي) بإضاءة بيضاء واضحة وحد قطع دقيق للرؤية الليلية الآمنة. هيكل محكم يقاوم الغبار والرطوبة.",
     "highlightsEn": [
@@ -1022,6 +1034,7 @@ export const PRODUCTS = [
     "accent": "primary",
     "icon": "belt",
     "image": "/parts/belt.svg",
+    "weightKg": 0.5,
     "descriptionEn": "Multi-rib serpentine belt made from heat-resistant EPDM rubber for quiet, slip-free power to the alternator, A/C and pumps. Built to last in high-temperature Gulf conditions.",
     "descriptionAr": "سير متعدد الأضلاع مصنوع من مطاط EPDM المقاوم للحرارة لنقل قدرة هادئ وبدون انزلاق للدينمو والمكيف والطلمبات. مصمم ليتحمل أجواء الخليج الحارة.",
     "highlightsEn": [
