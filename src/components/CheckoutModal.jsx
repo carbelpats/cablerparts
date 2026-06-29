@@ -24,6 +24,7 @@ import { useGarage } from "../context/GarageContext";
 import { useLang } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { useOrders } from "../context/OrdersContext";
+import { useSettings } from "../context/SettingsContext";
 import { PART_ICONS } from "../lib/partIcons";
 import {
   createPayment,
@@ -39,8 +40,7 @@ import {
 } from "../lib/validation";
 import {
   getShippingMethods,
-  getShippingMethod,
-  estimateDelivery,
+  computeShipping,
 } from "../services/shippingService";
 
 // ---- Localized copy (component-local per project convention) ----------------
@@ -74,7 +74,11 @@ const STRINGS = {
     cityPh: "e.g. Riyadh",
     region: "Region",
     // shipping-method selector
-    shipMethodLabel: "Delivery speed",
+    shipMethodLabel: "Delivery",
+    shipRiyadhTitle: "Same-day in Riyadh",
+    shipRiyadhDesc: "We deliver it to you ourselves, the same day.",
+    shipSmsaTitle: "SMSA delivery",
+    shipSmsaDesc: (kg) => `Shipped via SMSA, billed by weight (≈${kg} kg).`,
     shipEta: (a, b) =>
       a === b ? `${a} business day` : `${a}–${b} business days`,
     // step 3 — payment
@@ -169,7 +173,11 @@ const STRINGS = {
     cityPh: "مثال: الرياض",
     region: "المنطقة",
     // shipping-method selector
-    shipMethodLabel: "سرعة التوصيل",
+    shipMethodLabel: "التوصيل",
+    shipRiyadhTitle: "توصيل نفس اليوم بالرياض",
+    shipRiyadhDesc: "نوصّلها لك بأنفسنا في نفس اليوم.",
+    shipSmsaTitle: "توصيل سمسا",
+    shipSmsaDesc: (kg) => `شحن عبر سمسا، يُحسب بالوزن (~${kg} كجم).`,
     shipEta: (a, b) =>
       a === b ? `يوم عمل واحد` : `${a}–${b} أيام عمل`,
     paymentTitle: "الدفع",
@@ -483,6 +491,7 @@ export default function CheckoutModal() {
   const { hasVehicle, vehicle } = useGarage();
   const { lang, isRTL } = useLang();
   const { user, isAuthed } = useAuth();
+  const { settings } = useSettings();
   const { placeOrder } = useOrders();
   const navigate = useNavigate();
   const tx = STRINGS[lang] || STRINGS.en;
@@ -564,6 +573,26 @@ export default function CheckoutModal() {
 
   // Shipping methods (cost + ETA) shown on the shipping step.
   const shipMethods = useMemo(() => getShippingMethods(), []);
+  // Destination-aware shipping: Riyadh = our own same-day delivery (admin-set
+  // fee or free); elsewhere = SMSA weight-based. Driven by the admin-editable
+  // shipping settings + the cart's total weight.
+  const cartWeightKg = useMemo(
+    () => items.reduce((s, it) => s + (Number(it.weightKg) || 1) * (it.qty || 1), 0),
+    [items]
+  );
+  const liveShip = useMemo(
+    () =>
+      computeShipping({
+        city: form.city,
+        region: region.code,
+        weightKg: cartWeightKg,
+        subtotalUSD,
+        shipping: settings?.shipping,
+      }),
+    [form.city, region.code, cartWeightKg, subtotalUSD, settings]
+  );
+  const effShippingUSD = liveShip.costUSD;
+  const effTotalUSD = Math.max(0, subtotalUSD - discountUSD) + effShippingUSD;
 
   // If the region change removed the selected payment method, fall back to a
   // still-available one (keeps the selector + card gating consistent).
@@ -698,7 +727,7 @@ export default function CheckoutModal() {
         // Pass the chosen method so non-card flows (COD / wallet / BNPL) skip
         // the card processor; card is only sent when the method needs one.
         method: payMethod,
-        amountUSD: totalUSD,
+        amountUSD: effTotalUSD,
         currency: region.currency,
         card: needsCard
           ? {
@@ -725,20 +754,20 @@ export default function CheckoutModal() {
     try {
       // Resolve the chosen shipping tier + a delivery estimate (upper-bound ETA
       // from now). Tracking number is assigned later by the admin (left null).
-      const shippingDef = getShippingMethod(shipMethod);
-      const estimatedDeliveryDate = estimateDelivery(shipMethod, Date.now());
+      const estimatedDeliveryDate =
+        Date.now() + (liveShip.etaDays?.[1] ?? 3) * 24 * 60 * 60 * 1000;
       const order = await placeOrder({
         items,
         subtotalUSD,
         discountUSD,
-        shippingUSD,
-        totalUSD,
+        shippingUSD: effShippingUSD,
+        totalUSD: effTotalUSD,
         paymentId: payment.id,
         // New order lifecycle fields.
         paymentMethod: payMethod,
         paymentStatus: payment.status,
-        shippingMethod: shipMethod,
-        courierProvider: shippingDef.courier,
+        shippingMethod: liveShip.isLocal ? "riyadh_local" : "smsa",
+        courierProvider: liveShip.courier,
         estimatedDeliveryDate,
         contact: {
           name: form.name.trim(),
@@ -767,14 +796,14 @@ export default function CheckoutModal() {
     items,
     subtotalUSD,
     discountUSD,
-    shippingUSD,
-    totalUSD,
+    effShippingUSD,
+    effTotalUSD,
+    liveShip,
     form,
     region,
     tx,
     payMethod,
     needsCard,
-    shipMethod,
   ]);
 
   const goNext = useCallback(() => {
@@ -937,12 +966,12 @@ export default function CheckoutModal() {
           <dt className="font-sans text-sm text-textSecondary">{tx.shipping}</dt>
           <dd
             className={`font-mono text-sm tabular-nums ${
-              shippingUSD === 0
+              effShippingUSD === 0
                 ? "font-semibold text-accent"
                 : "text-textPrimary"
             }`}
           >
-            {shippingUSD === 0 ? tx.free : format(shippingUSD)}
+            {effShippingUSD === 0 ? tx.free : format(effShippingUSD)}
           </dd>
         </div>
         <div className="mt-1 flex items-center justify-between border-t border-border/60 pt-2.5">
@@ -950,7 +979,7 @@ export default function CheckoutModal() {
             {tx.total}
           </dt>
           <dd className="font-display text-xl font-extrabold tabular-nums text-textPrimary">
-            {format(totalUSD)}
+            {format(effTotalUSD)}
           </dd>
         </div>
       </dl>
@@ -1301,65 +1330,33 @@ export default function CheckoutModal() {
                       {/* Shipping-method selector — name/desc/ETA/price per tier.
                           Radiogroup of selectable cards; the chosen id drives the
                           courier + delivery estimate at order placement. */}
-                      <div
-                        role="radiogroup"
-                        aria-label={tx.shipMethodLabel}
-                        className="space-y-2"
-                      >
+                      <div className="space-y-2">
                         <p className="font-sans text-xs font-medium text-textSecondary">
                           {tx.shipMethodLabel}
                         </p>
-                        {shipMethods.map((m) => {
-                          const selected = shipMethod === m.id;
-                          return (
-                            <button
-                              key={m.id}
-                              type="button"
-                              role="radio"
-                              aria-checked={selected}
-                              onClick={() => setShipMethod(m.id)}
-                              className={`flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-start transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
-                                selected
-                                  ? "border-primary/60 bg-primary/5 ring-1 ring-inset ring-primary/30"
-                                  : "border-border bg-surface hover:border-primary/40"
-                              }`}
-                            >
-                              <span
-                                aria-hidden="true"
-                                className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 transition-colors duration-200 ${
-                                  selected
-                                    ? "border-primary"
-                                    : "border-border"
-                                }`}
-                              >
-                                {selected && (
-                                  <span className="h-2 w-2 rounded-full bg-primary" />
-                                )}
+                        <div className="flex items-start gap-3 rounded-xl border border-primary/50 bg-primary/5 px-3.5 py-3">
+                          <span
+                            aria-hidden="true"
+                            className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"
+                          >
+                            <Truck size={17} className="rtl:-scale-x-100" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="font-display text-sm font-bold text-textPrimary">
+                                {liveShip.isLocal ? tx.shipRiyadhTitle : tx.shipSmsaTitle}
                               </span>
-                              <span className="min-w-0 flex-1">
-                                <span className="flex items-center justify-between gap-2">
-                                  <span className="font-display text-sm font-bold text-textPrimary">
-                                    {m.name[lang] || m.name.en}
-                                  </span>
-                                  <span className="shrink-0 font-mono text-xs font-semibold tabular-nums text-textPrimary">
-                                    {m.priceUSD === 0 ? tx.free : format(m.priceUSD)}
-                                  </span>
-                                </span>
-                                <span className="mt-0.5 block font-sans text-[11px] text-textMuted">
-                                  {m.desc[lang] || m.desc.en}
-                                </span>
-                                <span className="mt-1 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-textSecondary">
-                                  <Truck
-                                    size={11}
-                                    aria-hidden="true"
-                                    className="rtl:-scale-x-100"
-                                  />
-                                  {tx.shipEta(m.etaDays[0], m.etaDays[1])}
-                                </span>
+                              <span className="shrink-0 font-mono text-xs font-semibold tabular-nums text-textPrimary">
+                                {effShippingUSD === 0 ? tx.free : format(effShippingUSD)}
                               </span>
-                            </button>
-                          );
-                        })}
+                            </span>
+                            <span className="mt-0.5 block font-sans text-[11px] text-textMuted">
+                              {liveShip.isLocal
+                                ? tx.shipRiyadhDesc
+                                : tx.shipSmsaDesc(liveShip.billableKg)}
+                            </span>
+                          </span>
+                        </div>
                       </div>
                     </fieldset>
                   )}

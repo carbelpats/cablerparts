@@ -38,6 +38,7 @@ import {
   Share2,
   FileText,
   ShieldCheck,
+  Truck,
 } from "lucide-react";
 import { useSettings } from "../../context/SettingsContext";
 import { useLang } from "../../context/LanguageContext";
@@ -63,6 +64,14 @@ const STRINGS = {
     paymentsTitle: "Payment providers",
     paymentsDesc:
       "Order and brand the payment row. Clear a logo to use the built-in badge.",
+    shippingTitle: "Shipping & delivery",
+    shippingDesc:
+      "Riyadh = your own same-day delivery; elsewhere = SMSA by weight. Values in SAR.",
+    shipRiyadhFee: "Riyadh delivery fee (SAR)",
+    shipRiyadhFree: "Make Riyadh delivery free",
+    shipSmsaBase: "SMSA base fee (SAR)",
+    shipSmsaPerKg: "SMSA per-kg fee (SAR)",
+    shipFreeOver: "Free shipping over (SAR · 0 = off)",
     socialTitle: "Social media",
     socialDesc:
       "Full profile URLs. Leave a field empty to hide that icon in the footer.",
@@ -165,6 +174,14 @@ const STRINGS = {
     paymentsTitle: "وسائل الدفع",
     paymentsDesc:
       "رتّب صف وسائل الدفع وخصّصه. امسح الشعار لاستخدام الشارة المدمجة.",
+    shippingTitle: "الشحن والتوصيل",
+    shippingDesc:
+      "الرياض = توصيلك بنفسك نفس اليوم؛ باقي المناطق = سمسا بالوزن. القيم بالريال.",
+    shipRiyadhFee: "رسوم توصيل الرياض (ريال)",
+    shipRiyadhFree: "اجعل توصيل الرياض مجانياً",
+    shipSmsaBase: "أساس رسوم سمسا (ريال)",
+    shipSmsaPerKg: "رسوم سمسا لكل كجم (ريال)",
+    shipFreeOver: "شحن مجاني فوق (ريال · 0 = معطّل)",
     socialTitle: "وسائل التواصل الاجتماعي",
     socialDesc:
       "روابط الحسابات الكاملة. اترك الحقل فارغاً لإخفاء أيقونته في التذييل.",
@@ -537,6 +554,27 @@ export default function AdminSettings() {
       brand: { ...f.brand, useLogoInHero: !f.brand.useLogoInHero },
     }));
 
+  // shipping — fees are stored in USD (app base) but entered in SAR (3.75 peg).
+  const SAR_RATE = 3.75;
+  const setShipFromSAR = (key) => (e) => {
+    const sar = Number(e?.target ? e.target.value : e) || 0;
+    setForm((f) => ({
+      ...f,
+      shipping: {
+        ...(f.shipping || {}),
+        [key]: Math.round((sar / SAR_RATE) * 100) / 100,
+      },
+    }));
+  };
+  const toggleRiyadhFree = () =>
+    setForm((f) => ({
+      ...f,
+      shipping: {
+        ...(f.shipping || {}),
+        riyadhFree: !(f.shipping && f.shipping.riyadhFree),
+      },
+    }));
+
   // payments list editing
   const setProvider = (idx, patch) =>
     setForm((f) => ({
@@ -755,6 +793,70 @@ export default function AdminSettings() {
               />
             </Field>
           </div>
+        </Section>
+
+        {/* SHIPPING */}
+        <Section icon={Truck} title={t.shippingTitle} desc={t.shippingDesc}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t.shipRiyadhFee} htmlFor="set-ship-riyadh">
+              <input
+                id="set-ship-riyadh"
+                type="number"
+                min="0"
+                step="1"
+                dir="ltr"
+                disabled={!!form.shipping?.riyadhFree}
+                value={Math.round((form.shipping?.riyadhFeeUSD ?? 7) * SAR_RATE)}
+                onChange={setShipFromSAR("riyadhFeeUSD")}
+                className={`${inputBase} disabled:opacity-50`}
+              />
+            </Field>
+            <Field label={t.shipFreeOver} htmlFor="set-ship-freeover">
+              <input
+                id="set-ship-freeover"
+                type="number"
+                min="0"
+                step="1"
+                dir="ltr"
+                value={Math.round((form.shipping?.freeOverUSD ?? 0) * SAR_RATE)}
+                onChange={setShipFromSAR("freeOverUSD")}
+                className={inputBase}
+              />
+            </Field>
+            <Field label={t.shipSmsaBase} htmlFor="set-ship-smsabase">
+              <input
+                id="set-ship-smsabase"
+                type="number"
+                min="0"
+                step="1"
+                dir="ltr"
+                value={Math.round((form.shipping?.smsaBaseUSD ?? 7) * SAR_RATE)}
+                onChange={setShipFromSAR("smsaBaseUSD")}
+                className={inputBase}
+              />
+            </Field>
+            <Field label={t.shipSmsaPerKg} htmlFor="set-ship-smsaperkg">
+              <input
+                id="set-ship-smsaperkg"
+                type="number"
+                min="0"
+                step="0.5"
+                dir="ltr"
+                value={Math.round((form.shipping?.smsaPerKgUSD ?? 1.6) * SAR_RATE)}
+                onChange={setShipFromSAR("smsaPerKgUSD")}
+                className={inputBase}
+              />
+            </Field>
+          </div>
+          <label className="mt-3 flex items-center gap-2.5 text-sm text-textSecondary">
+            <input
+              type="checkbox"
+              checked={!!form.shipping?.riyadhFree}
+              onChange={toggleRiyadhFree}
+              className="h-4 w-4 rounded border-border text-primary focus:ring-primary/40"
+            />
+            {t.shipRiyadhFree}
+          </label>
         </Section>
 
         {/* BRAND / HERO */}
