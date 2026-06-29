@@ -63,6 +63,7 @@ const STRINGS = {
     email: "Email address",
     emailPh: "you@example.com",
     phone: "Phone number",
+    phoneCountry: "Country",
     phonePh: "+966 5X XXX XXXX",
     // step 2 — shipping
     shippingTitle: "Shipping address",
@@ -158,6 +159,7 @@ const STRINGS = {
     email: "البريد الإلكتروني",
     emailPh: "you@example.com",
     phone: "رقم الجوال",
+    phoneCountry: "الدولة",
     phonePh: "+966 5X XXX XXXX",
     shippingTitle: "عنوان الشحن",
     shippingForVehicle: (v) => `نشحن قطع سيارتك ${v}.`,
@@ -402,6 +404,16 @@ function MiniThumb({ icon, accent }) {
 }
 
 // ---- Reusable labelled field ------------------------------------------------
+// GCC countries for the phone field — dial code + national-number placeholder.
+const PHONE_COUNTRIES = [
+  { code: "SA", flag: "🇸🇦", dial: "+966", ph: "5XXXXXXXX" },
+  { code: "AE", flag: "🇦🇪", dial: "+971", ph: "5XXXXXXXX" },
+  { code: "KW", flag: "🇰🇼", dial: "+965", ph: "XXXXXXXX" },
+  { code: "QA", flag: "🇶🇦", dial: "+974", ph: "XXXXXXXX" },
+  { code: "BH", flag: "🇧🇭", dial: "+973", ph: "XXXXXXXX" },
+  { code: "OM", flag: "🇴🇲", dial: "+968", ph: "XXXXXXXX" },
+];
+
 function Field({
   id,
   label,
@@ -521,6 +533,10 @@ export default function CheckoutModal() {
   // Selected payment + shipping methods (defaults: card / standard).
   const [payMethod, setPayMethod] = useState("card");
   const [shipMethod, setShipMethod] = useState("standard");
+  // Phone country (GCC) — drives the dial code + validation rule.
+  const [phoneCountry, setPhoneCountry] = useState(() =>
+    PHONE_COUNTRIES.some((c) => c.code === region.code) ? region.code : "SA"
+  );
 
   const setField = useCallback(
     (k) => (v) => setForm((prev) => ({ ...prev, [k]: v })),
@@ -596,7 +612,7 @@ export default function CheckoutModal() {
       e.email = emailRes.error === "required" ? tx.errRequired : tx.errEmail;
 
     // Phone — validatePhone(value, region.code) -> "required" | "format".
-    const phoneRes = validatePhone(form.phone, region.code);
+    const phoneRes = validatePhone(form.phone, phoneCountry);
     if (!phoneRes.ok)
       e.phone = phoneRes.error === "required" ? tx.errRequired : tx.errPhone;
 
@@ -615,7 +631,7 @@ export default function CheckoutModal() {
       else if (!cvcValid(form.cvc, form.card)) e.cvc = tx.errCvc;
     }
     return e;
-  }, [form, tx, region.code, needsCard]);
+  }, [form, tx, region.code, phoneCountry, needsCard]);
 
   // Detected brand for the inline badge near the card-number field.
   const cardBrand = useMemo(() => detectCardBrand(form.card), [form.card]);
@@ -1159,21 +1175,65 @@ export default function CheckoutModal() {
                           ltr
                           error={showErr("email")}
                         />
-                        <Field
-                          id="co-phone"
-                          label={tx.phone}
-                          type="tel"
-                          value={form.phone}
-                          onChange={(v) => {
-                            setField("phone")(v);
-                            markTouched("phone");
-                          }}
-                          placeholder={tx.phonePh}
-                          autoComplete="tel"
-                          inputMode="tel"
-                          ltr
-                          error={showErr("phone")}
-                        />
+                        <div>
+                          <label
+                            htmlFor="co-phone"
+                            className="mb-1.5 block font-sans text-xs font-medium text-textSecondary"
+                          >
+                            {tx.phone}
+                          </label>
+                          <div
+                            dir="ltr"
+                            className={`flex items-stretch overflow-hidden rounded-lg border bg-surface ${
+                              showErr("phone")
+                                ? "border-danger/60"
+                                : "border-border focus-within:border-primary/50"
+                            }`}
+                          >
+                            <select
+                              aria-label={tx.phoneCountry}
+                              value={phoneCountry}
+                              onChange={(e) => {
+                                setPhoneCountry(e.target.value);
+                                markTouched("phone");
+                              }}
+                              className="shrink-0 border-e border-border bg-surfaceElevated px-2 py-2.5 font-mono text-sm text-textPrimary focus:outline-none"
+                            >
+                              {PHONE_COUNTRIES.map((c) => (
+                                <option key={c.code} value={c.code}>
+                                  {c.flag} {c.dial}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              id="co-phone"
+                              type="tel"
+                              inputMode="tel"
+                              autoComplete="tel"
+                              value={form.phone}
+                              onChange={(e) => {
+                                setField("phone")(
+                                  e.target.value.replace(/\D/g, "").replace(/^0+/, "")
+                                );
+                                markTouched("phone");
+                              }}
+                              placeholder={
+                                (PHONE_COUNTRIES.find((c) => c.code === phoneCountry) || {}).ph ||
+                                "5XXXXXXXX"
+                              }
+                              aria-invalid={!!showErr("phone")}
+                              className="w-full bg-transparent px-3 py-2.5 text-start font-mono text-base tracking-wide text-textPrimary placeholder:text-textMuted focus:outline-none md:text-sm"
+                            />
+                          </div>
+                          {showErr("phone") && (
+                            <p
+                              role="alert"
+                              className="mt-1 font-sans text-[11px] font-medium text-danger"
+                            >
+                              {showErr("phone")}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </fieldset>
                   )}
