@@ -113,6 +113,54 @@ export const PART_ICONS = {
       <path d="M30 44v18M40 44v18" strokeWidth="2" opacity="0.5" />
     </g>
   ),
+  engine: (
+    <g fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M26 44h22v24a4 4 0 0 1-4 4H30a4 4 0 0 1-4-4z" />
+      <rect x="24" y="34" width="26" height="10" rx="2" />
+      <path d="M48 50h10a6 6 0 0 1 6 6v8" />
+      <circle cx="64" cy="68" r="6" />
+      <path d="M53 60h13" strokeWidth="2.5" opacity="0.55" />
+      <circle cx="31" cy="39" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="43" cy="39" r="1.6" fill="currentColor" stroke="none" />
+    </g>
+  ),
+  drivetrain: (
+    <g fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="30" y1="50" x2="70" y2="50" strokeWidth="6" />
+      <circle cx="28" cy="50" r="11" />
+      <circle cx="28" cy="50" r="3.5" />
+      <circle cx="72" cy="50" r="13" />
+      <circle cx="72" cy="50" r="4" />
+      <circle cx="72" cy="40" r="1.7" fill="currentColor" stroke="none" />
+      <circle cx="81" cy="53" r="1.7" fill="currentColor" stroke="none" />
+      <circle cx="65" cy="58" r="1.7" fill="currentColor" stroke="none" />
+    </g>
+  ),
+  cooling: (
+    <g fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="24" y="26" width="38" height="44" rx="4" />
+      <path d="M31 34v28M40 34v28M49 34v28" strokeWidth="2.5" opacity="0.6" />
+      <path d="M31 22h10" />
+      <path d="M74 45c3 4 5.5 6.5 5.5 9.2a5.5 5.5 0 0 1-11 0c0-2.7 2.5-5.2 5.5-9.2z" />
+    </g>
+  ),
+};
+
+/**
+ * Storefront category -> representative PART_ICONS key, so the category bar
+ * and product cards share the exact same artwork (one source of truth).
+ */
+export const CATEGORY_ICON = {
+  Braking: "brake",
+  Suspension: "suspension",
+  Engine: "engine",
+  Filtration: "filter",
+  Electrical: "battery",
+  Lighting: "light",
+  Drivetrain: "drivetrain",
+  Exhaust: "exhaust",
+  Cooling: "cooling",
+  Tires: "tire",
 };
 
 /**

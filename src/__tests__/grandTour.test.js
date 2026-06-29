@@ -17,7 +17,17 @@
 //   8. hasPurchased(productId) is true for the customer
 // -----------------------------------------------------------------------------
 
-import { beforeEach, describe, it, expect } from "vitest";
+import { beforeEach, describe, it, expect, vi } from "vitest";
+
+// Pin the LOCAL (localStorage) adapter regardless of any Supabase creds present
+// in a developer's .env. This suite exercises the offline service layer end to
+// end; without this, a machine whose .env has VITE_SUPABASE_* would resolve the
+// cloud adapter and signUp/etc. would hit the network and fail under jsdom.
+// (Hoisted by Vitest above the service imports below.)
+vi.mock("../services/supabaseClient", () => ({
+  isSupabaseConfigured: false,
+  getSupabase: async () => null,
+}));
 
 import * as authService from "../services/authService";
 import * as productsService from "../services/productsService";
