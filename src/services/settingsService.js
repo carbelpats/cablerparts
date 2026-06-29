@@ -69,6 +69,16 @@ export const DEFAULT_SETTINGS = {
       ar: "قطع أداء مهندَسة بمعايير الوكالة لمنطقة الخليج. كل قطعة قابلة للتتبّع برقمها، موثّقة التوافق، ومدعومة في جميع أنحاء دول الخليج.",
     },
   },
+  // Shipping. Riyadh is delivered BY US (same-day); the admin sets that fee or
+  // marks it free. Everywhere else ships via SMSA, billed by weight (base +
+  // per-kg). All amounts in USD (localized to SAR in the UI). Admin-editable.
+  shipping: {
+    riyadhFeeUSD: 7, // ~25 SAR — our own same-day Riyadh delivery
+    riyadhFree: false, // when true, Riyadh delivery is free
+    smsaBaseUSD: 7, // ~26 SAR base for SMSA
+    smsaPerKgUSD: 1.6, // ~6 SAR per billable kg
+    freeOverUSD: 0, // free shipping at/above this subtotal (0 = disabled)
+  },
   payments: [
     { id: "apple-pay", name: "Apple Pay", logoUrl: null },
     { id: "mada", name: "mada", logoUrl: null },

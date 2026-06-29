@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  Copy,
   User,
   Truck,
   CreditCard,
@@ -26,7 +27,6 @@ import { useOrders } from "../context/OrdersContext";
 import { PART_ICONS } from "../lib/partIcons";
 import {
   createPayment,
-  PAYMENT_TEST_CARDS,
   PAYMENT_METHODS,
 } from "../services/paymentService";
 import {
@@ -63,6 +63,7 @@ const STRINGS = {
     email: "Email address",
     emailPh: "you@example.com",
     phone: "Phone number",
+    phoneCountry: "Country",
     phonePh: "+966 5X XXX XXXX",
     // step 2 — shipping
     shippingTitle: "Shipping address",
@@ -93,7 +94,7 @@ const STRINGS = {
     codNote: "Pay in cash when your order is delivered.",
     redirectNote: (m) => `You'll be redirected to complete payment via ${m}.`,
     cardNumber: "Card number",
-    cardPh: "4242 4242 4242 4242",
+    cardPh: "•••• •••• •••• ••••",
     expiry: "Expiry",
     expiryPh: "MM/YY",
     cvc: "CVC",
@@ -130,6 +131,8 @@ const STRINGS = {
     successTitle: "Order confirmed!",
     successBody: "Your parts are being prepared for GCC dispatch.",
     orderNo: "Order number",
+    copyOrder: "Copy order number",
+    copyDone: "Copied",
     trackOrder: "Track order",
     continueShopping: "Continue shopping",
     successVehicle: (v) => `Heading to your ${v}.`,
@@ -156,6 +159,7 @@ const STRINGS = {
     email: "البريد الإلكتروني",
     emailPh: "you@example.com",
     phone: "رقم الجوال",
+    phoneCountry: "الدولة",
     phonePh: "+966 5X XXX XXXX",
     shippingTitle: "عنوان الشحن",
     shippingForVehicle: (v) => `نشحن قطع سيارتك ${v}.`,
@@ -184,7 +188,7 @@ const STRINGS = {
     codNote: "ادفع نقداً عند الاستلام.",
     redirectNote: (m) => `ستُحوّل لإتمام الدفع عبر ${m}.`,
     cardNumber: "رقم البطاقة",
-    cardPh: "4242 4242 4242 4242",
+    cardPh: "•••• •••• •••• ••••",
     expiry: "تاريخ الانتهاء",
     expiryPh: "MM/YY",
     cvc: "CVC",
@@ -216,6 +220,8 @@ const STRINGS = {
     successTitle: "تم تأكيد الطلب!",
     successBody: "يتم تجهيز قطعك للشحن داخل دول الخليج.",
     orderNo: "رقم الطلب",
+    copyOrder: "نسخ رقم الطلب",
+    copyDone: "تم النسخ",
     trackOrder: "تتبّع الطلب",
     continueShopping: "متابعة التسوّق",
     successVehicle: (v) => `في طريقها إلى سيارتك ${v}.`,
@@ -398,6 +404,16 @@ function MiniThumb({ icon, accent }) {
 }
 
 // ---- Reusable labelled field ------------------------------------------------
+// GCC countries for the phone field — dial code + national-number placeholder.
+const PHONE_COUNTRIES = [
+  { code: "SA", flag: "🇸🇦", dial: "+966", ph: "5XXXXXXXX" },
+  { code: "AE", flag: "🇦🇪", dial: "+971", ph: "5XXXXXXXX" },
+  { code: "KW", flag: "🇰🇼", dial: "+965", ph: "XXXXXXXX" },
+  { code: "QA", flag: "🇶🇦", dial: "+974", ph: "XXXXXXXX" },
+  { code: "BH", flag: "🇧🇭", dial: "+973", ph: "XXXXXXXX" },
+  { code: "OM", flag: "🇴🇲", dial: "+968", ph: "XXXXXXXX" },
+];
+
 function Field({
   id,
   label,
@@ -499,6 +515,7 @@ export default function CheckoutModal() {
   const [placed, setPlaced] = useState(false);
   // The REAL order returned by placeOrder() — drives the success screen.
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [copiedOrder, setCopiedOrder] = useState(false);
   // Payment processing state (charge runs before the order is placed).
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState(null); // localized message | null
@@ -516,6 +533,10 @@ export default function CheckoutModal() {
   // Selected payment + shipping methods (defaults: card / standard).
   const [payMethod, setPayMethod] = useState("card");
   const [shipMethod, setShipMethod] = useState("standard");
+  // Phone country (GCC) — drives the dial code + validation rule.
+  const [phoneCountry, setPhoneCountry] = useState(() =>
+    PHONE_COUNTRIES.some((c) => c.code === region.code) ? region.code : "SA"
+  );
 
   const setField = useCallback(
     (k) => (v) => setForm((prev) => ({ ...prev, [k]: v })),
@@ -591,7 +612,7 @@ export default function CheckoutModal() {
       e.email = emailRes.error === "required" ? tx.errRequired : tx.errEmail;
 
     // Phone — validatePhone(value, region.code) -> "required" | "format".
-    const phoneRes = validatePhone(form.phone, region.code);
+    const phoneRes = validatePhone(form.phone, phoneCountry);
     if (!phoneRes.ok)
       e.phone = phoneRes.error === "required" ? tx.errRequired : tx.errPhone;
 
@@ -610,7 +631,7 @@ export default function CheckoutModal() {
       else if (!cvcValid(form.cvc, form.card)) e.cvc = tx.errCvc;
     }
     return e;
-  }, [form, tx, region.code, needsCard]);
+  }, [form, tx, region.code, phoneCountry, needsCard]);
 
   // Detected brand for the inline badge near the card-number field.
   const cardBrand = useMemo(() => detectCardBrand(form.card), [form.card]);
@@ -793,6 +814,19 @@ export default function CheckoutModal() {
     if (id) navigate("/account/orders/" + id);
     else navigate("/account/orders");
   }, [placedOrder, closeCheckout, navigate]);
+
+  // Success -> copy the order number to the clipboard (brief confirmation).
+  const handleCopyOrder = useCallback(() => {
+    const id = placedOrder?.id || orderNumber;
+    if (!id) return;
+    try {
+      navigator.clipboard?.writeText(String(id));
+      setCopiedOrder(true);
+      setTimeout(() => setCopiedOrder(false), 2000);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }, [placedOrder, orderNumber]);
 
   // Success -> keep shopping (clears the cart as before).
   const handleFinish = useCallback(() => {
@@ -1007,12 +1041,31 @@ export default function CheckoutModal() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-textMuted">
                     {tx.orderNo}
                   </p>
-                  <p
-                    className="mt-1 font-mono text-lg font-bold tracking-wide text-primary"
-                    dir="ltr"
-                  >
-                    {placedOrder?.id || orderNumber}
-                  </p>
+                  <div className="mt-1 flex items-center justify-center gap-2">
+                    <p
+                      className="font-mono text-lg font-bold tracking-wide text-primary"
+                      dir="ltr"
+                    >
+                      {placedOrder?.id || orderNumber}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCopyOrder}
+                      aria-label={tx.copyOrder}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border text-textMuted transition-colors hover:bg-surface hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+                    >
+                      {copiedOrder ? (
+                        <Check size={14} aria-hidden="true" className="text-success" />
+                      ) : (
+                        <Copy size={14} aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                  {copiedOrder && (
+                    <p className="mt-1 font-sans text-[11px] font-semibold text-success">
+                      {tx.copyDone}
+                    </p>
+                  )}
                 </div>
                 <div className="mt-6 flex w-full max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
                   <button
@@ -1122,21 +1175,65 @@ export default function CheckoutModal() {
                           ltr
                           error={showErr("email")}
                         />
-                        <Field
-                          id="co-phone"
-                          label={tx.phone}
-                          type="tel"
-                          value={form.phone}
-                          onChange={(v) => {
-                            setField("phone")(v);
-                            markTouched("phone");
-                          }}
-                          placeholder={tx.phonePh}
-                          autoComplete="tel"
-                          inputMode="tel"
-                          ltr
-                          error={showErr("phone")}
-                        />
+                        <div>
+                          <label
+                            htmlFor="co-phone"
+                            className="mb-1.5 block font-sans text-xs font-medium text-textSecondary"
+                          >
+                            {tx.phone}
+                          </label>
+                          <div
+                            dir="ltr"
+                            className={`flex items-stretch overflow-hidden rounded-lg border bg-surface ${
+                              showErr("phone")
+                                ? "border-danger/60"
+                                : "border-border focus-within:border-primary/50"
+                            }`}
+                          >
+                            <select
+                              aria-label={tx.phoneCountry}
+                              value={phoneCountry}
+                              onChange={(e) => {
+                                setPhoneCountry(e.target.value);
+                                markTouched("phone");
+                              }}
+                              className="shrink-0 border-e border-border bg-surfaceElevated px-2 py-2.5 font-mono text-sm text-textPrimary focus:outline-none"
+                            >
+                              {PHONE_COUNTRIES.map((c) => (
+                                <option key={c.code} value={c.code}>
+                                  {c.flag} {c.dial}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              id="co-phone"
+                              type="tel"
+                              inputMode="tel"
+                              autoComplete="tel"
+                              value={form.phone}
+                              onChange={(e) => {
+                                setField("phone")(
+                                  e.target.value.replace(/\D/g, "").replace(/^0+/, "")
+                                );
+                                markTouched("phone");
+                              }}
+                              placeholder={
+                                (PHONE_COUNTRIES.find((c) => c.code === phoneCountry) || {}).ph ||
+                                "5XXXXXXXX"
+                              }
+                              aria-invalid={!!showErr("phone")}
+                              className="w-full bg-transparent px-3 py-2.5 text-start font-mono text-base tracking-wide text-textPrimary placeholder:text-textMuted focus:outline-none md:text-sm"
+                            />
+                          </div>
+                          {showErr("phone") && (
+                            <p
+                              role="alert"
+                              className="mt-1 font-sans text-[11px] font-medium text-danger"
+                            >
+                              {showErr("phone")}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </fieldset>
                   )}
@@ -1400,43 +1497,6 @@ export default function CheckoutModal() {
                               error={showErr("cvc")}
                             />
                           </div>
-                          {/* Test-card hint (from paymentService). */}
-                          <div className="rounded-lg border border-border bg-surfaceElevated/60 px-3 py-2.5">
-                            <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-textMuted">
-                              <CreditCard
-                                size={12}
-                                aria-hidden="true"
-                                className="text-primary"
-                              />
-                              {tx.testCardsTitle}
-                            </p>
-                            <ul className="space-y-1">
-                              {PAYMENT_TEST_CARDS.map((tc) => (
-                                <li
-                                  key={tc.number}
-                                  className="flex items-center justify-between gap-2"
-                                >
-                                  <span
-                                    className="font-mono text-[11px] tabular-nums tracking-wide text-textPrimary"
-                                    dir="ltr"
-                                  >
-                                    {tc.number}
-                                  </span>
-                                  <span
-                                    className={`font-sans text-[10px] font-semibold uppercase tracking-wide ${
-                                      tc.outcome === "success"
-                                        ? "text-success"
-                                        : "text-danger"
-                                    }`}
-                                  >
-                                    {tc.outcome === "success"
-                                      ? tx.testCardSuccess
-                                      : tx.testCardDeclined}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
                         </>
                       ) : (
                         // Non-card methods: a short localized note instead of the
@@ -1476,11 +1536,6 @@ export default function CheckoutModal() {
                         </p>
                       )}
 
-                      {needsCard && (
-                        <p className="rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 font-sans text-[11px] text-textMuted">
-                          {tx.mockNote}
-                        </p>
-                      )}
                     </fieldset>
                   )}
                 </div>

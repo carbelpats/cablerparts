@@ -1,0 +1,9 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Drive belt">
+  <rect x="34" y="78" width="188" height="100" rx="50" fill="none" stroke="#2A323C" stroke-width="30"/>
+  <rect x="34" y="78" width="188" height="100" rx="50" fill="none" stroke="#FF7A1A" stroke-width="20"/>
+  <rect x="34" y="78" width="188" height="100" rx="50" fill="none" stroke="#7A3D00" stroke-width="20" stroke-dasharray="3 9"/>
+  <circle cx="86" cy="128" r="28" fill="#8B97A4" stroke="#C7D0DA" stroke-width="4"/>
+  <circle cx="86" cy="128" r="9" fill="#2A323C"/>
+  <circle cx="170" cy="128" r="28" fill="#8B97A4" stroke="#C7D0DA" stroke-width="4"/>
+  <circle cx="170" cy="128" r="9" fill="#2A323C"/>
+</svg>

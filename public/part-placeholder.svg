@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Cabler part image coming soon">
+  <rect width="600" height="600" fill="#0B0E11"/>
+  <rect x="0.5" y="0.5" width="599" height="599" fill="none" stroke="#1C2530" stroke-width="1"/>
+  <g transform="translate(300 262)">
+    <g fill="#FF7A1A">
+      <rect x="-9" y="-66" width="18" height="30" rx="5"/>
+      <rect x="-9" y="-66" width="18" height="30" rx="5" transform="rotate(45)"/>
+      <rect x="-9" y="-66" width="18" height="30" rx="5" transform="rotate(90)"/>
+      <rect x="-9" y="-66" width="18" height="30" rx="5" transform="rotate(135)"/>
+      <rect x="-9" y="-66" width="18" height="30" rx="5" transform="rotate(180)"/>
+      <rect x="-9" y="-66" width="18" height="30" rx="5" transform="rotate(225)"/>
+      <rect x="-9" y="-66" width="18" height="30" rx="5" transform="rotate(270)"/>
+      <rect x="-9" y="-66" width="18" height="30" rx="5" transform="rotate(315)"/>
+    </g>
+    <circle cx="0" cy="0" r="44" fill="#FF7A1A"/>
+    <circle cx="0" cy="0" r="20" fill="#0B0E11"/>
+    <circle cx="0" cy="0" r="7" fill="#28E0C8"/>
+  </g>
+  <text x="300" y="372" text-anchor="middle" fill="#E7ECF2" font-family="system-ui, Segoe UI, sans-serif" font-size="34" font-weight="700" letter-spacing="3">CABLER</text>
+  <text x="300" y="410" text-anchor="middle" fill="#7E8A97" font-family="system-ui, Segoe UI, sans-serif" font-size="18" letter-spacing="1">صورة المنتج قريبًا · image soon</text>
+</svg>

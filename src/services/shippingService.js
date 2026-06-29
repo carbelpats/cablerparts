@@ -62,6 +62,69 @@ export function getShippingMethod(id) {
   return SHIPPING_METHODS.find((m) => m.id === id) || SHIPPING_METHODS[0];
 }
 
+// Riyadh is fulfilled by our own same-day delivery (not a courier). Match the
+// city name in either language.
+const RIYADH_RE = /riyadh|الرياض|رياض/i;
+export function isRiyadhDestination(city = "", region = "") {
+  return RIYADH_RE.test(String(city)) || /^riyadh$/i.test(String(region));
+}
+
+/**
+ * computeShipping({ city, region, weightKg, subtotalUSD, shipping }) ->
+ *   { costUSD, courier, isLocal, sameDay, free, billableKg, etaDays }
+ *
+ * The single source of truth for the delivery fee, driven by the admin-editable
+ * `shipping` settings:
+ *   - Riyadh  -> our own same-day delivery, flat `riyadhFeeUSD` (0 if riyadhFree)
+ *   - else    -> SMSA, weight-based: smsaBaseUSD + ceil(weightKg) * smsaPerKgUSD
+ *   - free shipping kicks in at/above `freeOverUSD` (when > 0)
+ */
+export function computeShipping({
+  city = "",
+  region = "",
+  weightKg = 0,
+  subtotalUSD = 0,
+  shipping = {},
+} = {}) {
+  const cfg = {
+    riyadhFeeUSD: 7,
+    riyadhFree: false,
+    smsaBaseUSD: 7,
+    smsaPerKgUSD: 1.6,
+    freeOverUSD: 0,
+    ...(shipping || {}),
+  };
+  const isRiyadh = isRiyadhDestination(city, region);
+  const qualifiesFree = cfg.freeOverUSD > 0 && subtotalUSD >= cfg.freeOverUSD;
+
+  if (isRiyadh) {
+    const cost = cfg.riyadhFree || qualifiesFree ? 0 : Math.max(0, cfg.riyadhFeeUSD);
+    return {
+      costUSD: cost,
+      courier: "Cabler",
+      isLocal: true,
+      sameDay: true,
+      free: cost === 0,
+      billableKg: 0,
+      etaDays: [0, 0],
+    };
+  }
+
+  const billableKg = Math.max(1, Math.ceil(weightKg || 1));
+  const cost = qualifiesFree
+    ? 0
+    : Math.max(0, cfg.smsaBaseUSD + billableKg * cfg.smsaPerKgUSD);
+  return {
+    costUSD: cost,
+    courier: "SMSA",
+    isLocal: false,
+    sameDay: false,
+    free: cost === 0,
+    billableKg,
+    etaDays: [2, 5],
+  };
+}
+
 /**
  * estimateDelivery(methodId, fromMs?) -> ms epoch
  * Uses the upper bound of the method's ETA range. fromMs defaults to "now"
@@ -124,6 +187,8 @@ export default {
   SHIPPING_PROVIDER,
   getShippingMethods,
   getShippingMethod,
+  isRiyadhDestination,
+  computeShipping,
   estimateDelivery,
   generateTrackingNumber,
   createShipment,
