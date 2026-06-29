@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Wrench,
   Star,
+  Banknote,
 } from "lucide-react";
 import { useGarage } from "../context/GarageContext";
 import { useLang } from "../context/LanguageContext";
@@ -44,21 +45,21 @@ const STRINGS = {
     headFitA: "Precision-matched parts for your ",
     headFitB: "",
     subDefault:
-      "Track-tested Chinese performance parts, held to OEM standards and trusted across the Gulf. Build your Garage once — then shop only what fits, with confidence.",
+      "OEM-grade Chinese auto parts, built to factory spec and delivered across the Gulf. Build your Garage once — then shop only what fits, with confidence.",
     subFit:
-      "Every component below is cross-checked against your build — verified fitment, OEM-grade tolerances, and GCC-backed warranty. Browse parts that are guaranteed to fit.",
+      "Every component below is matched to your build — correct fitment, OEM-grade tolerances, and a 2-year warranty. Browse parts that fit your car.",
     ctaShop: "Shop your parts",
     ctaBuildGarage: "Build your Garage",
     ctaManageGarage: "Manage your Garage",
     trust: {
       standard: "OEM-Grade Standard",
       warranty: "2-Year Warranty",
-      authentic: "Authenticity Verified",
+      cod: "Cash on Delivery",
       delivery: "Fast GCC Delivery",
     },
     stats: {
-      shipped: "Parts shipped",
-      rating: "Avg. rating",
+      makes: "Chinese makes",
+      warranty: "Yr warranty",
       markets: "GCC markets",
     },
   },
@@ -73,21 +74,21 @@ const STRINGS = {
     headFitA: "قطع متطابقة بدقة مع ",
     headFitB: "",
     subDefault:
-      "قطع أداء صينية مختبَرة على الحلبات، مصنوعة وفق معايير الوكالة وموثوقة في أنحاء الخليج. أنشئ مرآبك مرة واحدة، ثم تسوّق ما يناسب سيارتك فقط، بكل ثقة.",
+      "قطع غيار صينية بجودة الوكالة، مصنوعة وفق مواصفات المصنع وتُشحن في أنحاء الخليج. أنشئ مرآبك مرة واحدة، ثم تسوّق ما يناسب سيارتك فقط، بكل ثقة.",
     subFit:
-      "كل قطعة بالأسفل مطابَقة مع مواصفات سيارتك — توافق مؤكَّد، وتفاوتات بمعايير الوكالة، وضمان معتمد في الخليج. تصفّح القطع المضمونة المطابقة لسيارتك.",
+      "كل قطعة بالأسفل مطابَقة مع مواصفات سيارتك — توافق صحيح، وتفاوتات بجودة الوكالة، وضمان لمدة سنتين. تصفّح القطع المطابقة لسيارتك.",
     ctaShop: "تسوّق قطع سيارتك",
     ctaBuildGarage: "أنشئ مرآبك",
     ctaManageGarage: "إدارة المرآب",
     trust: {
       standard: "معيار جودة الوكالة",
       warranty: "ضمان سنتين",
-      authentic: "أصالة موثّقة",
+      cod: "الدفع عند الاستلام",
       delivery: "توصيل سريع في الخليج",
     },
     stats: {
-      shipped: "قطعة شُحنت",
-      rating: "متوسط التقييم",
+      makes: "ماركات صينية",
+      warranty: "سنوات ضمان",
       markets: "أسواق خليجية",
     },
   },
@@ -96,13 +97,13 @@ const STRINGS = {
 const TRUST_SIGNALS = [
   { key: "standard", icon: ShieldCheck },
   { key: "warranty", icon: Award },
-  { key: "authentic", icon: BadgeCheck },
+  { key: "cod", icon: Banknote },
   { key: "delivery", icon: Truck },
 ];
 
 const STATS = [
-  { key: "shipped", value: "50,000+" },
-  { key: "rating", value: "4.9", star: true },
+  { key: "makes", value: "8" },
+  { key: "warranty", value: "2" },
   { key: "markets", value: "6" },
 ];
 
