@@ -61,6 +61,7 @@ const STRINGS = {
     brand: "Brand",
     category: "Category",
     priceUSD: "Price (USD)",
+    weightKg: "Weight (kg)",
     compareAtUSD: "Compare-at price (USD)",
     descriptionEn: "Description (English)",
     descriptionAr: "Description (Arabic)",
@@ -123,6 +124,7 @@ const STRINGS = {
     brand: "العلامة التجارية",
     category: "الفئة",
     priceUSD: "السعر (دولار)",
+    weightKg: "الوزن (كجم)",
     compareAtUSD: "السعر قبل الخصم (دولار)",
     descriptionEn: "الوصف (إنجليزي)",
     descriptionAr: "الوصف (عربي)",
@@ -179,6 +181,7 @@ function emptyForm() {
     category: CATEGORY_KEYS[0] || "",
     priceUSD: "",
     compareAtUSD: "",
+    weightKg: "",
     descriptionEn: "",
     descriptionAr: "",
     fitment: [],
@@ -208,6 +211,8 @@ function productToForm(p) {
     descriptionAr: p.descriptionAr ?? "",
     fitment: Array.isArray(p.fitment) ? [...p.fitment] : [],
     stock: p.stock === null || p.stock === undefined ? "" : String(p.stock),
+    weightKg:
+      p.weightKg === null || p.weightKg === undefined ? "" : String(p.weightKg),
     image: p.image ?? "",
     icon: p.icon ?? ICON_KEYS[0] ?? "brake",
     accent: p.accent ?? "primary",
@@ -604,6 +609,7 @@ function ProductEditor({ initial, onClose, onSubmit }) {
       descriptionAr: form.descriptionAr.trim(),
       fitment: form.fitment,
       stock: Number(form.stock),
+      weightKg: form.weightKg === "" ? null : Number(form.weightKg),
       image: form.image.trim(),
       icon: form.icon,
       accent: form.accent,
@@ -783,6 +789,21 @@ function ProductEditor({ initial, onClose, onSubmit }) {
                 onChange={set("stock")}
                 aria-invalid={Boolean(errors.stock)}
                 className={`${inputCls(errors.stock)} font-mono tabular-nums`}
+              />
+            </Field>
+
+            {/* Weight — drives the SMSA (by-weight) shipping fee at checkout */}
+            <Field label={t.weightKg} htmlFor="pf-weight" optional>
+              <input
+                id="pf-weight"
+                type="number"
+                min="0"
+                step="0.1"
+                dir="ltr"
+                inputMode="decimal"
+                value={form.weightKg}
+                onChange={set("weightKg")}
+                className={`${inputCls(undefined)} font-mono tabular-nums`}
               />
             </Field>
 
