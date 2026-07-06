@@ -39,6 +39,8 @@ import {
   savePendingCheckout,
   readPendingCheckout,
 } from "../services/moyasarService";
+import Celebration from "./Celebration";
+import CheckoutProgress from "./CheckoutProgress";
 import {
   validateEmail,
   validatePhone,
@@ -272,143 +274,6 @@ const CARD_BRAND_LABEL = {
   amex: "Amex",
 };
 
-// ---- Boost gauge ------------------------------------------------------------
-// A semicircular turbo/RPM gauge. `value` is 0..1 (fraction of the flow done).
-// The amber arc + needle sweep up as steps complete; single-shot transitions
-// that respect prefers-reduced-motion via the duration prop.
-function BoostGauge({ value, labels, reduceMotion, complete }) {
-  // Geometry for a 180° arc (a semicircle), 200x120 viewBox.
-  const cx = 100;
-  const cy = 100;
-  const r = 80;
-  const startA = Math.PI; // 180° (left)
-  const sweep = Math.PI; // half turn to 0° (right)
-  const clamped = Math.max(0, Math.min(1, value));
-
-  const polar = (frac) => {
-    const a = startA - sweep * frac; // left -> right
-    return [cx + r * Math.cos(a), cy - r * Math.sin(a)];
-  };
-
-  const [bgStartX, bgStartY] = polar(0);
-  const [bgEndX, bgEndY] = polar(1);
-  const trackPath = `M ${bgStartX} ${bgStartY} A ${r} ${r} 0 0 1 ${bgEndX} ${bgEndY}`;
-
-  // Tick segments (8) for the turbo look.
-  const ticks = Array.from({ length: 9 }, (_, i) => {
-    const frac = i / 8;
-    const [ox, oy] = polar(frac);
-    const a = startA - sweep * frac;
-    const ix = cx + (r - 10) * Math.cos(a);
-    const iy = cy - (r - 10) * Math.sin(a);
-    return { ox, oy, ix, iy, lit: frac <= clamped + 0.001 };
-  });
-
-  // Needle endpoint.
-  const [nx, ny] = polar(clamped);
-  const dur = reduceMotion ? "0s" : "0.7s";
-  // Arc length of the lit portion (for the stroke-dash sweep).
-  const arcLen = Math.PI * r;
-
-  const pct = Math.round(clamped * 100);
-
-  return (
-    <div className="mx-auto flex w-full max-w-[18rem] flex-col items-center gap-2">
-      {/* Text label — a NORMAL-FLOW block element ABOVE the gauge wrapper, on its
-          own line, centered. It lives OUTSIDE the relative gauge wrapper below,
-          so it can never collide with the centered percentage at any value
-          (0%..100%) in LTR or RTL — overlap is mathematically impossible. */}
-      <div className="flex items-center justify-center gap-1.5 font-mono text-[10px] font-bold uppercase leading-none tracking-[0.2em] text-primary">
-        <Gauge size={12} aria-hidden="true" className="rtl:-scale-x-100" />
-        {complete ? labels.ready : labels.boost}
-      </div>
-
-      {/* Gauge wrapper — the SVG plus the LONE absolutely-positioned child (the
-          numeric percentage). Nothing else is absolute inside here. */}
-      <div className="relative w-full">
-      <svg
-        viewBox="0 0 200 120"
-        className="w-full overflow-visible"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={pct}
-        aria-label={labels.progressLabel}
-      >
-        {/* Track */}
-        <path
-          d={trackPath}
-          fill="none"
-          stroke="rgb(var(--border))"
-          strokeWidth="9"
-          strokeLinecap="round"
-        />
-        {/* Lit fill — amber primary, single-shot sweep via dashoffset */}
-        <path
-          d={trackPath}
-          fill="none"
-          stroke="rgb(var(--primary))"
-          strokeWidth="9"
-          strokeLinecap="round"
-          style={{
-            strokeDasharray: arcLen,
-            strokeDashoffset: arcLen * (1 - clamped),
-            transition: `stroke-dashoffset ${dur} cubic-bezier(0.22,1,0.36,1)`,
-            filter: "drop-shadow(0 0 6px rgb(var(--primary) / 0.55))",
-          }}
-        />
-        {/* Ticks */}
-        {ticks.map((t, i) => (
-          <line
-            key={i}
-            x1={t.ox}
-            y1={t.oy}
-            x2={t.ix}
-            y2={t.iy}
-            stroke={
-              t.lit ? "rgb(var(--primary))" : "rgb(var(--text-muted) / 0.5)"
-            }
-            strokeWidth="2"
-            strokeLinecap="round"
-            style={{ transition: `stroke ${dur} ease` }}
-          />
-        ))}
-        {/* Needle */}
-        <line
-          x1={cx}
-          y1={cy}
-          x2={nx}
-          y2={ny}
-          stroke="rgb(var(--primary))"
-          strokeWidth="3"
-          strokeLinecap="round"
-          style={{
-            transition: reduceMotion
-              ? "none"
-              : `x2 ${dur} cubic-bezier(0.22,1,0.36,1), y2 ${dur} cubic-bezier(0.22,1,0.36,1)`,
-            filter: "drop-shadow(0 0 4px rgb(var(--primary) / 0.6))",
-          }}
-        />
-        <circle cx={cx} cy={cy} r="6" fill="rgb(var(--primary))" />
-        <circle cx={cx} cy={cy} r="11" fill="none" stroke="rgb(var(--border))" strokeWidth="2" />
-      </svg>
-
-      {/* Hub readout — the ONLY absolutely-positioned child INSIDE the gauge
-          wrapper: just the numeric percentage, centered in the needle hub
-          (leading-none, mono tabular-nums). The label lives in normal flow
-          ABOVE this wrapper, so collision is mathematically impossible. */}
-      <span
-        className="pointer-events-none absolute inset-x-0 bottom-1 flex items-baseline justify-center font-display text-2xl font-extrabold leading-none tabular-nums text-textPrimary"
-        aria-hidden="true"
-      >
-        {pct}
-        <span className="font-mono text-base leading-none text-textMuted">%</span>
-      </span>
-      </div>
-    </div>
-  );
-}
-
 // ---- Mini cart thumb --------------------------------------------------------
 const ACCENT_THUMB = {
   primary: "from-primary/20 to-primary/5 text-primary ring-primary/25",
@@ -581,7 +446,9 @@ export default function CheckoutModal() {
       (m) => m.region === "*" || m.region === region.code
     );
     if (!isMoyasarConfigured) return base;
-    return base.filter((m) => m.id === "card" || m.id === "cod");
+    // Moyasar mode: the hosted form IS the payment step (Apple Pay + Visa /
+    // Mastercard / mada via Moyasar's own tabs). COD + other chips are removed.
+    return base.filter((m) => m.id === "card");
   }, [region.code]);
 
   // The definition of the currently selected method (drives card-field display).
@@ -708,10 +575,6 @@ export default function CheckoutModal() {
   // Only surface an error after the field is touched OR a Next was attempted.
   const showErr = (f) => (touched[f] ? errors[f] : undefined);
   const markTouched = (f) => setTouched((t) => ({ ...t, [f]: true }));
-
-  // ---- Boost-gauge value ---------------------------------------------------
-  // Sweeps in clean step increments; success pins it at full.
-  const gaugeValue = placed ? 1 : step / TOTAL_STEPS;
 
   // ---- Deterministic order number ------------------------------------------
   // Derived from count + rounded subtotal + items length — no Date.now/random.
@@ -1124,6 +987,9 @@ export default function CheckoutModal() {
         }`}
       />
 
+      {/* Order-complete celebration — confetti + success chime (self-contained) */}
+      <Celebration active={placed} />
+
       {/* Panel */}
       <div
         ref={panelRef}
@@ -1242,48 +1108,16 @@ export default function CheckoutModal() {
               </div>
             ) : (
               <>
-                {/* Boost gauge */}
-                <BoostGauge
-                  value={gaugeValue}
+                {/* Advanced progress meter (replaces the old needle gauge) */}
+                <CheckoutProgress
+                  step={step}
+                  total={TOTAL_STEPS}
+                  steps={tx.steps}
+                  icons={STEP_ICONS}
                   labels={tx}
                   reduceMotion={reduceMotion}
                   complete={false}
                 />
-
-                {/* Step labels */}
-                <ol className="flex items-center justify-center gap-2">
-                  {tx.steps.map((label, i) => {
-                    const Icon = STEP_ICONS[i];
-                    const done = i < step;
-                    const active = i === step;
-                    return (
-                      <li key={label} className="flex items-center gap-2">
-                        <span
-                          className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wide transition-colors duration-300 ${
-                            active
-                              ? "bg-primary/15 text-primary ring-1 ring-inset ring-primary/30"
-                              : done
-                              ? "text-success"
-                              : "text-textMuted"
-                          }`}
-                        >
-                          {done ? (
-                            <Check size={13} aria-hidden="true" />
-                          ) : (
-                            <Icon size={13} aria-hidden="true" />
-                          )}
-                          {label}
-                        </span>
-                        {i < tx.steps.length - 1 && (
-                          <span
-                            aria-hidden="true"
-                            className="h-px w-4 bg-border"
-                          />
-                        )}
-                      </li>
-                    );
-                  })}
-                </ol>
 
                 {/* Step form */}
                 <div
@@ -1497,9 +1331,10 @@ export default function CheckoutModal() {
                         {isMoyasarConfigured ? tx.payViaMoyasar : tx.paymentHint}
                       </p>
 
-                      {/* Payment-method selector — segmented buttons sourced from
-                          PAYMENT_METHODS (region-filtered). Selecting a method
-                          toggles whether the card fields render below. */}
+                      {/* Payment-method selector — mock mode only. In Moyasar
+                          mode the hosted form shows its own method tabs
+                          (Apple Pay + cards), so no chip row is rendered. */}
+                      {!isMoyasarConfigured && (
                       <div
                         role="radiogroup"
                         aria-label={tx.payMethodLabel}
@@ -1535,6 +1370,7 @@ export default function CheckoutModal() {
                           })}
                         </div>
                       </div>
+                      )}
 
                       {needsCard && isMoyasarConfigured ? (
                         // Hosted Moyasar form — rendered only for signed-in
