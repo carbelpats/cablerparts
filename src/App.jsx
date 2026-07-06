@@ -60,6 +60,7 @@ import Landing from "./pages/Landing";
 /* Heavier, less-trafficked routes are code-split so the landing stays light. */
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
+const PaymentCallbackPage = lazy(() => import("./pages/PaymentCallbackPage"));
 const InfoPage = lazy(() => import("./pages/InfoPage"));
 const AccountLayout = lazy(() => import("./pages/account/AccountLayout"));
 const ProfileSettings = lazy(() => import("./pages/account/ProfileSettings"));
@@ -1085,6 +1086,8 @@ function AppRoutes() {
         <Route index element={<Landing />} />
         <Route path="login" element={<AuthPage />} />
         <Route path="track" element={<TrackOrder />} />
+        {/* Moyasar returns here after 3-D Secure (?id=<payment_id>&status=…). */}
+        <Route path="pay/callback" element={<PaymentCallbackPage />} />
 
         {/* Bilingual info / legal pages — one InfoPage driven by slug. */}
         <Route path="about" element={<InfoPage slug="about" />} />
