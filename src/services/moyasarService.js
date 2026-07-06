@@ -32,14 +32,15 @@ export const isMoyasarConfigured =
   provider === "moyasar" && MOYASAR_PUBLISHABLE_KEY.startsWith("pk_");
 
 // Which methods the hosted form offers, from VITE_MOYASAR_METHODS (comma list:
-// creditcard | stcpay | applepay). Default = cards + STC Pay (both work on a
-// standard KSA account). Apple Pay needs the domain verified in the Moyasar
-// dashboard first — add "applepay" to the env var once that's done. The form
-// renders each enabled method as its own tab (and only shows Apple Pay on
-// Apple devices/Safari), so the checkout doesn't need per-method chrome.
+// creditcard | stcpay | applepay). Default = Apple Pay + cards (Visa /
+// Mastercard / mada via supported_networks). Apple Pay only renders on Apple
+// devices/Safari AND once the domain is verified in the Moyasar dashboard;
+// elsewhere the card form is the fallback. STC Pay is available too — add
+// "stcpay" to the env var to bring it back. The form renders each enabled
+// method as its own section, so the checkout needs no per-method chrome.
 const ALLOWED_METHODS = ["creditcard", "stcpay", "applepay"];
 const rawMethods =
-  import.meta.env?.VITE_MOYASAR_METHODS || "creditcard,stcpay";
+  import.meta.env?.VITE_MOYASAR_METHODS || "applepay,creditcard";
 export const MOYASAR_METHODS = (() => {
   const list = String(rawMethods)
     .split(",")

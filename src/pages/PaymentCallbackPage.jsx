@@ -17,6 +17,7 @@ import {
   readPendingCheckout,
   clearPendingCheckout,
 } from "../services/moyasarService";
+import Celebration from "../components/Celebration";
 
 // -----------------------------------------------------------------------------
 // CABLER PARTS — /pay/callback. Moyasar redirects here after the customer
@@ -323,6 +324,8 @@ export default function PaymentCallbackPage() {
 
       {phase === "success" && (
         <>
+          {/* Confetti + success chime on the confirmed order */}
+          <Celebration active />
           <span className="grid h-20 w-20 place-items-center rounded-full bg-success/15 text-success ring-1 ring-inset ring-success/30">
             <PartyPopper size={40} aria-hidden="true" />
           </span>
