@@ -773,6 +773,14 @@ export default function CheckoutModal() {
           callback_url: `${window.location.origin}/pay/callback`,
           methods: MOYASAR_METHODS,
           supported_networks: ["mada", "visa", "mastercard"],
+          // Ready for when "applepay" is added to VITE_MOYASAR_METHODS AND the
+          // domain is registered in the Moyasar dashboard. Moyasar hosts the
+          // merchant-validation endpoint, so no custom serverless fn is needed.
+          apple_pay: {
+            country: "SA",
+            label: "Cabler Parts",
+            validate_merchant_url: "https://api.moyasar.com/v1/applepay/initiate",
+          },
           language: lang,
           on_completed: (payment) => {
             // Runs after the payment is created, BEFORE the 3DS redirect —
