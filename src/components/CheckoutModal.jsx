@@ -33,6 +33,7 @@ import {
 import {
   isMoyasarConfigured,
   MOYASAR_PUBLISHABLE_KEY,
+  MOYASAR_METHODS,
   loadMoyasarForm,
   usdToHalalas,
   savePendingCheckout,
@@ -93,8 +94,8 @@ const STRINGS = {
     paymentTitle: "Payment",
     paymentHint: "Demo only — no real card is charged.",
     payViaMoyasar:
-      "Secure, encrypted payment via Moyasar — mada, Visa & Mastercard.",
-    madaCardLabel: "mada / Visa / Mastercard",
+      "Secure, encrypted payment via the Moyasar gateway. Pick a method below.",
+    madaCardLabel: "Online payment",
     chargedInSAR: (amt) => `You'll be charged SAR ${amt}.`,
     moyasarLoadError:
       "The payment form couldn't load. Check your connection and try again.",
@@ -196,8 +197,8 @@ const STRINGS = {
       a === b ? `يوم عمل واحد` : `${a}–${b} أيام عمل`,
     paymentTitle: "الدفع",
     paymentHint: "للعرض فقط — لن يتم خصم أي بطاقة فعلية.",
-    payViaMoyasar: "دفع آمن ومشفّر عبر ميسر — مدى وفيزا وماستركارد.",
-    madaCardLabel: "مدى / فيزا / ماستركارد",
+    payViaMoyasar: "دفع آمن ومشفّر عبر بوابة ميسر. اختر وسيلة الدفع بالأسفل.",
+    madaCardLabel: "الدفع الإلكتروني",
     chargedInSAR: (amt) => `سيُخصم منك ${amt} ريال سعودي.`,
     moyasarLoadError: "تعذّر تحميل نموذج الدفع. تحقّق من اتصالك وحاول مجدداً.",
     // payment-method selector
@@ -907,7 +908,7 @@ export default function CheckoutModal() {
           description: `Cabler Parts order (${count} items)`,
           publishable_api_key: MOYASAR_PUBLISHABLE_KEY,
           callback_url: `${window.location.origin}/pay/callback`,
-          methods: ["creditcard"],
+          methods: MOYASAR_METHODS,
           supported_networks: ["mada", "visa", "mastercard"],
           language: lang,
           on_completed: (payment) => {

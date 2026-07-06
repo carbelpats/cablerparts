@@ -213,7 +213,9 @@
 #mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el input.mysr-form-input.mysr-form-inputError {
   box-shadow: 0 0 0 1.5px rgb(var(--danger) / 0.7) !important;
 }
-#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-button {
+/* Amber only for the primary Pay button — method buttons (STC Pay) keep their
+   own recognizable brand. */
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-button:not(.mysr-form-methodButton) {
   background-color: rgb(var(--primary)) !important;
   color: #fff !important;
   font-family: inherit !important;
@@ -221,8 +223,23 @@
   letter-spacing: 0.02em;
   box-shadow: 0 0 20px rgb(var(--primary) / 0.35) !important;
 }
-#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-button:hover:not(:disabled) {
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-button:not(.mysr-form-methodButton):hover:not(:disabled) {
   background-color: rgb(var(--primary-hover)) !important;
+}
+/* STC Pay phone input matches the card inputs; divider blends into the panel. */
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el input.mysr-form-stcPayInput {
+  background-color: rgb(var(--surface)) !important;
+  color: rgb(var(--text-primary)) !important;
+  box-shadow: 0 0 0 1px rgb(var(--border)) !important;
+  font-family: inherit !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-dividerParagraph {
+  color: rgb(var(--text-muted)) !important;
+  font-family: inherit !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-dividerLine {
+  background-color: rgb(var(--border)) !important;
+  border-color: rgb(var(--border)) !important;
 }
 #mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-footer {
   margin-top: 0.5rem;
