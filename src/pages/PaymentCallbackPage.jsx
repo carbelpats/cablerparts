@@ -222,6 +222,13 @@ export default function PaymentCallbackPage() {
         setPhase("unverifiable");
         return;
       }
+      // A lookup that couldn't run (bad server key / Moyasar outage) is NOT a
+      // declined payment — the charge may exist. Send it to the retryable
+      // "can't confirm" state instead of telling the customer it failed.
+      if (verify.lookup === "unauthorized" || verify.lookup === "lookup_error") {
+        setPhase("unverifiable");
+        return;
+      }
       if (!verify.paid) {
         setPhase("failed");
         return;

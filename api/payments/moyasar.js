@@ -143,12 +143,23 @@ export default async function handler(req, res) {
       { headers: { Authorization: auth } }
     );
     if (!r.ok) {
-      // Unknown payment id (404) or Moyasar-side lookup error — not paid.
+      // Distinguish the three non-ok cases — they mean very different things:
+      //   404 not_found     -> no such payment (key is fine; nothing charged)
+      //   401 unauthorized  -> MOYASAR_SECRET_KEY is wrong/expired
+      //   else lookup_error -> transient Moyasar/network problem (retryable)
+      const lookup =
+        r.status === 404
+          ? "not_found"
+          : r.status === 401
+          ? "unauthorized"
+          : "lookup_error";
       res.status(200).json({
         configured: true,
         paid: false,
         valid: false,
-        status: r.status === 404 ? "not_found" : "lookup_failed",
+        lookup,
+        status: lookup,
+        upstream: r.status,
         amount: null,
         currency: null,
         id: paymentId,
@@ -166,6 +177,7 @@ export default async function handler(req, res) {
       configured: true,
       paid,
       valid: paid && orderCheck.valid,
+      lookup: "ok",
       priceCheck: orderCheck.priceCheck,
       status: payment?.status || null,
       amount: payment?.amount ?? null,
