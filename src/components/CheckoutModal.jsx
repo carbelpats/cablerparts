@@ -19,6 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useCheckout } from "../context/CheckoutContext";
 import { useCart } from "../context/CartContext";
+import { useProducts } from "../context/ProductsContext";
 import { useGeo } from "../context/GeoContext";
 import { useGarage } from "../context/GarageContext";
 import { useLang } from "../context/LanguageContext";
@@ -97,6 +98,8 @@ const STRINGS = {
     paymentHint: "Demo only — no real card is charged.",
     payViaMoyasar:
       "Secure, encrypted payment via the Moyasar gateway. Pick a method below.",
+    pricesSyncing:
+      "Refreshing live prices — payment unlocks in a moment. If this persists, check your connection and try again.",
     madaCardLabel: "Online payment",
     chargedInSAR: (amt) => `You'll be charged SAR ${amt}.`,
     moyasarLoadError:
@@ -200,6 +203,8 @@ const STRINGS = {
     paymentTitle: "الدفع",
     paymentHint: "للعرض فقط — لن يتم خصم أي بطاقة فعلية.",
     payViaMoyasar: "دفع آمن ومشفّر عبر بوابة ميسر. اختر وسيلة الدفع بالأسفل.",
+    pricesSyncing:
+      "نحدّث الأسعار الحية الآن — يفتح الدفع خلال لحظات. إذا استمرت الرسالة تحقق من اتصالك وأعد المحاولة.",
     madaCardLabel: "الدفع الإلكتروني",
     chargedInSAR: (amt) => `سيُخصم منك ${amt} ريال سعودي.`,
     moyasarLoadError: "تعذّر تحميل نموذج الدفع. تحقّق من اتصالك وحاول مجدداً.",
@@ -370,7 +375,9 @@ export default function CheckoutModal() {
     shippingUSD,
     totalUSD,
     clearCart,
+    syncPrices,
   } = useCart();
+  const { products, catalogSource } = useProducts();
   const { format, region } = useGeo();
   const { hasVehicle, vehicle } = useGarage();
   const { lang, isRTL } = useLang();
@@ -693,6 +700,16 @@ export default function CheckoutModal() {
     needsCard,
   ]);
 
+  // ---- Live-price guard ------------------------------------------------------
+  // While the catalog is the SEED fallback (cloud fetch timed out / failing),
+  // prices could be stale — real payments are blocked until live data arrives
+  // (the background retry swaps it in). Cart lines are re-priced from the live
+  // catalog whenever the modal is open so the charge always matches the DB.
+  const pricesLive = catalogSource === "live";
+  useEffect(() => {
+    if (isOpen && pricesLive) syncPrices(products);
+  }, [isOpen, pricesLive, products, syncPrices]);
+
   // ---- Moyasar hosted form ---------------------------------------------------
   // Card payments in Moyasar mode never touch our inputs/processor: Moyasar's
   // own form (publishable key) charges the card, 3-D Secure redirects the tab,
@@ -706,7 +723,13 @@ export default function CheckoutModal() {
   // Snapshot everything the order needs into sessionStorage so the callback
   // page can place it after the redirect returns. Re-runs on any edit; cheap.
   useEffect(() => {
-    if (!isOpen || !moyasarCardActive || step !== TOTAL_STEPS - 1 || !isAuthed)
+    if (
+      !isOpen ||
+      !moyasarCardActive ||
+      step !== TOTAL_STEPS - 1 ||
+      !isAuthed ||
+      !pricesLive
+    )
       return;
     const payload = {
       amountHalalas: moyasarHalalas,
@@ -742,6 +765,7 @@ export default function CheckoutModal() {
     moyasarCardActive,
     step,
     isAuthed,
+    pricesLive,
     moyasarHalalas,
     liveShip,
     items,
@@ -756,7 +780,13 @@ export default function CheckoutModal() {
   // Mount / refresh the hosted form when the payment step is visible. Only the
   // amount or language re-initialises it — contact edits don't reach here.
   useEffect(() => {
-    if (!isOpen || !moyasarCardActive || step !== TOTAL_STEPS - 1 || !isAuthed)
+    if (
+      !isOpen ||
+      !moyasarCardActive ||
+      step !== TOTAL_STEPS - 1 ||
+      !isAuthed ||
+      !pricesLive
+    )
       return;
     let cancelled = false;
     setMoyasarReady(false);
@@ -797,7 +827,17 @@ export default function CheckoutModal() {
     return () => {
       cancelled = true;
     };
-  }, [isOpen, moyasarCardActive, step, isAuthed, moyasarHalalas, lang, count, tx]);
+  }, [
+    isOpen,
+    moyasarCardActive,
+    step,
+    isAuthed,
+    pricesLive,
+    moyasarHalalas,
+    lang,
+    count,
+    tx,
+  ]);
 
   const goNext = useCallback(() => {
     STEP_FIELDS[step].forEach((f) =>
@@ -1339,10 +1379,27 @@ export default function CheckoutModal() {
                         {isMoyasarConfigured ? tx.payViaMoyasar : tx.paymentHint}
                       </p>
 
+                      {/* Live-price guard — while the catalog is the seed
+                          fallback, prices may be stale: block ALL payment UI
+                          until live data swaps in (background retry). */}
+                      {!pricesLive && (
+                        <p
+                          role="status"
+                          className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/5 px-3 py-2.5 font-sans text-[12px] font-medium text-textSecondary"
+                        >
+                          <Loader2
+                            size={15}
+                            aria-hidden="true"
+                            className="mt-px shrink-0 animate-spin text-warning"
+                          />
+                          {tx.pricesSyncing}
+                        </p>
+                      )}
+
                       {/* Payment-method selector — mock mode only. In Moyasar
                           mode the hosted form shows its own method tabs
                           (Apple Pay + cards), so no chip row is rendered. */}
-                      {!isMoyasarConfigured && (
+                      {pricesLive && !isMoyasarConfigured && (
                       <div
                         role="radiogroup"
                         aria-label={tx.payMethodLabel}
@@ -1380,7 +1437,7 @@ export default function CheckoutModal() {
                       </div>
                       )}
 
-                      {needsCard && isMoyasarConfigured ? (
+                      {!pricesLive ? null : needsCard && isMoyasarConfigured ? (
                         // Hosted Moyasar form — rendered only for signed-in
                         // users (the auth gate below handles the rest). Card
                         // data goes straight to Moyasar; we never see it.
@@ -1586,7 +1643,8 @@ export default function CheckoutModal() {
                       authed; otherwise the auth gate's sign-in CTA takes over.
                       In Moyasar card mode the hosted form carries its own Pay
                       button, so ours hides too. */}
-                  {step === TOTAL_STEPS - 1 && (!isAuthed || moyasarCardActive) ? (
+                  {step === TOTAL_STEPS - 1 &&
+                  (!isAuthed || moyasarCardActive || !pricesLive) ? (
                     <span aria-hidden="true" />
                   ) : (
                     <button

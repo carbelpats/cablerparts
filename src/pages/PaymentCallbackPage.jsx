@@ -235,16 +235,19 @@ export default function PaymentCallbackPage() {
         setPhase("failed");
         return;
       }
+      // Paid but this browser no longer holds the order snapshot (session
+      // wiped mid-redirect / site data cleared): that's the ORPHAN state —
+      // "payment received, order details missing" — NOT a scary manual-review
+      // mismatch. The server reports it as priceCheck "missing_order".
+      if (!pending?.order || verify.priceCheck === "missing_order") {
+        setPhase("orphan");
+        return;
+      }
       // `valid` = server re-checked currency (SAR), the charged amount vs the
       // order total at the peg, and the subtotal vs CATALOG prices. A paid but
       // non-matching charge goes to manual review — never into a wrong order.
       if (!verify.valid) {
         setPhase("mismatch");
-        return;
-      }
-
-      if (!pending?.order) {
-        setPhase("orphan");
         return;
       }
       // The URL's payment id must be the SAME payment this snapshot initiated

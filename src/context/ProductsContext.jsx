@@ -33,13 +33,27 @@ import {
   useRef,
 } from "react";
 import * as productsService from "../services/productsService";
+import { PRODUCTS as SEED_PRODUCTS } from "../lib/data";
+import { markAppReady, markLoadSettled } from "../lib/bootHealth";
 
 const ProductsContext = createContext(null);
+
+// The initial catalog load races this deadline: past it, the seed catalog is
+// shown and the real fetch keeps retrying in the background. The storefront
+// therefore can NEVER sit on skeletons indefinitely (the stale-auth-token
+// freeze), and a late-arriving cloud catalog still swaps in seamlessly.
+const INITIAL_LOAD_DEADLINE_MS = 7000;
+const RETRY_DELAY_MS = 10000;
+const MAX_BACKGROUND_RETRIES = 3;
 
 export function ProductsProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // "live"  -> products came from the real adapter (cloud or local store);
+  // "seed"  -> the deadline fallback is showing build-time seed data. Checkout
+  //            blocks real payments while "seed" (prices could be stale).
+  const [catalogSource, setCatalogSource] = useState("live");
 
   // guards against setState after unmount
   const mountedRef = useRef(true);
@@ -72,12 +86,85 @@ export function ProductsProvider({ children }) {
     }
   }, []);
 
-  // load once on mount
+  // Initial load — one fetch, one deadline timer, one settle handler (no
+  // Promise.race, so there is exactly one owner for every state transition):
+  //   • fetch resolves (any time)  -> live catalog + markAppReady.
+  //   • deadline fires first       -> seed fallback shows; the still-pending
+  //     fetch keeps running and swaps in seamlessly whenever it settles.
+  //   • fetch rejects              -> seed fallback + bounded background
+  //     retries (swap in-place; never flip `loading` back to skeletons).
+  // markLoadSettled tells the boot watchdog the pipeline is ALIVE (a rejection
+  // is an outage, not the auth wedge); only a real success marks the boot
+  // healthy, so the watchdog can still heal a poisoned token across visits.
   useEffect(() => {
-    refresh().catch(() => {
-      /* error already captured in state */
-    });
-  }, [refresh]);
+    let disposed = false;
+    let retryTimer = null;
+    let fellBack = false;
+    let loaded = false;
+
+    // Background retry — swaps data in-place WITHOUT flipping `loading`.
+    const attempt = (retriesLeft) => {
+      productsService
+        .listProducts()
+        .then((list) => {
+          markLoadSettled();
+          if (disposed || !mountedRef.current) return;
+          setProducts(Array.isArray(list) ? list : []);
+          setCatalogSource("live");
+          setError(null);
+          markAppReady();
+        })
+        .catch(() => {
+          markLoadSettled();
+          if (disposed || retriesLeft <= 0) return;
+          retryTimer = setTimeout(
+            () => attempt(retriesLeft - 1),
+            RETRY_DELAY_MS
+          );
+        });
+    };
+
+    const deadlineTimer = setTimeout(() => {
+      if (disposed || !mountedRef.current || loaded) return;
+      fellBack = true;
+      setProducts((prev) => (prev.length ? prev : SEED_PRODUCTS));
+      setCatalogSource("seed");
+      setLoading(false);
+    }, INITIAL_LOAD_DEADLINE_MS);
+
+    productsService
+      .listProducts()
+      .then((list) => {
+        loaded = true;
+        markLoadSettled();
+        clearTimeout(deadlineTimer);
+        if (disposed || !mountedRef.current) return;
+        setProducts(Array.isArray(list) ? list : []);
+        setCatalogSource("live");
+        setError(null);
+        setLoading(false);
+        markAppReady();
+      })
+      .catch(() => {
+        markLoadSettled(); // rejected = pipeline alive; outage, not a hang
+        clearTimeout(deadlineTimer);
+        if (disposed || !mountedRef.current) return;
+        if (!fellBack) {
+          fellBack = true;
+          setProducts((prev) => (prev.length ? prev : SEED_PRODUCTS));
+          setCatalogSource("seed");
+          setLoading(false);
+        }
+        attempt(MAX_BACKGROUND_RETRIES);
+      });
+
+    return () => {
+      disposed = true;
+      clearTimeout(deadlineTimer);
+      if (retryTimer) clearTimeout(retryTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // read-through helper: prefer the in-memory list, fall back to the service
   const getProduct = useCallback(
@@ -180,6 +267,7 @@ export function ProductsProvider({ children }) {
       products,
       loading,
       error,
+      catalogSource,
       getProduct,
       createProduct,
       updateProduct,
@@ -190,6 +278,7 @@ export function ProductsProvider({ children }) {
       products,
       loading,
       error,
+      catalogSource,
       getProduct,
       createProduct,
       updateProduct,
