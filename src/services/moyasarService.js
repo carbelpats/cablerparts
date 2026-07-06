@@ -39,8 +39,12 @@ export const isMoyasarConfigured =
 // "stcpay" to the env var to bring it back. The form renders each enabled
 // method as its own section, so the checkout needs no per-method chrome.
 const ALLOWED_METHODS = ["creditcard", "stcpay", "applepay"];
+// Default = cards only (Visa/Mastercard/mada). Apple Pay + STC Pay are opt-in
+// via VITE_MOYASAR_METHODS: Apple Pay additionally requires domain verification
+// in the Moyasar dashboard + the apple_pay config below — enabling it before
+// that setup makes Moyasar reject the whole form, so it must NOT default on.
 const rawMethods =
-  import.meta.env?.VITE_MOYASAR_METHODS || "applepay,creditcard";
+  import.meta.env?.VITE_MOYASAR_METHODS || "creditcard";
 export const MOYASAR_METHODS = (() => {
   const list = String(rawMethods)
     .split(",")
