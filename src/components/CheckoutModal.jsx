@@ -1542,7 +1542,7 @@ export default function CheckoutModal() {
                         isAuthed ? (
                           <div className="space-y-2">
                             <div
-                              className="rounded-xl bg-white p-3 shadow-inner"
+                              className="rounded-xl border border-border bg-surfaceElevated p-3"
                               dir="ltr"
                             >
                               {!moyasarReady && (
@@ -1550,7 +1550,7 @@ export default function CheckoutModal() {
                                   <Loader2
                                     size={18}
                                     aria-hidden="true"
-                                    className="animate-spin text-neutral-400"
+                                    className="animate-spin text-textMuted"
                                   />
                                 </p>
                               )}
