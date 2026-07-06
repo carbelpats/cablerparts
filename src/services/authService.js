@@ -383,11 +383,24 @@ const supabaseAdapter = {
     (async () => {
       try {
         const sb = await getSupabase();
-        const { data } = sb.auth.onAuthStateChange(async (_event, session) => {
-          const user = session?.user
-            ? await fetchProfile(sb, session.user)
-            : null;
-          cb(user);
+        // ROOT CAUSE of the "frozen until clear-site-data" bug — do not regress:
+        // GoTrue emits INITIAL_SESSION/SIGNED_IN while HOLDING its auth lock and
+        // AWAITS this callback. Any supabase call in here (fetchProfile runs a
+        // profiles query, whose getSession() needs that same lock) queues behind
+        // the very operation awaiting us -> circular wait -> the whole client
+        // wedges forever on every device with a stored session. Official
+        // guidance: return synchronously and defer real work past the lock.
+        const { data } = sb.auth.onAuthStateChange((_event, session) => {
+          setTimeout(async () => {
+            try {
+              const user = session?.user
+                ? await fetchProfile(sb, session.user)
+                : null;
+              cb(user);
+            } catch {
+              cb(null);
+            }
+          }, 0);
         });
         if (cancelled) data?.subscription?.unsubscribe?.();
         else unsub = () => data?.subscription?.unsubscribe?.();
