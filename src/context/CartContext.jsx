@@ -143,6 +143,25 @@ export function CartProvider({ children }) {
     setCouponError(null);
   }, []);
 
+  // Re-price cart lines from the (live) catalog — checkout calls this before
+  // real money moves, so a line captured while the seed fallback was showing
+  // can never be charged at a stale price. No-op when nothing differs.
+  const syncPrices = useCallback((catalog) => {
+    if (!Array.isArray(catalog) || catalog.length === 0) return;
+    setItems((prev) => {
+      let changed = false;
+      const next = prev.map((it) => {
+        const p = catalog.find((x) => String(x.id) === String(it.id));
+        if (p && typeof p.priceUSD === "number" && p.priceUSD !== it.priceUSD) {
+          changed = true;
+          return { ...it, priceUSD: p.priceUSD };
+        }
+        return it;
+      });
+      return changed ? next : prev;
+    });
+  }, []);
+
   // ---- drawer ---------------------------------------------------------------
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
@@ -250,6 +269,7 @@ export function CartProvider({ children }) {
     shippingUSD,
     totalUSD,
     freeShippingRemainingUSD,
+    syncPrices,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

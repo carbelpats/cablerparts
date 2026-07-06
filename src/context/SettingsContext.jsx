@@ -52,8 +52,14 @@ export function SettingsProvider({ children }) {
   }, []);
 
   // -- initial load ----------------------------------------------------------
+  // Deadline-capped: DEFAULT_SETTINGS are already in state, so if the cloud
+  // read stalls (stale-auth-token freeze) the app proceeds on defaults after
+  // 7s and a late result still hydrates in-place. Never blocks the UI.
   useEffect(() => {
     let cancelled = false;
+    const deadline = setTimeout(() => {
+      if (!cancelled && mountedRef.current) setLoading(false);
+    }, 7000);
     (async () => {
       try {
         const loaded = await svcGetSettings();
@@ -61,11 +67,13 @@ export function SettingsProvider({ children }) {
       } catch {
         // keep DEFAULT_SETTINGS already in state
       } finally {
+        clearTimeout(deadline);
         if (!cancelled && mountedRef.current) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(deadline);
     };
   }, []);
 

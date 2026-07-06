@@ -32,8 +32,17 @@ let _clientPromise = null;
 //
 // We replace it with a promise-chain lock that serialises auth operations
 // WITHIN the tab (so concurrent refreshes don't race) but has no cross-tab
-// dependency, so it can never wedge. Trade-off: two tabs may each refresh their
-// own token independently — harmless compared to a fully frozen app.
+// dependency, so it can never wedge on another tab.
+//
+// NOTE (verified against @supabase/auth-js internals): do NOT add an
+// acquisition timeout here. GoTrue only calls the injected lock when its own
+// `lockAcquired` flag is false — a holder that hangs keeps that flag true and
+// later ops bypass this function entirely, so a timeout can't help; and when
+// it would fire, releasing a waiter while the holder still runs breaks the
+// exclusivity contract and permanently corrupts GoTrue's pending-op queue.
+// Freeze protection lives in the LAYERS ABOVE instead: the data contexts race
+// their initial loads against deadlines (never blocking the UI), and the
+// boot-health watchdog clears a poisoned persisted session across visits.
 let _authLockChain = Promise.resolve();
 function inMemoryLock(_name, _acquireTimeout, fn) {
   const run = _authLockChain.then(() => fn(), () => fn());
