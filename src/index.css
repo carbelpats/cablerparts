@@ -180,3 +180,83 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* -----------------------------------------------------------------------------
+   Moyasar hosted payment form (mpf) — Cabler theme.
+   The form is rendered by Moyasar's script inside .mysr-form and styled by
+   their CDN stylesheet, which locks its colors behind a TRIPLE-repeated-id
+   selector (#mysr-form-form-el x3). Repeating the same id FOUR times outranks
+   it cleanly, so these rules restyle the form to the design tokens (and thus
+   follow light/dark automatically) without touching its behavior. The name
+   input ships WITHOUT a type attribute, so selectors must not require
+   [type=text].
+----------------------------------------------------------------------------- */
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-label,
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-labelGroup {
+  color: rgb(var(--text-secondary)) !important;
+  font-family: inherit !important;
+  font-weight: 600 !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el input.mysr-form-input {
+  background-color: rgb(var(--surface)) !important;
+  color: rgb(var(--text-primary)) !important;
+  caret-color: rgb(var(--primary));
+  box-shadow: 0 0 0 1px rgb(var(--border)) !important;
+  font-family: inherit !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el input.mysr-form-input::placeholder {
+  color: rgb(var(--text-muted)) !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el input.mysr-form-input:focus {
+  box-shadow: 0 0 0 2px rgb(var(--ring) / 0.55) !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el input.mysr-form-input.mysr-form-inputError {
+  box-shadow: 0 0 0 1.5px rgb(var(--danger) / 0.7) !important;
+}
+/* Amber only for the primary Pay button — method buttons (STC Pay) keep their
+   own recognizable brand. */
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-button:not(.mysr-form-methodButton) {
+  background-color: rgb(var(--primary)) !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 20px rgb(var(--primary) / 0.35) !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-button:not(.mysr-form-methodButton):hover:not(:disabled) {
+  background-color: rgb(var(--primary-hover)) !important;
+}
+/* STC Pay phone input matches the card inputs; divider blends into the panel. */
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el input.mysr-form-stcPayInput {
+  background-color: rgb(var(--surface)) !important;
+  color: rgb(var(--text-primary)) !important;
+  box-shadow: 0 0 0 1px rgb(var(--border)) !important;
+  font-family: inherit !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-dividerParagraph {
+  color: rgb(var(--text-muted)) !important;
+  font-family: inherit !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-dividerLine {
+  background-color: rgb(var(--border)) !important;
+  border-color: rgb(var(--border)) !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-footer {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  font-size: 12px;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-footer,
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-footer * {
+  color: rgb(var(--text-muted)) !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-configNotice {
+  color: rgb(var(--warning)) !important;
+  font-size: 12px !important;
+  padding: 10px 0 0 !important;
+}
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-inputAlert,
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-alertDanger,
+#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el#mysr-form-form-el .mysr-form-formError {
+  color: rgb(var(--danger)) !important;
+}

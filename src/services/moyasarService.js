@@ -31,6 +31,26 @@ export const MOYASAR_PUBLISHABLE_KEY =
 export const isMoyasarConfigured =
   provider === "moyasar" && MOYASAR_PUBLISHABLE_KEY.startsWith("pk_");
 
+// Which methods the hosted form offers, from VITE_MOYASAR_METHODS (comma list:
+// creditcard | stcpay | applepay). Default = cards + STC Pay (both work on a
+// standard KSA account). Apple Pay needs the domain verified in the Moyasar
+// dashboard first — add "applepay" to the env var once that's done. The form
+// renders each enabled method as its own tab (and only shows Apple Pay on
+// Apple devices/Safari), so the checkout doesn't need per-method chrome.
+const ALLOWED_METHODS = ["creditcard", "stcpay", "applepay"];
+const rawMethods =
+  import.meta.env?.VITE_MOYASAR_METHODS || "creditcard,stcpay";
+export const MOYASAR_METHODS = (() => {
+  const list = String(rawMethods)
+    .split(",")
+    .map((m) => m.trim().toLowerCase())
+    .filter((m) => ALLOWED_METHODS.includes(m));
+  // De-dupe while preserving order; never empty (cards are the safe floor).
+  const seen = new Set();
+  const out = list.filter((m) => (seen.has(m) ? false : seen.add(m)));
+  return out.length ? out : ["creditcard"];
+})();
+
 // USD -> SAR at the fixed peg (same constant the admin settings editor uses).
 export const SAR_PER_USD = 3.75;
 

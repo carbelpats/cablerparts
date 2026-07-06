@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   PartyPopper,
   ShieldAlert,
@@ -151,6 +151,7 @@ function RefChip({ label, value, copyLabel, copiedLabel }) {
 
 export default function PaymentCallbackPage() {
   const [params] = useSearchParams();
+  const location = useLocation();
   const { lang } = useLang();
   const { isAuthed, status: authStatus } = useAuth();
   const { clearCart } = useCart();
@@ -408,7 +409,19 @@ export default function PaymentCallbackPage() {
           )}
           <div className="mt-6 flex w-full max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
             {phase === "signedout" && (
-              <Link to="/login" className={heroBtn}>
+              // Round-trip: after signing in, AuthPage sends the user straight
+              // back to THIS callback URL (query intact), the flow re-runs and
+              // the order completes — no manual steps, no lost payment.
+              <Link
+                to="/login"
+                state={{
+                  from: {
+                    pathname: location.pathname,
+                    search: location.search,
+                  },
+                }}
+                className={heroBtn}
+              >
                 {tx.signIn}
               </Link>
             )}
