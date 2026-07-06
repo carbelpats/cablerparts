@@ -31,6 +31,14 @@ import {
   PAYMENT_METHODS,
 } from "../services/paymentService";
 import {
+  isMoyasarConfigured,
+  MOYASAR_PUBLISHABLE_KEY,
+  loadMoyasarForm,
+  usdToHalalas,
+  savePendingCheckout,
+  readPendingCheckout,
+} from "../services/moyasarService";
+import {
   validateEmail,
   validatePhone,
   cardNumberValid,
@@ -84,6 +92,12 @@ const STRINGS = {
     // step 3 — payment
     paymentTitle: "Payment",
     paymentHint: "Demo only — no real card is charged.",
+    payViaMoyasar:
+      "Secure, encrypted payment via Moyasar — mada, Visa & Mastercard.",
+    madaCardLabel: "mada / Visa / Mastercard",
+    chargedInSAR: (amt) => `You'll be charged SAR ${amt}.`,
+    moyasarLoadError:
+      "The payment form couldn't load. Check your connection and try again.",
     // payment-method selector
     payMethodLabel: "Payment method",
     payMethods: {
@@ -182,6 +196,10 @@ const STRINGS = {
       a === b ? `يوم عمل واحد` : `${a}–${b} أيام عمل`,
     paymentTitle: "الدفع",
     paymentHint: "للعرض فقط — لن يتم خصم أي بطاقة فعلية.",
+    payViaMoyasar: "دفع آمن ومشفّر عبر ميسر — مدى وفيزا وماستركارد.",
+    madaCardLabel: "مدى / فيزا / ماستركارد",
+    chargedInSAR: (amt) => `سيُخصم منك ${amt} ريال سعودي.`,
+    moyasarLoadError: "تعذّر تحميل نموذج الدفع. تحقّق من اتصالك وحاول مجدداً.",
     // payment-method selector
     payMethodLabel: "طريقة الدفع",
     payMethods: {
@@ -554,13 +572,16 @@ export default function CheckoutModal() {
 
   // Payment methods available for the active region. `region:"*"` is global;
   // region-specific methods (mada / STC Pay are SA-only) drop out elsewhere.
-  const payMethodsForRegion = useMemo(
-    () =>
-      PAYMENT_METHODS.filter(
-        (m) => m.region === "*" || m.region === region.code
-      ),
-    [region.code]
-  );
+  // In Moyasar mode the hosted form covers mada + Visa + Mastercard as ONE
+  // "card" method; wallets (Apple Pay / STC Pay) return once they're activated
+  // in the Moyasar account.
+  const payMethodsForRegion = useMemo(() => {
+    const base = PAYMENT_METHODS.filter(
+      (m) => m.region === "*" || m.region === region.code
+    );
+    if (!isMoyasarConfigured) return base;
+    return base.filter((m) => m.id === "card" || m.id === "cod");
+  }, [region.code]);
 
   // The definition of the currently selected method (drives card-field display).
   const activePayMethod = useMemo(
@@ -648,8 +669,9 @@ export default function CheckoutModal() {
     if (need(form.address)) e.address = tx.errRequired;
     if (need(form.city)) e.city = tx.errRequired;
 
-    // Card fields — skipped entirely for non-card methods (COD / wallet / BNPL).
-    if (needsCard) {
+    // Card fields — skipped entirely for non-card methods (COD / wallet / BNPL)
+    // and in Moyasar mode (the hosted form collects + validates the card).
+    if (needsCard && !isMoyasarConfigured) {
       if (need(form.card)) e.card = tx.errRequired;
       else if (!cardNumberValid(form.card)) e.card = tx.errCard;
 
@@ -669,9 +691,10 @@ export default function CheckoutModal() {
     () => [
       ["name", "email", "phone"],
       ["address", "city"],
-      // Card fields are only gating when the method needs a card; otherwise the
-      // payment step validates with no card inputs at all.
-      needsCard ? ["card", "expiry", "cvc"] : [],
+      // Card fields are only gating when the method needs a card AND our own
+      // form collects them (mock mode); the hosted Moyasar form validates its
+      // own inputs, so the step gates on nothing there.
+      needsCard && !isMoyasarConfigured ? ["card", "expiry", "cvc"] : [],
     ],
     [needsCard]
   );
@@ -805,6 +828,104 @@ export default function CheckoutModal() {
     payMethod,
     needsCard,
   ]);
+
+  // ---- Moyasar hosted form ---------------------------------------------------
+  // Card payments in Moyasar mode never touch our inputs/processor: Moyasar's
+  // own form (publishable key) charges the card, 3-D Secure redirects the tab,
+  // and /pay/callback verifies the charge server-side then places the order.
+  const moyasarCardActive = isMoyasarConfigured && needsCard;
+  const moyasarHalalas = usdToHalalas(effTotalUSD);
+  const moyasarRef = useRef(null);
+  const pendingRef = useRef(null);
+  const [moyasarReady, setMoyasarReady] = useState(false);
+
+  // Snapshot everything the order needs into sessionStorage so the callback
+  // page can place it after the redirect returns. Re-runs on any edit; cheap.
+  useEffect(() => {
+    if (!isOpen || !moyasarCardActive || step !== TOTAL_STEPS - 1 || !isAuthed)
+      return;
+    const payload = {
+      amountHalalas: moyasarHalalas,
+      etaDays: liveShip.etaDays,
+      order: {
+        items,
+        subtotalUSD,
+        discountUSD,
+        shippingUSD: effShippingUSD,
+        totalUSD: effTotalUSD,
+        paymentMethod: "card",
+        shippingMethod: liveShip.isLocal ? "riyadh_local" : "smsa",
+        courierProvider: liveShip.courier,
+        contact: {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+        },
+        shipping: {
+          address: form.address.trim(),
+          city: form.city.trim(),
+          regionCode: region.code,
+        },
+      },
+    };
+    pendingRef.current = payload;
+    // Preserve a paymentId already captured by on_completed — a re-save from a
+    // later render must never unbind an in-flight payment from its snapshot.
+    const prev = readPendingCheckout();
+    savePendingCheckout({ ...payload, paymentId: prev?.paymentId ?? null });
+  }, [
+    isOpen,
+    moyasarCardActive,
+    step,
+    isAuthed,
+    moyasarHalalas,
+    liveShip,
+    items,
+    subtotalUSD,
+    discountUSD,
+    effShippingUSD,
+    effTotalUSD,
+    form,
+    region.code,
+  ]);
+
+  // Mount / refresh the hosted form when the payment step is visible. Only the
+  // amount or language re-initialises it — contact edits don't reach here.
+  useEffect(() => {
+    if (!isOpen || !moyasarCardActive || step !== TOTAL_STEPS - 1 || !isAuthed)
+      return;
+    let cancelled = false;
+    setMoyasarReady(false);
+    loadMoyasarForm()
+      .then((Moyasar) => {
+        if (cancelled || !moyasarRef.current) return;
+        moyasarRef.current.innerHTML = "";
+        Moyasar.init({
+          element: ".mysr-form",
+          amount: moyasarHalalas,
+          currency: "SAR",
+          description: `Cabler Parts order (${count} items)`,
+          publishable_api_key: MOYASAR_PUBLISHABLE_KEY,
+          callback_url: `${window.location.origin}/pay/callback`,
+          methods: ["creditcard"],
+          supported_networks: ["mada", "visa", "mastercard"],
+          language: lang,
+          on_completed: (payment) => {
+            // Runs after the payment is created, BEFORE the 3DS redirect —
+            // attach the payment id to the pending order for the callback.
+            const cur = readPendingCheckout() || pendingRef.current || {};
+            savePendingCheckout({ ...cur, paymentId: payment?.id || null });
+          },
+        });
+        setMoyasarReady(true);
+      })
+      .catch(() => {
+        if (!cancelled && mountedRef.current) setPayError(tx.moyasarLoadError);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, moyasarCardActive, step, isAuthed, moyasarHalalas, lang, count, tx]);
 
   const goNext = useCallback(() => {
     STEP_FIELDS[step].forEach((f) =>
@@ -1372,7 +1493,7 @@ export default function CheckoutModal() {
                           aria-hidden="true"
                           className="text-success"
                         />
-                        {tx.paymentHint}
+                        {isMoyasarConfigured ? tx.payViaMoyasar : tx.paymentHint}
                       </p>
 
                       {/* Payment-method selector — segmented buttons sourced from
@@ -1405,14 +1526,42 @@ export default function CheckoutModal() {
                                     : "border-border bg-surface text-textSecondary hover:border-primary/40 hover:text-textPrimary"
                                 }`}
                               >
-                                {tx.payMethods[m.id] || m.id}
+                                {(isMoyasarConfigured && m.id === "card"
+                                  ? tx.madaCardLabel
+                                  : tx.payMethods[m.id]) || m.id}
                               </button>
                             );
                           })}
                         </div>
                       </div>
 
-                      {needsCard ? (
+                      {needsCard && isMoyasarConfigured ? (
+                        // Hosted Moyasar form — rendered only for signed-in
+                        // users (the auth gate below handles the rest). Card
+                        // data goes straight to Moyasar; we never see it.
+                        isAuthed ? (
+                          <div className="space-y-2">
+                            <div
+                              className="rounded-xl bg-white p-3 shadow-inner"
+                              dir="ltr"
+                            >
+                              {!moyasarReady && (
+                                <p className="flex items-center justify-center py-6">
+                                  <Loader2
+                                    size={18}
+                                    aria-hidden="true"
+                                    className="animate-spin text-neutral-400"
+                                  />
+                                </p>
+                              )}
+                              <div ref={moyasarRef} className="mysr-form" />
+                            </div>
+                            <p className="font-sans text-[11px] text-textMuted">
+                              {tx.chargedInSAR((moyasarHalalas / 100).toFixed(2))}
+                            </p>
+                          </div>
+                        ) : null
+                      ) : needsCard ? (
                         <>
                           <div>
                             <Field
@@ -1589,8 +1738,10 @@ export default function CheckoutModal() {
                     {tx.back}
                   </button>
                   {/* On the final step the Place Order button only renders when
-                      authed; otherwise the auth gate's sign-in CTA takes over. */}
-                  {step === TOTAL_STEPS - 1 && !isAuthed ? (
+                      authed; otherwise the auth gate's sign-in CTA takes over.
+                      In Moyasar card mode the hosted form carries its own Pay
+                      button, so ours hides too. */}
+                  {step === TOTAL_STEPS - 1 && (!isAuthed || moyasarCardActive) ? (
                     <span aria-hidden="true" />
                   ) : (
                     <button

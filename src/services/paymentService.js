@@ -227,8 +227,14 @@ export async function createPayment({
   const methodDef = PAYMENT_METHODS.find((m) => m.id === method);
   const isCard = methodDef ? methodDef.needsCard : true;
 
+  // Cash on delivery is NOT a PSP charge — no money moves until hand-off, so it
+  // must never route through (or be blocked by) the card-provider branch below.
+  if (method === "cod") return mockAlternative("cod");
+
   // Real-provider branch — wire your PSP here. Until then we use the mock so the
   // app is always runnable without server-side payment wiring.
+  // NOTE: in moyasar mode the CARD flow never reaches this function — the hosted
+  // Moyasar form charges directly and /pay/callback verifies server-side.
   switch (provider) {
     case "moyasar":
     case "stripe":
